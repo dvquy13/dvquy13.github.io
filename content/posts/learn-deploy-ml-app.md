@@ -4,9 +4,7 @@ date: 2020-02-17T11:30:03+00:00
 # weight: 1
 # aliases: ["/first"]
 tags: ["first"]
-author: "Me"
-# author: ["Me", "You"] # multiple authors
-showToc: false
+showToc: true
 TocOpen: false
 draft: false
 hidemeta: false
@@ -17,37 +15,25 @@ disableHLJS: true # to disable highlightjs
 disableShare: false
 disableHLJS: false
 hideSummary: false
-searchHidden: true
+searchHidden: false
 ShowReadingTime: true
 ShowBreadCrumbs: true
 ShowPostNavLinks: true
 ShowWordCount: true
 ShowRssButtonInSectionTermList: true
-UseHugoToc: true
+UseHugoToc: false
 cover:
     image: "<image path/url>" # image path/url
     alt: "<alt text>" # alt text
     caption: "<text>" # display caption under cover
     relative: false # when using page bundles set this to true
     hidden: true # only hide on current single page
-editPost:
-    URL: "https://github.com/<path_to_repo>/content"
-    Text: "Suggest Changes" # edit text
-    appendFilePath: true # to append file path to Edit link
 ---
-
-<aside>
-<img src="/icons/forward_gray.svg" alt="/icons/forward_gray.svg" width="40px" /> Original post: https://medium.com/vinid/what-i-learned-about-deploying-machine-learning-application-c7bfd654f999
-
-</aside>
-
-# **A tutorial on building custom ML training workflow using Google Cloud Platform**
 
 Imagine a company named Rainbow imports boxes of flowers and need to classify them into species. For six months, they have some staff label the boxes manually. Now, they hire you to build a Machine Learning model to do the task.
 
-!https://cdn-images-1.medium.com/max/800/1*7bnLKsChXq94QjtAiRn40w.png
-
-Source: https://hackernoon.com/top-5-machine-learning-projects-for-beginners-47b184e7837f
+![image](https://cdn-images-1.medium.com/max/800/1*7bnLKsChXq94QjtAiRn40w.png)
+##### Source: [Hackernoon](https://hackernoon.com/top-5-machine-learning-projects-for-beginners-47b184e7837f)
 
 With a small amount of labelled data as input and tons of experience working on Kaggle projects, you quickly develop a 95% accuracy using simple RandomForestClassifier from the popular scikit-learn library. Nice. Stakeholders approve and ask you when you could **deploy that model to production.**
 
@@ -59,7 +45,7 @@ In case you wonder, I hope this tutorial will help you understand one among some
 
 I choose the [Iris data set](https://archive.ics.uci.edu/ml/datasets/iris) as our input to help you see how our approach works with small-sized problems. All the codes are in this repo: https://github.com/dvquy13/gcp_ml_pipeline
 
-### Introduction
+# Introduction
 
 Like many other self-taught data people, I am familiar with manipulating data and develop a model on my laptop.
 
@@ -67,13 +53,13 @@ However, when you’re solving real-world problems, your duty does not stop afte
 
 Over the last few months, I have tried to deploy multiple computing pipelines. They are different in their scopes and complexity, ranging from processing a dozen of MB to 400 GB data per run. In this article, I want to summarize and share what I learned.
 
-### The targeted audience
+## The targeted audience
 
 This post is for data analysts/scientists who want to deploy their local solution, especially those without a software engineering background.
 
 You will need Cloud Dataproc to proceed. This product allows you to spin up a cluster of machines to run your computing job in a distributed manner. Please refer to [this documentation](https://cloud.google.com/dataproc/) if you don’t know what Dataproc is.
 
-### Agenda
+## Agenda
 
 1. Discuss the approach
 2. Step-by-step instructions to create the infrastructure and run the pipeline
@@ -81,21 +67,21 @@ You will need Cloud Dataproc to proceed. This product allows you to spin up a cl
 4. Introduce other extended components, including Big Data processing with Apache Spark, scheduler with Airflow, local development environment, unit testing
 5. Summary
 
-### Approaches
+# Approaches
 
-### About writing codes
+## About writing codes
 
 **Instead of writing a long script to do everything, we break a pipeline into tasks and checkpoint interim data to disk.** For example, after doing preprocess on train and test data, we dump both the data outputs and the transformer to Google Cloud Storage. We then load those objects as inputs for the next step.
 
 This strategy has several purposes. First, for a long-running task, if a job fails at one of the last steps, we can re-run the pipeline from the nearest checkpoint rather than wasting time and resources restarting the whole pipeline. Second, it allows us to (1) debug more easily, (2) get alert when things break and (3) monitor interim outputs. Lastly, decoupled components can be understood more clearly, and easier to be replaced or extended later.
 
-### **About computing resources**
+## **About computing resources**
 
 Normally for a small input size, we are fine with setting up a single virtual machine on the cloud. However, in some companies with mature cloud practice, the overhead of managing that VM is a type of cost that is difficult to justify. Especially when we have better options. **For instance, Cloud Dataproc provides us with virtual machines that only live for the duration of one run, thereby free us from managing the machines.** In this post, we explore Dataproc as our main engine for all the computing process.
 
-### Step-by-step instructions
+# Step-by-step instructions
 
-### Create a GCP project and enable necessary components
+## Create a GCP project and enable necessary components
 
 1. 👉 Create a free GCP account with $300 credit by going to [console.cloud.google.com](https://console.cloud.google.com/getting-started). **Beware that by following this tutorial, you might incur a cost of about $0.2–$0.5.**
 
@@ -111,9 +97,9 @@ Normally for a small input size, we are fine with setting up a single virtual ma
 
 !https://cdn-images-1.medium.com/max/800/1*mBmW_jb_412UYimWp9QaoQ.png
 
-### Environment setup
+## Environment setup
 
-**Step 1: Launch terminal window**
+### Step 1: Launch terminal window
 
 5. 👉 At the home page of your GCP project, select the command button to the right of your menubar. The CloudShell window then appears as you can see below:
 
@@ -127,7 +113,7 @@ Launch Cloud Shell Editor
 
 It’s recommended to use Cloud Shell to follow this tutorial. However, if you’re using Linux and want to use terminal on your local machine, make sure you first [install the Google Cloud SDK](https://cloud.google.com/sdk/install) and firebase CLI.
 
-**Step 2: Clone Github repo**
+### Step 2: Clone Github repo
 
 7. 👉 In the Terminal window:
 
@@ -153,6 +139,7 @@ CLUSTER_NAME=iris-pred
 
 10. 👉 Grant `execute` permission to the folder scripts by running the command: `chmod +x -R ./scripts`. Then, run `./scripts/00_import_data_to_bigquery.sh`. [Link to the script](https://github.com/dvquy13/gcp_ml_pipeline/blob/master/scripts/00_import_data_to_bigquery.sh).
 
+## Create cluster
 ### Step 3: Create Dataproc cluster and submit jobs
 
 We use Makefile to orchestrate our actions. You can find it here: https://github.com/dvquy13/gcp_ml_pipeline/blob/master/Makefile.
@@ -180,7 +167,7 @@ Firestore populated with predictions
 
 Along the way, you will see that the output data of each step is persisted in Cloud Storage. I use `parquet` rather than `CSV` as the serialization format because it can embed schema information (therefore you do not have to specify column types when reading) and reduce storage size. For more detail, please refer to [this benchmark](https://towardsdatascience.com/the-best-format-to-save-pandas-data-414dca023e0d).
 
-### Clean up
+# Clean up
 
 11. 👉 Finally, when you’re done exploring the results, you can delete all resources by running these commands:
 
@@ -190,13 +177,13 @@ Along the way, you will see that the output data of each step is persisted in Cl
 ./scripts/03_delete_project.sh
 ```
 
-### Explain codebase
+# Explain codebase
 
 `scripts/`This directory contains some initial scripts, which are the steps to help you set things up. In practice, I also favor using script rather than user interfaces such as web console because it is self-documented and easy for others to follow the exact steps.
 
 `configs/`Store all the arguments that need to be set initially. `.project_env` is a file to store the global variables used to work with GCP. We also have the `runtime.yaml`, where we [use Anchor, Alias and Extension in YAML](https://medium.com/@kinghuang/docker-compose-anchors-aliases-extensions-a1e4105d70bd) to define runtime parameters for multiple environments. Both of these files serve as a centralized config store so that we can easily look up and make changes, instead of finding the configs scattered elsewhere in the code.
 
-`Makefile`Originally Makefile is used to orchestrate the build process in C programming language. But it has done so well out of being just a shortcut so people start using it to facilitate ML model development. I have seen many tutorials using this tool, including [the one that inspires me to design my Pyspark codebase](https://developerzen.com/best-practices-writing-production-grade-pyspark-jobs-cb688ac4d20f).In this small project, we also use Makefile to save us a lot of time. As you can see above in **Step 3**, I put there our frequently used commands so that I can easily type `make <something>` to run a particular step.
+`Makefile`Originally Makefile is used to orchestrate the build process in C programming language. But it has done so well out of being just a shortcut so people start using it to facilitate ML model development. I have seen many tutorials using this tool, including [the one that inspires me to design my Pyspark codebase](https://developerzen.com/best-practices-writing-production-grade-pyspark-jobs-cb688ac4d20f).In this small project, we also use Makefile to save us a lot of time. As you can see above in ### Step 3**, I put there our frequently used commands so that I can easily type `make <something>` to run a particular ste
 
 `iris_pred/`: Source code.
 
@@ -211,15 +198,15 @@ As you can see in the snippet above, the class `Trainer` expose a function `run`
 
 In `io_handler.py`, the class IOHandler applies the principle [Composition Over Inheritance](https://en.wikipedia.org/wiki/Composition_over_inheritance) to ease the process of loading outputs from the previous step.
 
-### Further discussion
+# Further discussion
 
 To completely build and operate a pipeline, there is still more to be considered.
 
-### Apache Spark for bigger data
+## Apache Spark for bigger data
 
 In this tutorial, we rent one small machine from Dataproc and use pandas as our preprocessing engine, which perfectly handles the case of data fit into the memory of that machine. However, often data input in real-world situations will be much bigger, therefore require us to use a distributed computing framework for scalability. In that case, you can just switch to using Apache Spark. From version 1.3, Spark introduces its DataFrame API, which greatly bears resemblance to Pandas counterpart. After porting your code from Pandas to Spark, to be able to run jobs across multiple machines, you just need to create a bigger cluster with a master and multiple workers.
 
-### Apache Airflow for orchestration
+## Apache Airflow for orchestration
 
 Most of the batch job is not ad hoc. If it is, we should not even think about putting effort to standardize the process in the first place. [Apache Airflow](https://airflow.apache.org/) can play the role of both a scheduler and a monitor. It keeps metadata of each run and can send you alerts when things fail.
 
@@ -229,15 +216,15 @@ Example of Airflow DAG. [Source](https://www.google.com/url?sa=i&source=images&
 
 An alternative is Dataproc Workflows. This is a native solution offered by GCP, but I haven’t tried it myself so I will just leave the documentation [here](https://cloud.google.com/dataproc/docs/concepts/workflows/using-workflows).
 
-### Local development
+## Local development
 
 Because rarely our codes work the first time we write them, it’s very important to be able to quickly test without having to go through all the boilerplate steps from setting up variables to requesting cloud resources. My suggestion is that we should set up our local environment asap. We can install Apache Spark 2.4.3+ to act as our runner engine, and MongoDB to be our alternative for Cloud Firestore. Here in the code repo, you can still refer to some line containing what I call the “environment branching logic”, which enables you to switch between running the same code on both local and cloud environments.
 
-### Unit testing
+## Unit testing
 
 Many people have already talked about unit testing, so I won’t go too detailed here. I also don’t do unit testing in this tutorial for the sake of simplicity. However, I strongly encourage you to add testing yourself. Whatever it takes, unit testing forces us to modularize our code and add a layer of alerting. This is very important because things in data science often break in silence.
 
-### Alternatives for batch processing
+## Alternatives for batch processing
 
 There are several ways to do batch processing on Google Cloud Platform. I choose Cloud Dataproc because I am familiar with Apache Spark and my workflow typically involves components in the Machine Learning/Data Science ecosystem.
 
@@ -245,7 +232,7 @@ There are several ways to do batch processing on Google Cloud Platform. I choose
 
 https://cloud.google.com/solutions/data-lifecycle-cloud-platform#processing_large-scale_data
 
-### Summary
+# Summary
 
 Here is a summary of what you have learned in this tutorial:
 
@@ -256,7 +243,7 @@ Here is a summary of what you have learned in this tutorial:
 
 Again, one of my main goals in writing this article is to receive feedback from the community, so I can do my job better. Please feel free me leave me comments, and I hope you guys enjoy this tutorial.
 
-### References
+# References
 
 1. https://towardsdatascience.com/step-by-step-tutorial-pyspark-sentiment-analysis-on-google-dataproc-fef9bef46468
 2. https://developerzen.com/best-practices-writing-production-grade-pyspark-jobs-cb688ac4d20f
@@ -265,7 +252,7 @@ Again, one of my main goals in writing this article is to receive feedback from 
 
 ---
 
-### Credits
+# Credits
 
 Kudos to Binh Do for reviewing my work; to Khanh Nguyen, Linh Nguyen, Tuan Nguyen for providing me feedback.
 
