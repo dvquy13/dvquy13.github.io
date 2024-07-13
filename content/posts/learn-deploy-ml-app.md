@@ -30,6 +30,10 @@ cover:
     hidden: true # only hide on current single page
 ---
 
+{{< callout type="info" title="Note" >}}
+The original post was published [here](https://medium.com/vinid/what-i-learned-about-deploying-machine-learning-application-c7bfd654f999).
+{{< /callout >}}
+
 Imagine a company named Rainbow imports boxes of flowers and need to classify them into species. For six months, they have some staff label the boxes manually. Now, they hire you to build a Machine Learning model to do the task.
 
 ![image](https://cdn-images-1.medium.com/max/800/1*7bnLKsChXq94QjtAiRn40w.png)
@@ -41,7 +45,7 @@ Hmm, deploy a model from my laptop? …
 
 In case you wonder, I hope this tutorial will help you understand one among some common and most simple approaches. The diagram below depicts how we will use Google Cloud Platform to do the job in a batch-processing manner.
 
-!https://cdn-images-1.medium.com/max/1200/1*xb0UAAcHwbus-dfXLu5SCw.png
+![image](https://cdn-images-1.medium.com/max/1200/1*xb0UAAcHwbus-dfXLu5SCw.png)
 
 I choose the [Iris data set](https://archive.ics.uci.edu/ml/datasets/iris) as our input to help you see how our approach works with small-sized problems. All the codes are in this repo: https://github.com/dvquy13/gcp_ml_pipeline
 
@@ -85,17 +89,17 @@ Normally for a small input size, we are fine with setting up a single virtual ma
 
 1. 👉 Create a free GCP account with $300 credit by going to [console.cloud.google.com](https://console.cloud.google.com/getting-started). **Beware that by following this tutorial, you might incur a cost of about $0.2–$0.5.**
 
-!https://cdn-images-1.medium.com/max/800/1*gNpMH0Knm_ElpJSexisAag.png
+![image](https://cdn-images-1.medium.com/max/800/1*gNpMH0Knm_ElpJSexisAag.png)
 
 2. 👉 Click Billing at the left sidebar and initiate a billing account to be able to use the components used in this tutorial
 
-!https://cdn-images-1.medium.com/max/800/1*HRbgGB_s3KwK8kxRiaTUPQ.png
+![image](https://cdn-images-1.medium.com/max/800/1*HRbgGB_s3KwK8kxRiaTUPQ.png)
 
 3. 👉 Select **Library**, then search and enable the following API: Cloud Dataproc, Cloud Storage and Cloud Firestore.
 
 4. 👉 Navigate to the Firestore either by scrolling the sidebar to the left or search from the top menu bar. When you arrive at the below screen, choose **SELECT NATIVE MODE**, then choose `us-east1` as the location.
 
-!https://cdn-images-1.medium.com/max/800/1*mBmW_jb_412UYimWp9QaoQ.png
+![image](https://cdn-images-1.medium.com/max/800/1*mBmW_jb_412UYimWp9QaoQ.png)
 
 ## Environment setup
 
@@ -103,11 +107,11 @@ Normally for a small input size, we are fine with setting up a single virtual ma
 
 5. 👉 At the home page of your GCP project, select the command button to the right of your menubar. The CloudShell window then appears as you can see below:
 
-!https://cdn-images-1.medium.com/max/800/1*6HVcsv6LqFEaf8eOIt6Xyg.png
+![image](https://cdn-images-1.medium.com/max/800/1*6HVcsv6LqFEaf8eOIt6Xyg.png)
 
 6. 👉 Launch Cloud Shell Editor:
 
-!https://cdn-images-1.medium.com/max/800/1*T5WH0YKLnpH3gWq1Lj_BZA.png
+![image](https://cdn-images-1.medium.com/max/800/1*T5WH0YKLnpH3gWq1Lj_BZA.png)
 
 Launch Cloud Shell Editor
 
@@ -124,7 +128,7 @@ cd gcp_ml_pipeline
 
 8. 👉 Select `File` then open the file `gcp_ml_pipeline/configs/.project_env`:
 
-!https://cdn-images-1.medium.com/max/800/1*cqPTo5ebmac4e7aO-Alnug.png
+![image](https://cdn-images-1.medium.com/max/800/1*cqPTo5ebmac4e7aO-Alnug.png)
 
 9. 👉 Replace the values enclosed by <>. For the `GCP_PROJECT`, you need to provide the `id` of your GCP project. For the remaining, feel free to choose some random names for the global variables that identify your resources. The final output looks like this:
 
@@ -155,13 +159,13 @@ We use Makefile to orchestrate our actions. You can find it here: https://github
 7. `make submit-job ENV=dev MODULE=predict TASK=store_predictions`**Store predictions.** The reason we do not combine this with the above step is two-fold. First, writing to a database often takes time and requires several retries. Second, we write to a document database like Cloud Firestore because when other team uses, they typically retrieve one document per query. However, there are times when we want to inspect the whole batch of predictions (e.g. debugging, count number of documents scored more than 0.9). For this query pattern, we will better off using the persisted outputs from the previous step, stored as parquet files in Cloud Storage.
 8. `make delete-dataproc-cluster`**Delete Dataproc cluster.** After the process finishes, delete the cluster so no further cost incurs.
 
-!https://cdn-images-1.medium.com/max/800/1*meEStEyORtyi06DTLioGVg.png
+![image](https://cdn-images-1.medium.com/max/800/1*meEStEyORtyi06DTLioGVg.png)
 
 Succeeded Dataproc jobs
 
 You can see that your predictions are stored at Cloud Firestore by accessing its web console.
 
-!https://cdn-images-1.medium.com/max/800/1*XEcsap97Y0cCiYoPbgSa3g.png
+![image](https://cdn-images-1.medium.com/max/800/1*XEcsap97Y0cCiYoPbgSa3g.png)
 
 Firestore populated with predictions
 
@@ -210,7 +214,7 @@ In this tutorial, we rent one small machine from Dataproc and use pandas as our 
 
 Most of the batch job is not ad hoc. If it is, we should not even think about putting effort to standardize the process in the first place. [Apache Airflow](https://airflow.apache.org/) can play the role of both a scheduler and a monitor. It keeps metadata of each run and can send you alerts when things fail.
 
-!https://cdn-images-1.medium.com/max/800/1*2DPJcNVFajHrm4WjTqI9dA.png
+![image](https://cdn-images-1.medium.com/max/800/1*2DPJcNVFajHrm4WjTqI9dA.png)
 
 Example of Airflow DAG. [Source](https://www.google.com/url?sa=i&source=images&cd=&ved=2ahUKEwiHu5jc1dfmAhWULqYKHaQKBBAQjRx6BAgBEAQ&url=https%3A%2F%2Fwww.astronomer.io%2Fguides%2Fsubdags&psig=AOvVaw1KeFNXmbAOrSVsWWG3HOSK&ust=1577599347094494).
 
@@ -228,7 +232,7 @@ Many people have already talked about unit testing, so I won’t go too detailed
 
 There are several ways to do batch processing on Google Cloud Platform. I choose Cloud Dataproc because I am familiar with Apache Spark and my workflow typically involves components in the Machine Learning/Data Science ecosystem.
 
-!https://cdn-images-1.medium.com/max/800/1*vHR1GQDtHDq7VXdUlx_xtA.png
+![image](https://cdn-images-1.medium.com/max/800/1*vHR1GQDtHDq7VXdUlx_xtA.png)
 
 https://cloud.google.com/solutions/data-lifecycle-cloud-platform#processing_large-scale_data
 

@@ -20,8 +20,9 @@ params:
   # author: Me
   images: ["<link or path of image for opengraph, twitter-cards>"]
   DateFormat: "January 2, 2006"
-  defaultTheme: auto # dark, light
-  disableThemeToggle: false
+  # dark theme is not really working with my newly added styling and avatar so pass
+  defaultTheme: light # dark, light, auto
+  disableThemeToggle: true
 
   ShowReadingTime: true
   ShowShareButtons: true
