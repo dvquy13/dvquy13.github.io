@@ -3,7 +3,7 @@ title: "What I learned about deploying Machine Learning application"
 date: 2020-02-17T11:30:03+00:00
 # weight: 1
 # aliases: ["/first"]
-tags: ["first"]
+tags: ["machine learning"]
 showToc: true
 TocOpen: false
 draft: false
