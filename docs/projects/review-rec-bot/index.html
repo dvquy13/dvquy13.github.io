@@ -179,11 +179,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#approach" id="toc-approach" class="nav-link" data-scroll-target="#approach">Approach</a></li>
   <li><a href="#evaluation" id="toc-evaluation" class="nav-link" data-scroll-target="#evaluation">Evaluation</a></li>
   <li><a href="#learningsremarks" id="toc-learningsremarks" class="nav-link" data-scroll-target="#learningsremarks">Learnings/Remarks</a></li>
-  <li><a href="#challenges" id="toc-challenges" class="nav-link" data-scroll-target="#challenges">Challenges</a>
-  <ul class="collapse">
-  <li><a href="#challenge-1-auto-retrieval-not-reliable" id="toc-challenge-1-auto-retrieval-not-reliable" class="nav-link" data-scroll-target="#challenge-1-auto-retrieval-not-reliable">Challenge 1: Auto-retrieval not reliable</a></li>
-  <li><a href="#challenges-2-indexing-pipeline-takes-too-long" id="toc-challenges-2-indexing-pipeline-takes-too-long" class="nav-link" data-scroll-target="#challenges-2-indexing-pipeline-takes-too-long">Challenges 2: Indexing pipeline takes too long</a></li>
-  </ul></li>
+  <li><a href="#challenges" id="toc-challenges" class="nav-link" data-scroll-target="#challenges">Challenges</a></li>
   <li><a href="#future-improvements" id="toc-future-improvements" class="nav-link" data-scroll-target="#future-improvements">Future Improvements</a></li>
   </ul>
 </nav>
@@ -250,13 +246,13 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="challenges" class="level1">
 <h1>Challenges</h1>
-<section id="challenge-1-auto-retrieval-not-reliable" class="level2">
-<h2 class="anchored" data-anchor-id="challenge-1-auto-retrieval-not-reliable">Challenge 1: Auto-retrieval not reliable</h2>
+<section id="challenge-1-auto-retrieval-not-reliable" class="level4">
+<h4 class="anchored" data-anchor-id="challenge-1-auto-retrieval-not-reliable">Challenge 1: Auto-retrieval not reliable</h4>
 <p>While theoretically both precision and recall should be greatly improved if we are able to apply the right filters for User questions instead of relying on embedding/keyword matching, my first attempt to apply auto-retrieval with ChromaDB did not yield promising results. There were at least two syntactic issues which broke the agentic workflow. Even after fixing those two the unreliable nature of this approach is still there and I also witnessed a -10% degradation in Retrieval Hit Rate.</p>
 <p>In the end I forfeited the feature but nevertheless look forward to a way to re-applying this technique.</p>
 </section>
-<section id="challenges-2-indexing-pipeline-takes-too-long" class="level2">
-<h2 class="anchored" data-anchor-id="challenges-2-indexing-pipeline-takes-too-long">Challenges 2: Indexing pipeline takes too long</h2>
+<section id="challenges-2-indexing-pipeline-takes-too-long" class="level4">
+<h4 class="anchored" data-anchor-id="challenges-2-indexing-pipeline-takes-too-long">Challenges 2: Indexing pipeline takes too long</h4>
 <p>Indexing 70K nodes from 30K reviews for 400 businesses takes more than 6 hours!</p>
 </section>
 </section>

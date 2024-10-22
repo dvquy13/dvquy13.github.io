@@ -23,7 +23,7 @@ format:
       - united
       - custom.scss
     css: styles.css
-    mainfont: "Inter Variable, Arial, sans-serif"
+    mainfont: "InterVariable, Inter, sans-serif"
     highlight-style: github
     fontsize: 16px
     linestretch: 1.7

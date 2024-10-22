@@ -324,3 +324,8 @@ Again, one of my main goals in writing this article is to receive feedback from 
 # Credits
 
 Kudos to Bido for reviewing my work; to anh Khanh, anh Linh, anh Tuan for providing me feedback.
+
+<br>
+If you find this article helpful, please cite this writeup as:
+
+> Quy, Dinh. (Feb 2020). {{< meta title >}}. {{< var website_url >}}. https://{{< var website_url >}}/posts/deploy-ml-gcp/.
