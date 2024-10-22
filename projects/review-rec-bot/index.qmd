@@ -2,14 +2,12 @@
 title: Review Rec Bot
 subtitle: Demo building Restaurant Recommendation Chatbot based on Yelp Public Data
 date: "2024-09-22"
-categories: [llm, tech]
+categories: [tech, llm]
 keywords: [llm, rag, chatbot, llamaindex]
 feed: false
 draft: false
 image: thumbnail.svg
 ---
-
-In this project, I demo a RAG engine usiness Recommendation Chatbot based on Yelp Data
 
 ::: {.callout-note appearance="simple"}
 ## [Project Details](https://github.com/dvquy13/review-rec-bot)
@@ -62,13 +60,13 @@ As next steps, while there is not much room to improve Response Correctness, we 
 
 # Challenges
 
-Challenge 1: Auto-retrieval not reliable
+## Challenge 1: Auto-retrieval not reliable
 
 While theoretically both precision and recall should be greatly improved if we are able to apply the right filters for User questions instead of relying on embedding/keyword matching, my first attempt to apply auto-retrieval with ChromaDB did not yield promising results. There were at least two syntactic issues which broke the agentic workflow. Even after fixing those two the unreliable nature of this approach is still there and I also witnessed a -10% degradation in Retrieval Hit Rate.
 
 In the end I forfeited the feature but nevertheless look forward to a way to re-applying this technique.
 
-Challenges 2: Indexing pipeline takes too long
+## Challenges 2: Indexing pipeline takes too long
 
 Indexing 70K nodes from 30K reviews for 400 businesses takes more than 6 hours!
 

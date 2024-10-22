@@ -4,7 +4,7 @@ project:
 
 website:
   title: "DvQ"
-  site-url: https://dvquy13.github.io/icy-touch
+  site-url: https://dvquy13.github.io
   description: "DvQ Personal Blog"
   navbar:
     right:
@@ -23,7 +23,7 @@ format:
       - united
       - custom.scss
     css: styles.css
-    mainfont: "InterVariable, Inter, sans-serif"
+    mainfont: "Inter Variable, Arial, sans-serif"
     highlight-style: github
     fontsize: 16px
     linestretch: 1.7

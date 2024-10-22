@@ -9,7 +9,10 @@
   {
     "listing": "/index.html",
     "items": [
-      "/posts/site-search-elasticsearch/index.html"
+      "/projects/review-rec-bot/index.html",
+      "/projects/reviews-parsing-mlsys/index.html",
+      "/posts/site-search-elasticsearch/index.html",
+      "/posts/deploy-ml-gcp/index.html"
     ]
   }
 ]

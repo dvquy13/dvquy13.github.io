@@ -2,7 +2,7 @@
 title: Reviews Parsing MLSys
 subtitle: Setting up a ML system on K8s
 date: "2024-06-21"
-categories: [machine learning, tech]
+categories: [tech, machine learning]
 keywords: [k8s, ml system, mlflow, jenkins, kserve, mlserver]
 feed: false
 draft: false
@@ -17,7 +17,7 @@ This project focuses on applying engineering practices to build a Machine Learni
 # Architecture
 
 :::{.column-page}
-<a href="./architecture.svg" target="_blank">![](./architecture.svg)</a>
+![](./architecture.svg){.lightbox}
 :::
 
 # Demo

@@ -15,7 +15,7 @@ about:
       href: https://x.com/dvquys
 ---
 
-Hi, I'm Quy—an Applied Data Scientist. I blog about [RecSys](/posts.html#category=recsys), [LLM](/posts.html#category=llm), [ML](/posts.html#category=machine%20learning), [Productivity](/posts.html#category=productivity) and other random things.
+Hi, I'm Quy—an Applied Data Scientist. I blog about [RecSys](/#category=recsys), [ML](/#category=machine%20learning), [Productivity](/#category=productivity) and other random things.
 
 Here are some of my [side projects](/projects.html) regarding the above topics.
 
