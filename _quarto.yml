@@ -30,7 +30,8 @@ format:
     linkcolor: "#114b8f"
     monofont: "Roboto Mono"
     grid:
-      body-width: 500px
+      # Chosen so that we have maximum 75 characters in the text body for readability
+      body-width: 550px
     header-includes: |
       <!-- Inter -->
       <link rel="preconnect" href="https://rsms.me/">
