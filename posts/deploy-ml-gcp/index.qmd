@@ -195,7 +195,7 @@ Along the way, you will see that the output data of each step is persisted in Cl
   
 `jobs/`: contain tasks as modules. Inside `jobs`, we have one module corresponding to a step in our pipeline. All these modules expose an `entry_point.py` file where we unify the API to easily and consistently communicate with `main.py`.
 
-```python
+```python {filename="iris_pred/jobs/model/train.py"}
 import logging
 logger = logging.getLogger(__name__)
 import subprocess
@@ -266,7 +266,6 @@ class Trainer:
         self._fit(X_train, y_train)
         self._persist_pipeline()
 ```
-`iris_pred/jobs/model/train.py`
 
 As you can see in the snippet above, the class `Trainer` expose a function `run`. Each step in the process corresponds to a private function declared in the same class.
 

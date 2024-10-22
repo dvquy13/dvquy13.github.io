@@ -423,7 +423,11 @@ CLUSTER_NAME=iris-pred</code></pre>
 <p><code>iris_pred/</code>: Source code.</p>
 <p><code>main.py</code>: is the interface to all tasks. This file parses the arguments to load config and get the job name, then call <code>analyze</code> function in <code>entry_point.py</code> from the appropriate module.</p>
 <p><code>jobs/</code>: contain tasks as modules. Inside <code>jobs</code>, we have one module corresponding to a step in our pipeline. All these modules expose an <code>entry_point.py</code> file where we unify the API to easily and consistently communicate with <code>main.py</code>.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> logging</span>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>iris_pred/jobs/model/train.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb4" data-filename="iris_pred/jobs/model/train.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> logging</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>logger <span class="op">=</span> logging.getLogger(<span class="va">__name__</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> subprocess</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -492,7 +496,7 @@ CLUSTER_NAME=iris-pred</code></pre>
 <span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._make_pipeline()</span>
 <span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._fit(X_train, y_train)</span>
 <span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._persist_pipeline()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><code>iris_pred/jobs/model/train.py</code></p>
+</div>
 <p>As you can see in the snippet above, the class <code>Trainer</code> expose a function <code>run</code>. Each step in the process corresponds to a private function declared in the same class.</p>
 <p><code>shared/</code>: functions and classes to be reused across modules</p>
 <p>In <code>io_handler.py</code>, the class IOHandler applies the principle <a href="https://en.wikipedia.org/wiki/Composition_over_inheritance">Composition Over Inheritance</a> to ease the process of loading outputs from the previous step.</p>
@@ -551,7 +555,7 @@ CLUSTER_NAME=iris-pred</code></pre>
 <p>Kudos to Bido for reviewing my work; to anh Khanh, anh Linh, anh Tuan for providing me feedback.</p>
 <p><br> If you find this article helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
-<p>Quy, Dinh. (Feb 2020). What I learned about deploying Machine Learning application. dvquy13.github.io. https://dvquy13.github.io/posts/deploy-ml-gcp/.</p>
+<p>Quy, Dinh. (Feb 2020). What I learned about deploying Machine Learning application. https://dvquys.com. https://https://dvquys.com/posts/deploy-ml-gcp/.</p>
 </blockquote>
 
 
@@ -650,7 +654,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp("https:\/\/dvquy13\.github\.io");
+      var filterRegex = new RegExp("https:\/\/dvquys\.com");
     var isInternal = (href) => {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
@@ -979,7 +983,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"loop":false,"descPosition":"bottom","openEffect":"zoom","closeEffect":"zoom","selector":".lightbox"});
+<script>var lightboxQuarto = GLightbox({"selector":".lightbox","loop":false,"descPosition":"bottom","closeEffect":"zoom","openEffect":"zoom"});
 (function() {
   let previousOnload = window.onload;
   window.onload = () => {
