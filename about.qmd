@@ -5,13 +5,10 @@ about:
   template: jolla
   links:
     - icon: linkedin
-      text: LinkedIn
       href: https://www.linkedin.com/in/dvquy/
     - icon: github
-      text: Github
       href: https://github.com/dvquy13
     - icon: twitter-x
-      text: X
       href: https://x.com/dvquys
 ---
 

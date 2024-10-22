@@ -11,12 +11,12 @@ website:
       - about.qmd
       - index.qmd
       - projects.qmd
+      - icon: linkedin
+        href: https://www.linkedin.com/in/dvquy/
       - icon: github
-        href: https://github.com/
-      - icon: twitter
-        href: https://twitter.com
-      - icon: rss
-        href: index.xml
+        href: https://github.com/dvquy13
+      - icon: twitter-x
+        href: https://x.com/dvquys
 format:
   html:
     theme:
