@@ -1,0 +1,43 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "DvQ"
+  site-url: https://dvquy13.github.io/icy-touch
+  description: "DvQ Personal Blog"
+  navbar:
+    right:
+      - about.qmd
+      - index.qmd
+      - projects.qmd
+      - icon: github
+        href: https://github.com/
+      - icon: twitter
+        href: https://twitter.com
+      - icon: rss
+        href: index.xml
+format:
+  html:
+    theme:
+      - united
+      - custom.scss
+    css: styles.css
+    mainfont: "InterVariable, Inter, sans-serif"
+    highlight-style: github
+    fontsize: 16px
+    linestretch: 1.7
+    linkcolor: "#114b8f"
+    monofont: "Roboto Mono"
+    grid:
+      body-width: 500px
+    header-includes: |
+      <!-- Inter -->
+      <link rel="preconnect" href="https://rsms.me/">
+      <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+      <!-- Roboto Mono -->
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+
+toc: true

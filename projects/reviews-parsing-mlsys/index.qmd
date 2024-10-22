@@ -1,0 +1,30 @@
+---
+title: Reviews Parsing MLSys
+subtitle: Setting up a ML system on K8s
+date: "2024-06-21"
+categories: [machine learning, tech]
+keywords: [k8s, ml system, mlflow, jenkins, kserve, mlserver]
+feed: false
+draft: false
+---
+
+This project focuses on applying engineering practices to build a Machine Learning System in the domain of public reviews data.
+
+::: {.callout-note appearance="simple"}
+## [Project Details](https://github.com/dvquy13/reviews-parsing-mlsys)
+:::
+
+# Architecture
+
+:::{.column-page}
+<a href="./architecture.svg" target="_blank">![](./architecture.svg)</a>
+:::
+
+# Demo
+
+{{< video https://youtu.be/O-8_Q1GgJpM?si=VA9XK7fBDAl6ngH3 >}}
+
+<br>
+If you find this article helpful, please cite this writeup as:
+
+> Quy, Dinh. (Jun 2024). {{< meta title >}}. {{< var website_url >}}. https://{{< var website_url >}}/projects/reviews-parsing-mlsys/.

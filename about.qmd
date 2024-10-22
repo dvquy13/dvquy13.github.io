@@ -1,0 +1,24 @@
+---
+title: "About"
+image: avatar.svg
+about:
+  template: jolla
+  links:
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/dvquy/
+    - icon: github
+      text: Github
+      href: https://github.com/dvquy13
+    - icon: twitter-x
+      text: X
+      href: https://x.com/dvquys
+---
+
+Hi, I'm Quy—an Applied Data Scientist. I blog about [RecSys](/posts.html#category=recsys), [LLM](/posts.html#category=llm), [ML](/posts.html#category=machine%20learning), [Productivity](/posts.html#category=productivity) and other random things.
+
+Here are some of my [side projects](/projects.html) regarding the above topics.
+
+I spend most of my other free time in football and DotA. Recently I started to learn badminton but damn this sport is hard.
+
+I'm from Hanoi, Vietnam 🇻🇳. Currently living in Singapore 🇸🇬.

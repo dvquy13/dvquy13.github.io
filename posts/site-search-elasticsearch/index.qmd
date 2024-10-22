@@ -1,0 +1,923 @@
+---
+title: "A Site-Search Engineer’s Journal Approaching Relevance Challenges in Elasticsearch Query Construction"
+date: "2023-06-01"
+categories: [tech, search]
+feed: true
+subtitle: A hierarchical keyword-matching approach
+keywords: full-text search, elasticsearch
+---
+
+
+::: {.callout-note appearance="simple"}
+## This article is originally published in [Towards Data Science](https://medium.com/towards-data-science/a-site-search-engineers-journal-approaching-relevance-challenges-in-elasticsearch-query-1eca29283da5)
+:::
+
+# Intro
+
+Over the last 22 months I have been working as a site-search engineer who uses Elasticsearch to help improve relevance in our restaurant platform. I have deployed in total 83 releases including 3 major versions.
+
+With roughly one release per week, I can say that not only our search engine is much better than it was 2 years ago, but I have also learned quite a lot. Though still far from a great search engine, here are some things worth sharing in my opinion. More importantly, I really want to get feedback about them.
+
+This blog post is to provide an approach to design the Elasticsearch query template to deal with common site-search problems including searching for matches across different fields, boosting results and testing. Together we will identify issues with the default approach and then gradually come up with a new one to address the issues altogether.
+
+This [Github repo](https://github.com/dvquy13/elasticsearch-sharing) contains the examples and code discussed in this post.
+
+# Main
+
+We now play the role of a search engineer for a restaurant platform, which allows diners to discover and make reservation for their next meals. We haven’t had much experience, but luckily the app does not require accuracy level of Google from the start. The key is to make gradual visible progresses!
+
+Alright, let’s dive into it. First off, we make sure user can search for restaurant by name. Here we can rely on the simple default `query-match` to get the job done.
+
+``` shell
+# Index our first two restaurants
+POST _bulk
+{ "index" : { "_index" : "restaurant", "_id" : "001sabichuong" } }
+{ "restaurant_name": "Sa Bi Chuong", "cuisine": "Vietnamese", "rating": 5.0 }
+{ "index" : { "_index" : "restaurant", "_id" : "002vietnamesephonoodle" } }
+{ "restaurant_name": "Vietnamese Pho Noodle", "cuisine": "Vietnamese", "rating": 4.0 }
+
+# Test searching for one
+# Should return Vietnamese Pho Noodle
+GET restaurant/_search
+{
+  "query" : {
+    "match" : { "restaurant_name": "vietnamese" }
+  }
+}
+```
+
+The above snippet can be run at Kibana’s Dev Tools \> Console, which will be available at your `localhost:5601` if you follow the repo.
+
+The code is self-explained. We ask Elasticsearch to return restaurants whose name contains `vietnamese`. And we get back one result for `Vietnamese Pho Noodle`. No problems.
+
+But we quickly find out that name is not the only place we want to look for when user submit a query. Given keyword`vietnamese` we should also return the restaurant `Sa Bi Chuong`, because it’s a Vietnamese restaurant as tagged in the `cuisine`. A `multi_match` query allows us to do exactly that.
+
+``` shell
+# Matching multiple fields
+# Should return all 2 Vietnamese restaurant with the Vietnamese Pho Noodle on top
+GET restaurant/_search
+{
+  "query" : {
+    "multi_match" : {
+      "query": "vietnamese",
+      "fields": [ "restaurant_name", "cuisine" ]
+    }
+  }
+}
+```
+
+``` shell
+# Result
+"hits": {
+    ...
+    "hits": [
+      {
+        "_index": "restaurant",
+        "_id": "002vietnamesephonoodle",
+        "_score": 0.6931471,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho Noodle",
+          "cuisine": "Vietnamese",
+          "rating": 4
+        }
+      },
+      {
+        "_index": "restaurant",
+        "_id": "001sabichuong",
+        "_score": 0.18232156,
+        "_source": {
+          "restaurant_name": "Sa Bi Chuong",
+          "cuisine": "Vietnamese",
+          "rating": 5
+        }
+      }
+    ]
+  }
+```
+
+# Problems with the default TFIDF
+
+Notice the above scores. The first one is like 4 times higher than the second, indicating that it’s much more relevant given query `vietnamese`. One might have an assumption that because matching at multiple fields will make the score higher.
+
+Whenever we have doubts, we can use Elasticsearch `explain` to get a detailed breakdown of its scoring components.
+
+``` shell
+# Let's use explain=true to see what happens under the hood
+# Vietnamese Pho Noodle is on top because of the default implementation of TFIDF that penalizes the matching at cuisine field because there are multiple restaurants with cuisine=Vietnamese while there are only one restaurant with name=Vietnamese
+# Question: But why having the name Vietnamese in its name makes it more Vietnamese than other restaurants?
+GET restaurant/_search
+{
+  "query" : {
+    "multi_match" : {
+      "query": "vietnamese",
+      "fields": [ "restaurant_name", "cuisine" ]
+    }
+  },
+  "explain": true
+}
+```
+
+``` shell
+# Result
+"hits": {
+    "hits": [
+      {
+        "_id": "002vietnamesephonoodle",
+        "_score": 0.6931471,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho Noodle",
+          "cuisine": "Vietnamese",
+          "rating": 4
+        },
+        "_explanation": {
+          "value": 0.6931471,
+          "description": "max of:",
+          "details": [
+            # Matching in field `cuisine` yields score=0.18
+            # Note that by default the score is calculated by TFIDF
+            # More info about Elasticsearch TFIDF: https://www.elastic.co/guide/en/elasticsearch/reference/8.6/index-modules-similarity.html#bm25
+            {
+              "value": 0.18232156,
+              "description": "weight(cuisine:vietnamese in 1) [PerFieldSimilarity], result of:",
+              "details": [...]
+            },
+            # Matching in field `restaurant_name` yields score=0.69
+            {
+              "value": 0.6931471,
+              "description": "weight(restaurant_name:vietnamese in 1) [PerFieldSimilarity], result of:",
+              "details": [...]
+            }
+            # Because the final score is "max of:" those two above scores,
+            # it is equal to the matching score with `restaurant_name`
+          ]
+        }
+      },
+      {
+        "_id": "001sabichuong",
+        "_score": 0.18232156,
+        "_source": {
+          "restaurant_name": "Sa Bi Chuong",
+          "cuisine": "Vietnamese",
+          "rating": 5
+        },
+        # Similarly since there's no matching with `restaurant_name`,
+        # here the final score is equal to the matching score of `cuisine`
+        "_explanation": {
+          "value": 0.18232156,
+          "description": "max of:",
+          "details": [
+            {
+              "value": 0.18232156,
+              "description": "weight(cuisine:vietnamese in 0) [PerFieldSimilarity], result of:",
+              "details": [...]
+            }
+          ]
+        }
+      }
+    ]
+  }
+```
+
+Above we can see that Vietnamese Pho Noodle is on top because of the default implementation of TFIDF that penalizes the matching at cuisine field because there are multiple restaurants with `cuisine=Vietnamese` while there are only one restaurant with `name=Vietnamese`.
+
+Diving into the `_explanation` block, we realize that score difference originates from the TFIDF matching output for `restaurant_name`. This is expected as the algorithm assumes that a keyword is a better signal if it is not common and usually found in a lot of documents (sort of a solution to automatically handle stopwords). In our examples, both the restaurants have cuisine `Vietnamese` so according to TFIDF, that match does not say much about the relevance of the documents.
+
+Whether we should encourage this behavior is a question. Is it true that having Vietnamese in the name make one restaurant more “Vietnamese” than the other?
+
+Another problem with TFIDF is that it takes into account the length of the field.
+
+```         
+# Let's add another restaurant
+POST _bulk
+{ "index" : { "_index" : "restaurant", "_id" : "003vietnamesepho" } }
+{ "restaurant_name": "Vietnamese Pho", "cuisine": "Vietnamese", "rating": 3.0 }
+
+# In the below example we see that the new Vietnamese Pho restaurant is ranked higher...
+GET restaurant/_search
+{
+  "query" : {
+    "multi_match" : {
+      "query": "vietnamese pho",
+      "fields": [ "restaurant_name", "cuisine" ]
+    }
+  },
+  "explain": true
+}
+```
+
+You can find the detailed and lengthy result in Appendix #1 at the end of the post. In short, we see that the result ranks restaurant Vietnamese Pho first and then Vietnamese Pho Noodle. Analyzing the component scores indicates that the key difference is that Vietnamese Pho has `length=2` (words) while Vietnamese Pho Noodle has `length=3`. It feels unintuitive since we know that the second restaurant has higher rating, given that both, in practice, are equally matching to user’s keyword.
+
+# Reranking (boosting) with function_score
+
+As we talk about `rating`, we can wrap our query with`function_score` to incorporate that information to modify our matching scores, hence have a better control over our ranking.
+
+```         
+GET restaurant/_search
+{
+  "query": {
+    "function_score": {
+      # Our main query is wrapped in a function_score clause
+      "query": {
+        "multi_match" : {
+          "query": "vietnamese",
+          "fields": [ "restaurant_name", "cuisine" ]
+        }
+      },
+      # We define the functions that will be applied on top of the matching scores
+      # returned by our main query
+      "functions": [
+        {
+          "field_value_factor": {
+            "field": "rating",
+            "modifier": "none",
+            "missing": 1
+          }
+        }
+      ],
+      # Retrieve the max boosting defined inside `functions`
+      # Above there is only one boosting so it's applied by default
+      "score_mode": "max",
+      # Multiply the matching score with the boosting calculated from functions
+      "boost_mode": "multiply"
+    }
+  }
+}
+```
+
+```         
+# Result
+{
+  "hits": {
+    "hits": [
+      {
+        "_index": "restaurant",
+        "_id": "002vietnamesephonoodle",
+        "_score": 1.7885544,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho Noodle",
+          "cuisine": "Vietnamese",
+          "rating": 4
+        }
+      },
+      {
+        "_index": "restaurant",
+        "_id": "003vietnamesepho",
+        "_score": 1.5706451,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho",
+          "cuisine": "Vietnamese",
+          "rating": 3
+        }
+      },
+      {
+        "_index": "restaurant",
+        "_id": "001sabichuong",
+        "_score": 0.66765696,
+        "_source": {
+          "restaurant_name": "Sa Bi Chuong",
+          "cuisine": "Vietnamese",
+          "rating": 5
+        }
+      }
+    ]
+  }
+}
+```
+
+The higher rating restaurant is on top now. But how about restaurant `Sa Bi Chuong` with `rating=5`? It being the last result seems like we haven’t boosted “enough”.
+
+We might start tinkering a bit more with `function_score` to make that happen. Here is one of the implementation which models the boosting in a non-linear manner to effectively apply a strong boost on documents with `rating=5`.
+
+```         
+GET restaurant/_search
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "multi_match" : {
+          "query": "vietnamese",
+          "fields": [ "restaurant_name", "cuisine" ]
+        }
+      },
+      "functions": [
+        # Apply a non-linear function to model that
+        # a rating of 5 has much more weight than rating of 4 (not just 25% more)
+        {
+          "filter": {
+            "range": {
+              "rating": {
+                "gte": 5,
+                "lte": 5
+              }
+            }
+          },
+          "weight": 10
+        },
+        {
+          "filter": {
+            "range": {
+              "rating": {
+                "gte": 4,
+                "lt": 5
+              }
+            }
+          },
+          "weight": 2
+        }
+      ],
+      "score_mode": "max",
+      "boost_mode": "multiply"
+    }
+  }
+}
+```
+
+```         
+# Result
+{
+  "hits": {
+    "hits": [
+      {
+        "_index": "restaurant",
+        "_id": "001sabichuong",
+        "_score": 1.3353139,
+        "_source": {
+          "restaurant_name": "Sa Bi Chuong",
+          "cuisine": "Vietnamese",
+          "rating": 5
+        }
+      },
+      {
+        "_index": "restaurant",
+        "_id": "002vietnamesephonoodle",
+        "_score": 0.8942772,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho Noodle",
+          "cuisine": "Vietnamese",
+          "rating": 4
+        }
+      },
+      {
+        "_index": "restaurant",
+        "_id": "003vietnamesepho",
+        "_score": 0.52354836,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho",
+          "cuisine": "Vietnamese",
+          "rating": 3
+        }
+      }
+    ]
+  }
+}
+```
+
+We might ponder that: “Isn’t the function boosting now looking too arbitrary? Will it work for other cases?”. Indeed, that’s the question we should ask ourselves. Overtime, with more and more requirements, our query template will grow in complexity, leading to conflicts between the modifications we make.
+
+Let’s move to the next example to illustrate what I mean by “conflict”.
+
+# The complexity comes with fuzzy matching
+
+While not vital, the ability to handle user’s typo is always a nice-to-have feature, especially when they are now familiar with smart search engine like Google’s. Elasticsearch has a built-in mechanism called `fuzzy matching`, which is configurable with the option `fuzziness`.
+
+```         
+# The use of `bool` query below is to implement the logic: At least one condition should match
+PUT _scripts/01-default-fuzzy-search-template
+{
+  "script": {
+    "lang": "mustache",
+    "source": {
+      "query": {
+        "function_score": {
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "bool": {
+                    "should": [
+                      {
+                        "multi_match" : {
+                          "query": "{{query_string}}",
+                          "fields": [ "restaurant_name", "cuisine" ]
+                        }
+                      },
+                      {
+                        "multi_match" : {
+                          "query": "{{query_string}}",
+                          "fields": [ "restaurant_name", "cuisine" ],
+                          # For the purpose of this demo, default behavior works well enough
+                          "fuzziness": "AUTO"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "functions": [
+            {
+              "filter": {
+                "range": {
+                  "rating": {
+                    "gte": 5,
+                    "lte": 5
+                  }
+                }
+              },
+              "weight": 10
+            },
+            {
+              "filter": {
+                "range": {
+                  "rating": {
+                    "gte": 4,
+                    "lt": 5
+                  }
+                }
+              },
+              "weight": 2
+            }
+          ],
+          "score_mode": "max",
+          "boost_mode": "multiply"
+        }
+      }
+    },
+    "params": {
+      "query_string": "My query string"
+    }
+  }
+}
+```
+
+Notice that we just created a query template instead of running a query. We can now invoke the query with paramaters, which is a nice feature Elasticsearch introduces to make our code look less overwhelming. Like this:
+
+```         
+GET /_search/template
+{
+  "id": "01-default-fuzzy-search-template",
+  "params": {
+    "query_string": "vietnames"
+  }
+}
+```
+
+The above query returns our expected Vietnamese restaurant given a typo keyword `vietnames`. Under the hood, fuzzy matching uses [Levenshtein edit distance](https://www.elastic.co/guide/en/elasticsearch/reference/8.7/query-dsl-fuzzy-query.html), which measures similarity between strings by the number of modifications one make to make one become another. In our example, we just need to add one letter `e` at the end to make `vietnames` become `vietnamese`. Quite an easy task for the algorithm. One might also argue that it’s quite easy for our developers as well. 2 lines of code and a new beautiful feature.
+
+Well, the interesting bit lies elsewhere. One day, our sales team suddenly comes to us with a complaint that search result is wrong. People are getting Japanese BBQ restaurants over Korean ones even when they explicitly search for `kbbq` (which is a common acronym for `korean bbq`).
+
+Here are the restaurants:
+
+```         
+POST _bulk
+{ "index" : { "_index" : "restaurant", "_id" : "004parkhangseokbbq" } }
+{ "restaurant_name": "Park Hang-seo's KBBQ", "cuisine": "Korean", "rating": 2.0 }
+{ "index" : { "_index" : "restaurant", "_id" : "005bestbbqintown" } }
+{ "restaurant_name": "Best BBQ in town", "cuisine": "Japanese", "rating": 5.0 }
+```
+
+Query:
+
+```         
+{
+  "id": "01-default-fuzzy-search-template",
+  "params": {
+    "query_string": "kbbq"
+  }
+}
+```
+
+Result:
+
+```         
+{
+  "hits": {
+    "hits": [
+      {
+        "_index": "restaurant",
+        "_id": "005bestbbqintown",
+        "_score": 8.384459,
+        "_source": {
+          "restaurant_name": "Best BBQ in town",
+          "cuisine": "Japanese",
+          "rating": 5
+        }
+      },
+      {
+        "_index": "restaurant",
+        "_id": "004parkhangseokbbq",
+        "_score": 2.5153382,
+        "_source": {
+          "restaurant_name": "Park Hang-seo's KBBQ",
+          "cuisine": "Korean",
+          "rating": 2
+        }
+      }
+    ]
+  }
+}
+```
+
+To understand what is happening, we need to enable `explain=true` to see what contributes to the final scores. As this time the output is too verbose, here are the findings:
+
+-   The keyword matching score (before boosting) for the `Best BBQ in town` restaurant is 0.8, less than the 1.2 of `Park Hang-seo's KBBQ`
+-   So if no boosting applied, we will see `Park Hang-seo's KBBQ` restaurant ranks at the first position
+-   But then the boosting from `rating` modifies the score, leading to the ordering as we can see
+
+One way to frame the issue is that we have imperfect boosting. Say we have a better formula that strikes the right balances, then the problem should be solved. But it’s close to impossible to guarantee that the new formula will not cause any other issues. We don’t want these kinds of issue creep into the system without any notice and then some day being flagged out by stakeholders. We want to be the first to be aware of those issues, especially whenever we make any changes. Therefore, before discussing potential solutions, I hope we all agree that the very next important thing we should do is (yes, you are probably thinking about the same thing as I am) setting up a testing/evaluation mechanism.
+
+# How should we create test cases for this search application?
+
+IMHO, the first challenge is about moving data. The queries and the documents can both grow over time, so a static mock dataset might not be a very good representative of the search relevance anymore after a month. The next bit is related to our mindset. Sometimes we might need to think about whether we need 100% passed test cases in order to fix this new very urgent issue. For example, there are cases where if you fix some issues then the search result orderings of the other test cases might alter a bit. If we hard-code the rankings, then we might sweat ourselves trying to tweak our query template. But in practice a lot of the times we neither don’t need the ranking to be exactly pre-defined nor we are perfectly sure about which ordering is actually optimal. We should consider using a soft mechanism where we quantify the relevance of the system and using threshold instead.
+
+Here we look at how we can use Elasticsearch Ranking Evaluation API to implement such evaluation scheme:
+
+```         
+GET restaurant/_rank_eval
+{
+  # Query template comes in really handy when used in conjunction with _rank_eval
+  "templates": [
+     {
+        "id": "01-default-fuzzy-search-template",
+        "template": {
+            "id": "01-default-fuzzy-search-template"
+        }
+     }
+  ],
+  "requests": [
+    {
+     "id": "kbbq_query",
+     # Here we manually define the true positives with rating >= 1.0
+     # The actual rating number helps when using metrics that takes into account
+     # the ranking of the search results
+     "ratings": [
+        { "_index": "restaurant", "_id": "004parkhangseokbbq", "rating": 3 },
+        { "_index": "restaurant", "_id": "005bestbbqintown", "rating": 1 }
+      ],
+     "template_id": "01-default-fuzzy-search-template",
+     "params": {
+        "query_string": "kbbq"
+      }
+    },
+    {
+     "id": "vietnamese_query",
+     "ratings": [
+        { "_index": "restaurant", "_id": "001sabichuong", "rating": 3 },
+        { "_index": "restaurant", "_id": "002vietnamesephonoodle", "rating": 3 },
+        { "_index": "restaurant", "_id": "003vietnamesepho", "rating": 3 }
+      ],
+     "template_id": "01-default-fuzzy-search-template",
+     "params": {
+        "query_string": "vietnamese"
+      }
+    }
+  ],
+  "metric": {
+    "dcg": {
+      "k": 5,
+      "normalize": true
+    }
+  }
+}
+```
+
+The result:
+
+```         
+{
+  "metric_score": 0.8549048706984328,  # This is the overall metric score, best is 1.0, worst is 0.0
+  "details": {
+    "kbbq_query": {
+      # This kbbq_query has a imperfect score because it ranks the more relevant result lower
+      "metric_score": 0.7098097413968655,
+      "unrated_docs": [],
+      "hits": [
+        {
+          "hit": {
+            "_index": "restaurant",
+            "_id": "005bestbbqintown",
+            "_score": 8.384459
+          },
+          "rating": 1
+        },
+        {
+          "hit": {
+            "_index": "restaurant",
+            "_id": "004parkhangseokbbq",
+            "_score": 2.5153382
+          },
+          "rating": 3
+        }
+      ],
+      "metric_details": {
+        ...
+      }
+    },
+    "vietnamese_query": {
+      "metric_score": 1,
+      "unrated_docs": [],
+      "hits": [
+        ...
+      ],
+      "metric_details": {
+        ...
+      }
+    }
+  },
+  "failures": {}
+}
+```
+
+Let’s try to better our search by introducing changes that move the evaluation score closer to the perfect 1.0.
+
+# Our revised search model
+
+Before start designing a new query template, we can take a step back and really think about how we should model the search engine. Below are the essentials:
+
+1.  Exact matching will always surface on top of not-exact ones like fuzzy matching;
+2.  Exact matches does not take into account field length or word/document frequencies. If two documents have the same exact match in a field, they should have the same keyword matching score;
+3.  Within the same level of matching (whether exact or fuzzy), while the initial keyword matching scores should be the same, they can be reranked by certain modifiers such as distance, popularity, … However, the modified scores should not make the final score to exceed the base score of the upper level, e.g. modifed fuzzy score should not be greater than exact base score. This is to ensure the essential #1.
+
+If you watch football, this resembles how the leagues such as Premiere League rank their teams. No matter how much more goals the team L has scored compared to team M’s or their head-to-head results, if team M has more points than team M has a higher ranking. The other measures are for tie-breaker only.
+
+This understanding can be then transferred to how we use Elasticsearch to express our model.
+
+One approach is to use `dis_max` query combined with `constant_score` query. The idea is to categorize each type of matching into different levels of score where one level will have twice the score of the below level. The documents fall into one level of matching (tie) will be reranked by modifiers but eventually the new scores will not exceed the upper base score. Here is the new query template:
+
+```         
+PUT _scripts/02-constant-score-search-template
+{
+  "script": {
+    "lang": "mustache",
+    "source": {
+      "query": {
+        "function_score": {
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "bool": {
+                    "should": [
+                      {
+                        # `dis_max` query gets the max score of an array of clauses
+                        "dis_max": {
+                          "queries": [
+                            {
+                              # `constant_score` says that if matches, return a constant score
+                              "constant_score": {
+                                "filter": {
+                                  "multi_match" : {
+                                    "query": "{{query_string}}",
+                                    "fields": [ "restaurant_name", "cuisine" ]
+                                  }
+                                },
+                                # This is the constant that is returned as score
+                                # Note that the exact number is chosen intentionally
+                                # Here the upper level will be twice the lower level
+                                # and we will restrict the modifiers to be only
+                                # able to boost by at most 100% the base score
+                                # so that the lower level can not exceed the upper
+                                "boost": 2
+                              }
+                            },
+                            {
+                              "constant_score": {
+                                "filter": {
+                                  "multi_match" : {
+                                    "query": "{{query_string}}",
+                                    "fields": [ "restaurant_name", "cuisine" ],
+                                    "fuzziness": "AUTO"
+                                  }
+                                },
+                                "boost": 1
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "functions": [
+            # Design the modifiers to be multiplier of maximum 1.9999 the base score
+            {
+              "weight": 1
+            },
+            {
+              "field_value_factor": {
+                "field": "rating",
+                "modifier": "ln",
+                "missing": 1
+              },
+              "weight": 0.1
+            }
+          ],
+          "score_mode": "sum",
+          "boost_mode": "multiply"
+        }
+      }
+    },
+    "params": {
+      "query_string": "My query string"
+    }
+  }
+}
+```
+
+When we re-run the evaluation, we can observe that the normalized DCG metric now has score equal to 1.0, denoting a perfect accuracy!
+
+# Summary
+
+This blog post focuses on putting you in the shoe of an Elasticsearch engineer who has to derive query templates that fit the needs of a site-search enginer. We have briefly coverred the following topics:
+
+-   Keyword matching with multiple fields
+-   Understanding default Elasticsearch scoring
+-   Problems with the default TFIDF
+-   Boosting search results by attributes
+-   Fuzzy matching
+-   Elasticsearch query templateEvaluation with Rank Evaluation API
+-   Constructing query with `dis_max`and `constant_score`
+
+Though definitely not optimal, I hope that parts of the blog post help you come closer to utilize Elasticsearch to help solve your own problems.
+
+I also much appreciate any comments or feedbacks. If you want to discuss more, please comment on this post or open an issue in the Github repo: https://github.com/dvquy13/elasticsearch-sharing.
+
+Thanks all!
+
+# Appendix
+
+## Appendix 1: Detailed breakdown of default TFIDF matching where length of the field value affect overall matching score
+
+```         
+# Result
+{
+  "hits": {
+    "hits": [
+      {
+        "_id": "003vietnamesepho",
+        "_score": 1.0470967,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho",
+          "cuisine": "Vietnamese",
+          "rating": 3
+        },
+        "_explanation": {
+          "value": 1.0470967,
+          "description": "max of:",
+          "details": [
+            {
+              "value": 0.13353139,
+              "description": "sum of:",
+              "details": [
+                {
+                  "value": 0.13353139,
+                  "description": "weight(cuisine:vietnamese in 0) [PerFieldSimilarity], result of:",
+                  "details": [...]
+                }
+              ]
+            },
+            {
+              "value": 1.0470967,
+              "description": "sum of:",
+              "details": [
+                # Matching score with "vietnamese"
+                {
+                  "value": 0.52354836,
+                  "description": "weight(restaurant_name:vietnamese in 0) [PerFieldSimilarity], result of:",
+                  "details": [
+                    {
+                      "value": 0.52354836,
+                      "description": "score(freq=1.0), computed as boost * idf * tf from:",
+                      "details": [
+                        {
+                          "value": 2.2,
+                          "description": "boost",
+                          "details": []
+                        },
+                        {
+                          "value": 0.47000363,
+                          "description": "idf, computed as log(1 + (N - n + 0.5) / (n + 0.5)) from:",
+                          ...
+                        },
+                        {
+                          "value": 0.50632906,
+                          "description": "tf, computed as freq / (freq + k1 * (1 - b + b * dl / avgdl)) from:",
+                          "details": [
+                            {
+                              "value": 1,
+                              "description": "freq, occurrences of term within document",
+                              "details": []
+                            },
+                            {
+                              "value": 1.2,
+                              "description": "k1, term saturation parameter",
+                              "details": []
+                            },
+                            {
+                              "value": 0.75,
+                              "description": "b, length normalization parameter",
+                              "details": []
+                            },
+                            # Notice the length=2 here is in the denominator,
+                            # which means that the higher the length the less
+                            # the score
+                            {
+                              "value": 2,
+                              "description": "dl, length of field",
+                              "details": []
+                            },
+                            {
+                              "value": 2.6666667,
+                              "description": "avgdl, average length of field",
+                              "details": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                # Matching score with "pho"
+                {
+                  "value": 0.52354836,
+                  "description": "weight(restaurant_name:pho in 0) [PerFieldSimilarity], result of:",
+                  # Details are exactly like above
+                  "details": [...]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "_id": "002vietnamesephonoodle",
+        "_score": 0.8942772,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho Noodle",
+          "cuisine": "Vietnamese",
+          "rating": 4
+        },
+        "_explanation": {
+          "value": 0.8942772,
+          "description": "max of:",
+          "details": [
+            {
+              "value": 0.13353139,
+              "description": "sum of:",
+              "details": [...]
+            },
+            {
+              "value": 0.8942772,
+              "description": "sum of:",
+              "details": [
+                {
+                  "value": 0.4471386,
+                  "description": "weight(restaurant_name:vietnamese in 1) [PerFieldSimilarity], result of:",
+                  "details": [
+                    {
+                      "value": 0.4471386,
+                      "description": "score(freq=1.0), computed as boost * idf * tf from:",
+                      "details": [
+                        ...,
+                        {
+                          "value": 0.4324324,
+                          "description": "tf, computed as freq / (freq + k1 * (1 - b + b * dl / avgdl)) from:",
+                          "details": [
+                            ...,
+                            # Here the length=3 (greater than length=2 of the
+                            # above restaurant)
+                            {
+                              "value": 3,
+                              "description": "dl, length of field",
+                              "details": []
+                            },
+                            ...
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "value": 0.4471386,
+                  "description": "weight(restaurant_name:pho in 1) [PerFieldSimilarity], result of:",
+                  "details": [...]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+<br>
+If you find this article helpful, please cite this writeup as:
+
+> Quy, Dinh. (Jun 2023). {{< meta title >}}. {{< var website_url >}}. https://{{< var website_url >}}/posts/site-search-elasticsearch/.

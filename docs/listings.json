@@ -1,0 +1,15 @@
+[
+  {
+    "listing": "/projects.html",
+    "items": [
+      "/projects/review-rec-bot/index.html",
+      "/projects/reviews-parsing-mlsys/index.html"
+    ]
+  },
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/site-search-elasticsearch/index.html"
+    ]
+  }
+]
