@@ -6,4 +6,8 @@ freeze: true
 
 # Enable banner style title blocks
 title-block-banner: true
-toc: true
+
+comments: 
+  utterances:
+    repo: dvquy13/icy-touch-comments
+    

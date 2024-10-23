@@ -19,9 +19,6 @@ website:
         href: https://x.com/dvquys
       - icon: rss
         href: index.xml
-  comments: 
-    utterances:
-      repo: dvquy13/icy-touch-comments
 format:
   html:
     theme:
