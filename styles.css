@@ -60,8 +60,3 @@ div.quarto-about-jolla main {
     /* Do not change width like this since it would break on mobile */
     /* width: 500px; */
 }
-
-/* // Change subtitle font size */
-p.subtitle.lead {
-    font-size: 16px !important;
-}
