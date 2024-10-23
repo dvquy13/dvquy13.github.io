@@ -1,9 +1,4 @@
 /* css styles */
-/* // Change subtitle font sizez */
-p.subtitle.lead {
-    font-size: 16px !important;
-}
-
 /* Change listing's post metadata's reading time */
 div.listing-reading-time {
     font-size: 0.8em;
@@ -64,4 +59,9 @@ div.quarto-about-jolla main {
     text-align: left;
     /* Do not change width like this since it would break on mobile */
     /* width: 500px; */
+}
+
+/* // Change subtitle font sizez */
+p.subtitle.lead {
+    font-size: 16px !important;
 }

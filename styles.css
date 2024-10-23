@@ -63,5 +63,5 @@ div.quarto-about-jolla main {
 
 /* // Change subtitle font sizez */
 p.subtitle.lead {
-    font-size: 16px;
+    font-size: 16px !important;
 }
