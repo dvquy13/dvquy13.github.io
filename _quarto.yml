@@ -17,6 +17,11 @@ website:
         href: https://github.com/dvquy13
       - icon: twitter-x
         href: https://x.com/dvquys
+      - icon: rss
+        href: index.xml
+  comments: 
+    utterances:
+      repo: dvquy13/icy-touch-comments
 format:
   html:
     theme:
@@ -28,6 +33,7 @@ format:
     fontsize: 16px
     linestretch: 1.7
     linkcolor: "#114b8f"
+    smooth-scroll: true
     monofont: "Roboto Mono"
     grid:
       # Chosen so that we have maximum 75 characters in the text body for readability

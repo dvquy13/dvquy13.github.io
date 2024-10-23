@@ -1,10 +1,9 @@
 ---
-title: Reviews Parsing MLSys
-subtitle: Setting up a ML system on K8s
+title: Let's build an ML system
+subtitle: End-to-end set up and deploy on Kubernetes
 date: "2024-06-21"
 categories: [tech, machine learning]
 keywords: [k8s, ml system, mlflow, jenkins, kserve, mlserver]
-feed: false
 draft: false
 ---
 

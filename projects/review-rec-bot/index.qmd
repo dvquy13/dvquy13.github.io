@@ -1,10 +1,9 @@
 ---
-title: Review Rec Bot
-subtitle: Demo building Restaurant Recommendation Chatbot based on Yelp Public Data
+title: Building a Conversational Assistant for Restaurant Discovery and Booking
+subtitle: Lessons from Creating a Chatbot Using RAG, LLMs, and Advanced Retrieval Techniques
 date: "2024-09-22"
 categories: [tech, llm]
 keywords: [llm, rag, chatbot, llamaindex]
-feed: false
 draft: false
 image: thumbnail.svg
 ---

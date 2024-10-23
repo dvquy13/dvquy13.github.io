@@ -9,7 +9,7 @@
 <meta name="dcterms.date" content="2023-06-01">
 <meta name="keywords" content="full-text search, elasticsearch">
 
-<title>A Site-Search Engineer’s Journal Approaching Relevance Challenges in Elasticsearch Query Construction – DvQ</title>
+<title>A Hierarchical approach with Elasticsearch: Lessons from 22 Months of Iteration – DvQ</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -68,6 +68,7 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<style>html{ scroll-behavior: smooth; }</style>
 <!-- Inter -->
 <link rel="preconnect" href="https://rsms.me/">
 <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
@@ -124,6 +125,11 @@ ul.task-list li input[type="checkbox"] {
 </i> 
 <span class="menu-text"></span></a>
   </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
@@ -135,8 +141,8 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">A Site-Search Engineer’s Journal Approaching Relevance Challenges in Elasticsearch Query Construction</h1>
-            <p class="subtitle lead">A hierarchical keyword-matching approach</p>
+      <h1 class="title">A Hierarchical approach with Elasticsearch: Lessons from 22 Months of Iteration</h1>
+            <p class="subtitle lead">A Practical Guide to Designing Query Templates, Boosting Relevance, and Addressing Site-Search Challenges</p>
                                 <div class="quarto-categories">
                 <div class="quarto-category">tech</div>
                 <div class="quarto-category">search</div>
@@ -758,7 +764,7 @@ PUT _scripts/01-default-fuzzy-search-template
 <li>Exact matches does not take into account field length or word/document frequencies. If two documents have the same exact match in a field, they should have the same keyword matching score;</li>
 <li>Within the same level of matching (whether exact or fuzzy), while the initial keyword matching scores should be the same, they can be reranked by certain modifiers such as distance, popularity,&nbsp;… However, the modified scores should not make the final score to exceed the base score of the upper level, e.g.&nbsp;modifed fuzzy score should not be greater than exact base score. This is to ensure the essential #1.</li>
 </ol>
-<p>If you watch football, this resembles how the leagues such as Premiere League rank their teams. No matter how much more goals the team L has scored compared to team M’s or their head-to-head results, if team M has more points than team M has a higher ranking. The other measures are for tie-breaker only.</p>
+<p>If you watch football, this is similar to how the leagues such as Premiere League rank their teams. No matter how much more goals the team L has scored compared to team M’s or their head-to-head results, if team M has more points than team M has a higher ranking. The other measures are for tie-breaker only.</p>
 <p>This understanding can be then transferred to how we use Elasticsearch to express our model.</p>
 <p>One approach is to use <code>dis_max</code> query combined with <code>constant_score</code> query. The idea is to categorize each type of matching into different levels of score where one level will have twice the score of the below level. The documents fall into one level of matching (tie) will be reranked by modifiers but eventually the new scores will not exceed the upper base score. Here is the new query template:</p>
 <pre><code>PUT _scripts/02-constant-score-search-template
@@ -1027,7 +1033,7 @@ PUT _scripts/01-default-fuzzy-search-template
 }</code></pre>
 <p><br> If you find this article helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
-<p>Quy, Dinh. (Jun 2023). A Site-Search Engineer’s Journal Approaching Relevance Challenges in Elasticsearch Query Construction. https://dvquys.com. https://https://dvquys.com/posts/site-search-elasticsearch/.</p>
+<p>Quy, Dinh. (Jun 2023). A Hierarchical approach with Elasticsearch: Lessons from 22 Months of Iteration. dvquys.com. https://dvquys.com/posts/site-search-elasticsearch/.</p>
 </blockquote>
 
 
@@ -1455,9 +1461,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<script src="https://utteranc.es/client.js" repo="dvquy13/icy-touch-comments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
 </div> <!-- /content -->
 
 
 
 
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
 </body></html>

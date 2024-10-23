@@ -1,0 +1,1595 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>DvQ</title>
+<link>https://dvquys.com/</link>
+<atom:link href="https://dvquys.com/index.xml" rel="self" type="application/rss+xml"/>
+<description>DvQ Personal Blog</description>
+<generator>quarto-1.5.57</generator>
+<lastBuildDate>Sat, 21 Sep 2024 16:00:00 GMT</lastBuildDate>
+<item>
+  <title>Building a Conversational Assistant for Restaurant Discovery and Booking</title>
+  <link>https://dvquys.com/projects/review-rec-bot/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<a href="https://github.com/dvquy13/review-rec-bot">Project Details</a>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+
+</div>
+</div>
+<section id="demo" class="level1">
+<h1>Demo</h1>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/4trTuAV3RnY?si=s7s5pjbgoSopGJja" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+</section>
+<section id="problem-statement" class="level1">
+<h1>Problem Statement</h1>
+<p>Listing/reservation businesses like Yelp offer value to users by providing useful information to make them find out where to go next. Good search and recommendation systems go a long way, but they are still far from delivering the ultimate experience where users can interact naturally with the system for complex queries or have a conversation to drill down their needs.</p>
+</section>
+<section id="approach" class="level1">
+<h1>Approach</h1>
+<p>Build a chatbot assistant to assist users in <strong>discovering places to go and booking</strong>.</p>
+<p>Workflow:</p>
+<ol type="1">
+<li>Download <a href="https://www.yelp.com/dataset">Yelp reviews data</a>. Sample <strong>5,240 reviews from 100 businesses</strong>.</li>
+<li>Set up development environment including experimentation tracking via MLflow, observability with Arize Phoenix</li>
+<li>Build MVP version using LlamaIndex, Qdrant</li>
+<li>Build synthetic evaluation datasets with 30 questions for retrieval and response. Manual response dataset are gradually built up and added based on error analysis</li>
+<li>Conduct error analysis and look at the model’s output to come up with new iteration ideas. Run a total of 10 experiments to improve the RAG, with notable attempts including: Replacing Llama-8.1B with GPT-4o-mini, Fine-tuning Embedding Model, Hybrid Retrievers, Semantic Chunking, BGE Reranker, Query Expansion</li>
+<li>Build RAG Agent based on OpenAI API with Query Engine tool and Reservation Service tool. Chatbot UI is built with Chainlit.</li>
+</ol>
+</section>
+<section id="evaluation" class="level1">
+<h1>Evaluation</h1>
+<p>Evaluation results can be found <a href="https://drive.google.com/file/d/1GU0gnChJBBlB-xfaMEcnmGiHhUFKzfqb/view?usp=sharing">here</a>.</p>
+<p>Two proposed key metrics are <strong>Retrieval Hit Rate</strong> and <strong>Response Correctness</strong>.</p>
+<p>Retrieval is a critical component in any RAG system. Along with data prep, retrieval sits at the top of the pipeline so any improvements in these fronts is more likely to improve the overall system. <strong>Hit rate</strong> is chosen as a key metric because since we can employ rerank as a subsequent step, we have room to optimize for the ranking issues.&nbsp;</p>
+<p>For response, <strong>Correctness</strong> measures both how relevant the answer is with respect to the query and how correct it is compared to the referenced answer. It’s therefore a better indicator than pure relevance, which is just based on the query and hence easier to get right.</p>
+<p>For reference, Response Correctness on synthetic dataset has improved <strong>+166%</strong> from 1.75 / 5.00 from MVP version to <strong>4.67 / 5.00</strong> on the current version. The current <strong>Retrieval Hit Rate @ 50</strong> reaches <strong>73%</strong>, not directly comparable but at MVP version <strong>Retrieval Hit Rate @ 10</strong> was 20%.</p>
+<p>As next steps, while there is not much room to improve Response Correctness, we ought to increase Retrieval Hit Rate to 90% which should be doable since this dataset only contains a small amount of data.</p>
+</section>
+<section id="learningsremarks" class="level1">
+<h1>Learnings/Remarks</h1>
+<ul>
+<li>Using question-style query leads to 5-20% uplift in retrieval hit rate compared to using keyword search</li>
+<li>BM25 Retriever alone results in 200% increase in retrieval effectiveness including hit rate, average precision, MRR and NDCG</li>
+<li>Fine-tuning small embedding model like Snowflake/snowflake-arctic-embed-m-v1.5 yield +80% retrieval effectiveness, especially rankings of the retrieved nodes</li>
+<li>Using GPT-4o-mini as response synthesizer significantly improve the quality of response in all aspects (especially correctness from 2.6 to 3.8) compared to Llama 3.1-8B-Instruct</li>
+<li>Using TreeSummarize with custom prompt yields a +10% uplift on response correctness evaluation, from 3.97 to 4.37. Based on eyeballing we also see a way better response that is recommendation-like</li>
+</ul>
+</section>
+<section id="challenges" class="level1">
+<h1>Challenges</h1>
+<section id="challenge-1-auto-retrieval-not-reliable" class="level4">
+<h4 class="anchored" data-anchor-id="challenge-1-auto-retrieval-not-reliable">Challenge 1: Auto-retrieval not reliable</h4>
+<p>While theoretically both precision and recall should be greatly improved if we are able to apply the right filters for User questions instead of relying on embedding/keyword matching, my first attempt to apply auto-retrieval with ChromaDB did not yield promising results. There were at least two syntactic issues which broke the agentic workflow. Even after fixing those two the unreliable nature of this approach is still there and I also witnessed a -10% degradation in Retrieval Hit Rate.</p>
+<p>In the end I forfeited the feature but nevertheless look forward to a way to re-applying this technique.</p>
+</section>
+<section id="challenges-2-indexing-pipeline-takes-too-long" class="level4">
+<h4 class="anchored" data-anchor-id="challenges-2-indexing-pipeline-takes-too-long">Challenges 2: Indexing pipeline takes too long</h4>
+<p>Indexing 70K nodes from 30K reviews for 400 businesses takes more than 6 hours!</p>
+</section>
+</section>
+<section id="future-improvements" class="level1">
+<h1>Future Improvements</h1>
+<ul>
+<li>Guardrail system inputs and outputs</li>
+<li>Experiment with Contextual Compression and Filters</li>
+<li>Fine tune LLM Re-ranker (FlagEmbedding BGE Reranker)</li>
+<li>Try ColBERT as a new retriever (may be add to the list of retrievers)</li>
+<li>Try different loss function in training embeddings</li>
+<li>Improve the diversity by implement custom re-ranker that weight downs the reviews from the already seen biz_id</li>
+</ul>
+<p><br> If you find this article helpful, please cite this writeup as:</p>
+<blockquote class="blockquote">
+<p>Quy, Dinh. (Sep 2024). Building a Conversational Assistant for Restaurant Discovery and Booking. dvquys.com. https://dvquys.com/projects/review-rec-bot/.</p>
+</blockquote>
+
+
+</section>
+
+ ]]></description>
+  <category>tech</category>
+  <category>llm</category>
+  <guid>https://dvquys.com/projects/review-rec-bot/</guid>
+  <pubDate>Sat, 21 Sep 2024 16:00:00 GMT</pubDate>
+  <media:content url="https://dvquys.com/projects/review-rec-bot/thumbnail.svg" medium="image" type="image/svg+xml"/>
+</item>
+<item>
+  <title>Let’s build an ML system</title>
+  <link>https://dvquys.com/projects/reviews-parsing-mlsys/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>This project focuses on applying engineering practices to build a Machine Learning System in the domain of public reviews data.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<a href="https://github.com/dvquy13/reviews-parsing-mlsys">Project Details</a>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+
+</div>
+</div>
+<section id="architecture" class="level1 page-columns page-full">
+<h1>Architecture</h1>
+<div class="column-page">
+<p><a href="./architecture.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://dvquys.com/projects/reviews-parsing-mlsys/architecture.svg" class="img-fluid"></a></p>
+</div>
+</section>
+<section id="demo" class="level1">
+<h1>Demo</h1>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/O-8_Q1GgJpM?si=VA9XK7fBDAl6ngH3" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<p><br> If you find this article helpful, please cite this writeup as:</p>
+<blockquote class="blockquote">
+<p>Quy, Dinh. (Jun 2024). Let’s build an ML system. dvquys.com. https://dvquys.com/projects/reviews-parsing-mlsys/.</p>
+</blockquote>
+
+
+</section>
+
+ ]]></description>
+  <category>tech</category>
+  <category>machine learning</category>
+  <guid>https://dvquys.com/projects/reviews-parsing-mlsys/</guid>
+  <pubDate>Thu, 20 Jun 2024 16:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>A Hierarchical approach with Elasticsearch: Lessons from 22 Months of Iteration</title>
+  <link>https://dvquys.com/posts/site-search-elasticsearch/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+This article is originally published in <a href="https://medium.com/towards-data-science/a-site-search-engineers-journal-approaching-relevance-challenges-in-elasticsearch-query-1eca29283da5">Towards Data Science</a>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+
+</div>
+</div>
+<section id="intro" class="level1">
+<h1>Intro</h1>
+<p>Over the last 22 months I have been working as a site-search engineer who uses Elasticsearch to help improve relevance in our restaurant platform. I have deployed in total 83 releases including 3 major versions.</p>
+<p>With roughly one release per week, I can say that not only our search engine is much better than it was 2 years ago, but I have also learned quite a lot. Though still far from a great search engine, here are some things worth sharing in my opinion. More importantly, I really want to get feedback about them.</p>
+<p>This blog post is to provide an approach to design the Elasticsearch query template to deal with common site-search problems including searching for matches across different fields, boosting results and testing. Together we will identify issues with the default approach and then gradually come up with a new one to address the issues altogether.</p>
+<p>This <a href="https://github.com/dvquy13/elasticsearch-sharing">Github repo</a> contains the examples and code discussed in this post.</p>
+</section>
+<section id="main" class="level1">
+<h1>Main</h1>
+<p>We now play the role of a search engineer for a restaurant platform, which allows diners to discover and make reservation for their next meals. We haven’t had much experience, but luckily the app does not require accuracy level of Google from the start. The key is to make gradual visible progresses!</p>
+<p>Alright, let’s dive into it. First off, we make sure user can search for restaurant by name. Here we can rely on the simple default <code>query-match</code> to get the job done.</p>
+<pre class="shell"><code># Index our first two restaurants
+POST _bulk
+{ "index" : { "_index" : "restaurant", "_id" : "001sabichuong" } }
+{ "restaurant_name": "Sa Bi Chuong", "cuisine": "Vietnamese", "rating": 5.0 }
+{ "index" : { "_index" : "restaurant", "_id" : "002vietnamesephonoodle" } }
+{ "restaurant_name": "Vietnamese Pho Noodle", "cuisine": "Vietnamese", "rating": 4.0 }
+
+# Test searching for one
+# Should return Vietnamese Pho Noodle
+GET restaurant/_search
+{
+  "query" : {
+    "match" : { "restaurant_name": "vietnamese" }
+  }
+}</code></pre>
+<p>The above snippet can be run at Kibana’s Dev Tools &gt; Console, which will be available at your <code>localhost:5601</code> if you follow the repo.</p>
+<p>The code is self-explained. We ask Elasticsearch to return restaurants whose name contains <code>vietnamese</code>. And we get back one result for <code>Vietnamese Pho Noodle</code>. No problems.</p>
+<p>But we quickly find out that name is not the only place we want to look for when user submit a query. Given keyword<code>vietnamese</code> we should also return the restaurant <code>Sa Bi Chuong</code>, because it’s a Vietnamese restaurant as tagged in the <code>cuisine</code>. A <code>multi_match</code> query allows us to do exactly that.</p>
+<pre class="shell"><code># Matching multiple fields
+# Should return all 2 Vietnamese restaurant with the Vietnamese Pho Noodle on top
+GET restaurant/_search
+{
+  "query" : {
+    "multi_match" : {
+      "query": "vietnamese",
+      "fields": [ "restaurant_name", "cuisine" ]
+    }
+  }
+}</code></pre>
+<pre class="shell"><code># Result
+"hits": {
+    ...
+    "hits": [
+      {
+        "_index": "restaurant",
+        "_id": "002vietnamesephonoodle",
+        "_score": 0.6931471,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho Noodle",
+          "cuisine": "Vietnamese",
+          "rating": 4
+        }
+      },
+      {
+        "_index": "restaurant",
+        "_id": "001sabichuong",
+        "_score": 0.18232156,
+        "_source": {
+          "restaurant_name": "Sa Bi Chuong",
+          "cuisine": "Vietnamese",
+          "rating": 5
+        }
+      }
+    ]
+  }</code></pre>
+</section>
+<section id="problems-with-the-default-tfidf" class="level1">
+<h1>Problems with the default&nbsp;TFIDF</h1>
+<p>Notice the above scores. The first one is like 4 times higher than the second, indicating that it’s much more relevant given query <code>vietnamese</code>. One might have an assumption that because matching at multiple fields will make the score higher.</p>
+<p>Whenever we have doubts, we can use Elasticsearch <code>explain</code> to get a detailed breakdown of its scoring components.</p>
+<pre class="shell"><code># Let's use explain=true to see what happens under the hood
+# Vietnamese Pho Noodle is on top because of the default implementation of TFIDF that penalizes the matching at cuisine field because there are multiple restaurants with cuisine=Vietnamese while there are only one restaurant with name=Vietnamese
+# Question: But why having the name Vietnamese in its name makes it more Vietnamese than other restaurants?
+GET restaurant/_search
+{
+  "query" : {
+    "multi_match" : {
+      "query": "vietnamese",
+      "fields": [ "restaurant_name", "cuisine" ]
+    }
+  },
+  "explain": true
+}</code></pre>
+<pre class="shell"><code># Result
+"hits": {
+    "hits": [
+      {
+        "_id": "002vietnamesephonoodle",
+        "_score": 0.6931471,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho Noodle",
+          "cuisine": "Vietnamese",
+          "rating": 4
+        },
+        "_explanation": {
+          "value": 0.6931471,
+          "description": "max of:",
+          "details": [
+            # Matching in field `cuisine` yields score=0.18
+            # Note that by default the score is calculated by TFIDF
+            # More info about Elasticsearch TFIDF: https://www.elastic.co/guide/en/elasticsearch/reference/8.6/index-modules-similarity.html#bm25
+            {
+              "value": 0.18232156,
+              "description": "weight(cuisine:vietnamese in 1) [PerFieldSimilarity], result of:",
+              "details": [...]
+            },
+            # Matching in field `restaurant_name` yields score=0.69
+            {
+              "value": 0.6931471,
+              "description": "weight(restaurant_name:vietnamese in 1) [PerFieldSimilarity], result of:",
+              "details": [...]
+            }
+            # Because the final score is "max of:" those two above scores,
+            # it is equal to the matching score with `restaurant_name`
+          ]
+        }
+      },
+      {
+        "_id": "001sabichuong",
+        "_score": 0.18232156,
+        "_source": {
+          "restaurant_name": "Sa Bi Chuong",
+          "cuisine": "Vietnamese",
+          "rating": 5
+        },
+        # Similarly since there's no matching with `restaurant_name`,
+        # here the final score is equal to the matching score of `cuisine`
+        "_explanation": {
+          "value": 0.18232156,
+          "description": "max of:",
+          "details": [
+            {
+              "value": 0.18232156,
+              "description": "weight(cuisine:vietnamese in 0) [PerFieldSimilarity], result of:",
+              "details": [...]
+            }
+          ]
+        }
+      }
+    ]
+  }</code></pre>
+<p>Above we can see that Vietnamese Pho Noodle is on top because of the default implementation of TFIDF that penalizes the matching at cuisine field because there are multiple restaurants with <code>cuisine=Vietnamese</code> while there are only one restaurant with <code>name=Vietnamese</code>.</p>
+<p>Diving into the <code>_explanation</code> block, we realize that score difference originates from the TFIDF matching output for <code>restaurant_name</code>. This is expected as the algorithm assumes that a keyword is a better signal if it is not common and usually found in a lot of documents (sort of a solution to automatically handle stopwords). In our examples, both the restaurants have cuisine <code>Vietnamese</code> so according to TFIDF, that match does not say much about the relevance of the documents.</p>
+<p>Whether we should encourage this behavior is a question. Is it true that having Vietnamese in the name make one restaurant more “Vietnamese” than the other?</p>
+<p>Another problem with TFIDF is that it takes into account the length of the field.</p>
+<pre><code># Let's add another restaurant
+POST _bulk
+{ "index" : { "_index" : "restaurant", "_id" : "003vietnamesepho" } }
+{ "restaurant_name": "Vietnamese Pho", "cuisine": "Vietnamese", "rating": 3.0 }
+
+# In the below example we see that the new Vietnamese Pho restaurant is ranked higher...
+GET restaurant/_search
+{
+  "query" : {
+    "multi_match" : {
+      "query": "vietnamese pho",
+      "fields": [ "restaurant_name", "cuisine" ]
+    }
+  },
+  "explain": true
+}</code></pre>
+<p>You can find the detailed and lengthy result in Appendix #1 at the end of the post. In short, we see that the result ranks restaurant Vietnamese Pho first and then Vietnamese Pho Noodle. Analyzing the component scores indicates that the key difference is that Vietnamese Pho has <code>length=2</code> (words) while Vietnamese Pho Noodle has <code>length=3</code>. It feels unintuitive since we know that the second restaurant has higher rating, given that both, in practice, are equally matching to user’s keyword.</p>
+</section>
+<section id="reranking-boosting-with-function_score" class="level1">
+<h1>Reranking (boosting) with function_score</h1>
+<p>As we talk about <code>rating</code>, we can wrap our query with<code>function_score</code> to incorporate that information to modify our matching scores, hence have a better control over our ranking.</p>
+<pre><code>GET restaurant/_search
+{
+  "query": {
+    "function_score": {
+      # Our main query is wrapped in a function_score clause
+      "query": {
+        "multi_match" : {
+          "query": "vietnamese",
+          "fields": [ "restaurant_name", "cuisine" ]
+        }
+      },
+      # We define the functions that will be applied on top of the matching scores
+      # returned by our main query
+      "functions": [
+        {
+          "field_value_factor": {
+            "field": "rating",
+            "modifier": "none",
+            "missing": 1
+          }
+        }
+      ],
+      # Retrieve the max boosting defined inside `functions`
+      # Above there is only one boosting so it's applied by default
+      "score_mode": "max",
+      # Multiply the matching score with the boosting calculated from functions
+      "boost_mode": "multiply"
+    }
+  }
+}</code></pre>
+<pre><code># Result
+{
+  "hits": {
+    "hits": [
+      {
+        "_index": "restaurant",
+        "_id": "002vietnamesephonoodle",
+        "_score": 1.7885544,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho Noodle",
+          "cuisine": "Vietnamese",
+          "rating": 4
+        }
+      },
+      {
+        "_index": "restaurant",
+        "_id": "003vietnamesepho",
+        "_score": 1.5706451,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho",
+          "cuisine": "Vietnamese",
+          "rating": 3
+        }
+      },
+      {
+        "_index": "restaurant",
+        "_id": "001sabichuong",
+        "_score": 0.66765696,
+        "_source": {
+          "restaurant_name": "Sa Bi Chuong",
+          "cuisine": "Vietnamese",
+          "rating": 5
+        }
+      }
+    ]
+  }
+}</code></pre>
+<p>The higher rating restaurant is on top now. But how about restaurant <code>Sa Bi Chuong</code> with <code>rating=5</code>? It being the last result seems like we haven’t boosted “enough”.</p>
+<p>We might start tinkering a bit more with <code>function_score</code> to make that happen. Here is one of the implementation which models the boosting in a non-linear manner to effectively apply a strong boost on documents with <code>rating=5</code>.</p>
+<pre><code>GET restaurant/_search
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "multi_match" : {
+          "query": "vietnamese",
+          "fields": [ "restaurant_name", "cuisine" ]
+        }
+      },
+      "functions": [
+        # Apply a non-linear function to model that
+        # a rating of 5 has much more weight than rating of 4 (not just 25% more)
+        {
+          "filter": {
+            "range": {
+              "rating": {
+                "gte": 5,
+                "lte": 5
+              }
+            }
+          },
+          "weight": 10
+        },
+        {
+          "filter": {
+            "range": {
+              "rating": {
+                "gte": 4,
+                "lt": 5
+              }
+            }
+          },
+          "weight": 2
+        }
+      ],
+      "score_mode": "max",
+      "boost_mode": "multiply"
+    }
+  }
+}</code></pre>
+<pre><code># Result
+{
+  "hits": {
+    "hits": [
+      {
+        "_index": "restaurant",
+        "_id": "001sabichuong",
+        "_score": 1.3353139,
+        "_source": {
+          "restaurant_name": "Sa Bi Chuong",
+          "cuisine": "Vietnamese",
+          "rating": 5
+        }
+      },
+      {
+        "_index": "restaurant",
+        "_id": "002vietnamesephonoodle",
+        "_score": 0.8942772,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho Noodle",
+          "cuisine": "Vietnamese",
+          "rating": 4
+        }
+      },
+      {
+        "_index": "restaurant",
+        "_id": "003vietnamesepho",
+        "_score": 0.52354836,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho",
+          "cuisine": "Vietnamese",
+          "rating": 3
+        }
+      }
+    ]
+  }
+}</code></pre>
+<p>We might ponder that: “Isn’t the function boosting now looking too arbitrary? Will it work for other cases?”. Indeed, that’s the question we should ask ourselves. Overtime, with more and more requirements, our query template will grow in complexity, leading to conflicts between the modifications we make.</p>
+<p>Let’s move to the next example to illustrate what I mean by “conflict”.</p>
+</section>
+<section id="the-complexity-comes-with-fuzzy-matching" class="level1">
+<h1>The complexity comes with fuzzy&nbsp;matching</h1>
+<p>While not vital, the ability to handle user’s typo is always a nice-to-have feature, especially when they are now familiar with smart search engine like Google’s. Elasticsearch has a built-in mechanism called <code>fuzzy matching</code>, which is configurable with the option <code>fuzziness</code>.</p>
+<pre><code># The use of `bool` query below is to implement the logic: At least one condition should match
+PUT _scripts/01-default-fuzzy-search-template
+{
+  "script": {
+    "lang": "mustache",
+    "source": {
+      "query": {
+        "function_score": {
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "bool": {
+                    "should": [
+                      {
+                        "multi_match" : {
+                          "query": "{{query_string}}",
+                          "fields": [ "restaurant_name", "cuisine" ]
+                        }
+                      },
+                      {
+                        "multi_match" : {
+                          "query": "{{query_string}}",
+                          "fields": [ "restaurant_name", "cuisine" ],
+                          # For the purpose of this demo, default behavior works well enough
+                          "fuzziness": "AUTO"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "functions": [
+            {
+              "filter": {
+                "range": {
+                  "rating": {
+                    "gte": 5,
+                    "lte": 5
+                  }
+                }
+              },
+              "weight": 10
+            },
+            {
+              "filter": {
+                "range": {
+                  "rating": {
+                    "gte": 4,
+                    "lt": 5
+                  }
+                }
+              },
+              "weight": 2
+            }
+          ],
+          "score_mode": "max",
+          "boost_mode": "multiply"
+        }
+      }
+    },
+    "params": {
+      "query_string": "My query string"
+    }
+  }
+}</code></pre>
+<p>Notice that we just created a query template instead of running a query. We can now invoke the query with paramaters, which is a nice feature Elasticsearch introduces to make our code look less overwhelming. Like this:</p>
+<pre><code>GET /_search/template
+{
+  "id": "01-default-fuzzy-search-template",
+  "params": {
+    "query_string": "vietnames"
+  }
+}</code></pre>
+<p>The above query returns our expected Vietnamese restaurant given a typo keyword <code>vietnames</code>. Under the hood, fuzzy matching uses <a href="https://www.elastic.co/guide/en/elasticsearch/reference/8.7/query-dsl-fuzzy-query.html">Levenshtein edit distance</a>, which measures similarity between strings by the number of modifications one make to make one become another. In our example, we just need to add one letter <code>e</code> at the end to make <code>vietnames</code> become <code>vietnamese</code>. Quite an easy task for the algorithm. One might also argue that it’s quite easy for our developers as well. 2 lines of code and a new beautiful feature.</p>
+<p>Well, the interesting bit lies elsewhere. One day, our sales team suddenly comes to us with a complaint that search result is wrong. People are getting Japanese BBQ restaurants over Korean ones even when they explicitly search for <code>kbbq</code> (which is a common acronym for <code>korean bbq</code>).</p>
+<p>Here are the restaurants:</p>
+<pre><code>POST _bulk
+{ "index" : { "_index" : "restaurant", "_id" : "004parkhangseokbbq" } }
+{ "restaurant_name": "Park Hang-seo's KBBQ", "cuisine": "Korean", "rating": 2.0 }
+{ "index" : { "_index" : "restaurant", "_id" : "005bestbbqintown" } }
+{ "restaurant_name": "Best BBQ in town", "cuisine": "Japanese", "rating": 5.0 }</code></pre>
+<p>Query:</p>
+<pre><code>{
+  "id": "01-default-fuzzy-search-template",
+  "params": {
+    "query_string": "kbbq"
+  }
+}</code></pre>
+<p>Result:</p>
+<pre><code>{
+  "hits": {
+    "hits": [
+      {
+        "_index": "restaurant",
+        "_id": "005bestbbqintown",
+        "_score": 8.384459,
+        "_source": {
+          "restaurant_name": "Best BBQ in town",
+          "cuisine": "Japanese",
+          "rating": 5
+        }
+      },
+      {
+        "_index": "restaurant",
+        "_id": "004parkhangseokbbq",
+        "_score": 2.5153382,
+        "_source": {
+          "restaurant_name": "Park Hang-seo's KBBQ",
+          "cuisine": "Korean",
+          "rating": 2
+        }
+      }
+    ]
+  }
+}</code></pre>
+<p>To understand what is happening, we need to enable <code>explain=true</code> to see what contributes to the final scores. As this time the output is too verbose, here are the findings:</p>
+<ul>
+<li>The keyword matching score (before boosting) for the <code>Best BBQ in town</code> restaurant is 0.8, less than the 1.2 of <code>Park Hang-seo's KBBQ</code></li>
+<li>So if no boosting applied, we will see <code>Park Hang-seo's KBBQ</code> restaurant ranks at the first position</li>
+<li>But then the boosting from <code>rating</code> modifies the score, leading to the ordering as we can see</li>
+</ul>
+<p>One way to frame the issue is that we have imperfect boosting. Say we have a better formula that strikes the right balances, then the problem should be solved. But it’s close to impossible to guarantee that the new formula will not cause any other issues. We don’t want these kinds of issue creep into the system without any notice and then some day being flagged out by stakeholders. We want to be the first to be aware of those issues, especially whenever we make any changes. Therefore, before discussing potential solutions, I hope we all agree that the very next important thing we should do is (yes, you are probably thinking about the same thing as I am) setting up a testing/evaluation mechanism.</p>
+</section>
+<section id="how-should-we-create-test-cases-for-this-search-application" class="level1">
+<h1>How should we create test cases for this search application?</h1>
+<p>IMHO, the first challenge is about moving data. The queries and the documents can both grow over time, so a static mock dataset might not be a very good representative of the search relevance anymore after a month. The next bit is related to our mindset. Sometimes we might need to think about whether we need 100% passed test cases in order to fix this new very urgent issue. For example, there are cases where if you fix some issues then the search result orderings of the other test cases might alter a bit. If we hard-code the rankings, then we might sweat ourselves trying to tweak our query template. But in practice a lot of the times we neither don’t need the ranking to be exactly pre-defined nor we are perfectly sure about which ordering is actually optimal. We should consider using a soft mechanism where we quantify the relevance of the system and using threshold instead.</p>
+<p>Here we look at how we can use Elasticsearch Ranking Evaluation API to implement such evaluation scheme:</p>
+<pre><code>GET restaurant/_rank_eval
+{
+  # Query template comes in really handy when used in conjunction with _rank_eval
+  "templates": [
+     {
+        "id": "01-default-fuzzy-search-template",
+        "template": {
+            "id": "01-default-fuzzy-search-template"
+        }
+     }
+  ],
+  "requests": [
+    {
+     "id": "kbbq_query",
+     # Here we manually define the true positives with rating &gt;= 1.0
+     # The actual rating number helps when using metrics that takes into account
+     # the ranking of the search results
+     "ratings": [
+        { "_index": "restaurant", "_id": "004parkhangseokbbq", "rating": 3 },
+        { "_index": "restaurant", "_id": "005bestbbqintown", "rating": 1 }
+      ],
+     "template_id": "01-default-fuzzy-search-template",
+     "params": {
+        "query_string": "kbbq"
+      }
+    },
+    {
+     "id": "vietnamese_query",
+     "ratings": [
+        { "_index": "restaurant", "_id": "001sabichuong", "rating": 3 },
+        { "_index": "restaurant", "_id": "002vietnamesephonoodle", "rating": 3 },
+        { "_index": "restaurant", "_id": "003vietnamesepho", "rating": 3 }
+      ],
+     "template_id": "01-default-fuzzy-search-template",
+     "params": {
+        "query_string": "vietnamese"
+      }
+    }
+  ],
+  "metric": {
+    "dcg": {
+      "k": 5,
+      "normalize": true
+    }
+  }
+}</code></pre>
+<p>The result:</p>
+<pre><code>{
+  "metric_score": 0.8549048706984328,  # This is the overall metric score, best is 1.0, worst is 0.0
+  "details": {
+    "kbbq_query": {
+      # This kbbq_query has a imperfect score because it ranks the more relevant result lower
+      "metric_score": 0.7098097413968655,
+      "unrated_docs": [],
+      "hits": [
+        {
+          "hit": {
+            "_index": "restaurant",
+            "_id": "005bestbbqintown",
+            "_score": 8.384459
+          },
+          "rating": 1
+        },
+        {
+          "hit": {
+            "_index": "restaurant",
+            "_id": "004parkhangseokbbq",
+            "_score": 2.5153382
+          },
+          "rating": 3
+        }
+      ],
+      "metric_details": {
+        ...
+      }
+    },
+    "vietnamese_query": {
+      "metric_score": 1,
+      "unrated_docs": [],
+      "hits": [
+        ...
+      ],
+      "metric_details": {
+        ...
+      }
+    }
+  },
+  "failures": {}
+}</code></pre>
+<p>Let’s try to better our search by introducing changes that move the evaluation score closer to the perfect 1.0.</p>
+</section>
+<section id="our-revised-search-model" class="level1">
+<h1>Our revised search&nbsp;model</h1>
+<p>Before start designing a new query template, we can take a step back and really think about how we should model the search engine. Below are the essentials:</p>
+<ol type="1">
+<li>Exact matching will always surface on top of not-exact ones like fuzzy matching;</li>
+<li>Exact matches does not take into account field length or word/document frequencies. If two documents have the same exact match in a field, they should have the same keyword matching score;</li>
+<li>Within the same level of matching (whether exact or fuzzy), while the initial keyword matching scores should be the same, they can be reranked by certain modifiers such as distance, popularity,&nbsp;… However, the modified scores should not make the final score to exceed the base score of the upper level, e.g.&nbsp;modifed fuzzy score should not be greater than exact base score. This is to ensure the essential #1.</li>
+</ol>
+<p>If you watch football, this is similar to how the leagues such as Premiere League rank their teams. No matter how much more goals the team L has scored compared to team M’s or their head-to-head results, if team M has more points than team M has a higher ranking. The other measures are for tie-breaker only.</p>
+<p>This understanding can be then transferred to how we use Elasticsearch to express our model.</p>
+<p>One approach is to use <code>dis_max</code> query combined with <code>constant_score</code> query. The idea is to categorize each type of matching into different levels of score where one level will have twice the score of the below level. The documents fall into one level of matching (tie) will be reranked by modifiers but eventually the new scores will not exceed the upper base score. Here is the new query template:</p>
+<pre><code>PUT _scripts/02-constant-score-search-template
+{
+  "script": {
+    "lang": "mustache",
+    "source": {
+      "query": {
+        "function_score": {
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "bool": {
+                    "should": [
+                      {
+                        # `dis_max` query gets the max score of an array of clauses
+                        "dis_max": {
+                          "queries": [
+                            {
+                              # `constant_score` says that if matches, return a constant score
+                              "constant_score": {
+                                "filter": {
+                                  "multi_match" : {
+                                    "query": "{{query_string}}",
+                                    "fields": [ "restaurant_name", "cuisine" ]
+                                  }
+                                },
+                                # This is the constant that is returned as score
+                                # Note that the exact number is chosen intentionally
+                                # Here the upper level will be twice the lower level
+                                # and we will restrict the modifiers to be only
+                                # able to boost by at most 100% the base score
+                                # so that the lower level can not exceed the upper
+                                "boost": 2
+                              }
+                            },
+                            {
+                              "constant_score": {
+                                "filter": {
+                                  "multi_match" : {
+                                    "query": "{{query_string}}",
+                                    "fields": [ "restaurant_name", "cuisine" ],
+                                    "fuzziness": "AUTO"
+                                  }
+                                },
+                                "boost": 1
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "functions": [
+            # Design the modifiers to be multiplier of maximum 1.9999 the base score
+            {
+              "weight": 1
+            },
+            {
+              "field_value_factor": {
+                "field": "rating",
+                "modifier": "ln",
+                "missing": 1
+              },
+              "weight": 0.1
+            }
+          ],
+          "score_mode": "sum",
+          "boost_mode": "multiply"
+        }
+      }
+    },
+    "params": {
+      "query_string": "My query string"
+    }
+  }
+}</code></pre>
+<p>When we re-run the evaluation, we can observe that the normalized DCG metric now has score equal to 1.0, denoting a perfect accuracy!</p>
+</section>
+<section id="summary" class="level1">
+<h1>Summary</h1>
+<p>This blog post focuses on putting you in the shoe of an Elasticsearch engineer who has to derive query templates that fit the needs of a site-search enginer. We have briefly coverred the following topics:</p>
+<ul>
+<li>Keyword matching with multiple fields</li>
+<li>Understanding default Elasticsearch scoring</li>
+<li>Problems with the default TFIDF</li>
+<li>Boosting search results by attributes</li>
+<li>Fuzzy matching</li>
+<li>Elasticsearch query templateEvaluation with Rank Evaluation API</li>
+<li>Constructing query with <code>dis_max</code>and <code>constant_score</code></li>
+</ul>
+<p>Though definitely not optimal, I hope that parts of the blog post help you come closer to utilize Elasticsearch to help solve your own problems.</p>
+<p>I also much appreciate any comments or feedbacks. If you want to discuss more, please comment on this post or open an issue in the Github repo: https://github.com/dvquy13/elasticsearch-sharing.</p>
+<p>Thanks all!</p>
+</section>
+<section id="appendix" class="level1">
+<h1>Appendix</h1>
+<section id="appendix-1-detailed-breakdown-of-default-tfidf-matching-where-length-of-the-field-value-affect-overall-matching-score" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-1-detailed-breakdown-of-default-tfidf-matching-where-length-of-the-field-value-affect-overall-matching-score">Appendix 1: Detailed breakdown of default TFIDF matching where length of the field value affect overall matching&nbsp;score</h2>
+<pre><code># Result
+{
+  "hits": {
+    "hits": [
+      {
+        "_id": "003vietnamesepho",
+        "_score": 1.0470967,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho",
+          "cuisine": "Vietnamese",
+          "rating": 3
+        },
+        "_explanation": {
+          "value": 1.0470967,
+          "description": "max of:",
+          "details": [
+            {
+              "value": 0.13353139,
+              "description": "sum of:",
+              "details": [
+                {
+                  "value": 0.13353139,
+                  "description": "weight(cuisine:vietnamese in 0) [PerFieldSimilarity], result of:",
+                  "details": [...]
+                }
+              ]
+            },
+            {
+              "value": 1.0470967,
+              "description": "sum of:",
+              "details": [
+                # Matching score with "vietnamese"
+                {
+                  "value": 0.52354836,
+                  "description": "weight(restaurant_name:vietnamese in 0) [PerFieldSimilarity], result of:",
+                  "details": [
+                    {
+                      "value": 0.52354836,
+                      "description": "score(freq=1.0), computed as boost * idf * tf from:",
+                      "details": [
+                        {
+                          "value": 2.2,
+                          "description": "boost",
+                          "details": []
+                        },
+                        {
+                          "value": 0.47000363,
+                          "description": "idf, computed as log(1 + (N - n + 0.5) / (n + 0.5)) from:",
+                          ...
+                        },
+                        {
+                          "value": 0.50632906,
+                          "description": "tf, computed as freq / (freq + k1 * (1 - b + b * dl / avgdl)) from:",
+                          "details": [
+                            {
+                              "value": 1,
+                              "description": "freq, occurrences of term within document",
+                              "details": []
+                            },
+                            {
+                              "value": 1.2,
+                              "description": "k1, term saturation parameter",
+                              "details": []
+                            },
+                            {
+                              "value": 0.75,
+                              "description": "b, length normalization parameter",
+                              "details": []
+                            },
+                            # Notice the length=2 here is in the denominator,
+                            # which means that the higher the length the less
+                            # the score
+                            {
+                              "value": 2,
+                              "description": "dl, length of field",
+                              "details": []
+                            },
+                            {
+                              "value": 2.6666667,
+                              "description": "avgdl, average length of field",
+                              "details": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                # Matching score with "pho"
+                {
+                  "value": 0.52354836,
+                  "description": "weight(restaurant_name:pho in 0) [PerFieldSimilarity], result of:",
+                  # Details are exactly like above
+                  "details": [...]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "_id": "002vietnamesephonoodle",
+        "_score": 0.8942772,
+        "_source": {
+          "restaurant_name": "Vietnamese Pho Noodle",
+          "cuisine": "Vietnamese",
+          "rating": 4
+        },
+        "_explanation": {
+          "value": 0.8942772,
+          "description": "max of:",
+          "details": [
+            {
+              "value": 0.13353139,
+              "description": "sum of:",
+              "details": [...]
+            },
+            {
+              "value": 0.8942772,
+              "description": "sum of:",
+              "details": [
+                {
+                  "value": 0.4471386,
+                  "description": "weight(restaurant_name:vietnamese in 1) [PerFieldSimilarity], result of:",
+                  "details": [
+                    {
+                      "value": 0.4471386,
+                      "description": "score(freq=1.0), computed as boost * idf * tf from:",
+                      "details": [
+                        ...,
+                        {
+                          "value": 0.4324324,
+                          "description": "tf, computed as freq / (freq + k1 * (1 - b + b * dl / avgdl)) from:",
+                          "details": [
+                            ...,
+                            # Here the length=3 (greater than length=2 of the
+                            # above restaurant)
+                            {
+                              "value": 3,
+                              "description": "dl, length of field",
+                              "details": []
+                            },
+                            ...
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "value": 0.4471386,
+                  "description": "weight(restaurant_name:pho in 1) [PerFieldSimilarity], result of:",
+                  "details": [...]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}</code></pre>
+<p><br> If you find this article helpful, please cite this writeup as:</p>
+<blockquote class="blockquote">
+<p>Quy, Dinh. (Jun 2023). A Hierarchical approach with Elasticsearch: Lessons from 22 Months of Iteration. dvquys.com. https://dvquys.com/posts/site-search-elasticsearch/.</p>
+</blockquote>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <category>tech</category>
+  <category>search</category>
+  <guid>https://dvquys.com/posts/site-search-elasticsearch/</guid>
+  <pubDate>Wed, 31 May 2023 16:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>From Model to Production: Deploying Your Machine Learning Solution on Google Cloud</title>
+  <link>https://dvquys.com/posts/deploy-ml-gcp/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+This article is originally published in <a href="https://medium.com/vinid/what-i-learned-about-deploying-machine-learning-application-c7bfd654f999">VinID Engineering</a>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+
+</div>
+</div>
+<p>Imagine a company named Rainbow imports boxes of flowers and need to classify them into species. For six months, they have some staff label the boxes manually. Now, they hire you to build a Machine Learning model to do the task.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://cdn-images-1.medium.com/max/800/1*7bnLKsChXq94QjtAiRn40w.png" class="img-fluid figure-img"></p>
+<figcaption>Source: <a href="https://hackernoon.com/top-5-machine-learning-projects-for-beginners-47b184e7837f">Hackernoon</a></figcaption>
+</figure>
+</div>
+<p>With a small amount of labelled data as input and tons of experience working on Kaggle projects, you quickly develop a 95% accuracy using simple RandomForestClassifier from the popular scikit-learn library. Nice. Stakeholders approve and ask you when you could <strong>deploy that model to production.</strong></p>
+<p>Hmm, deploy a model from my laptop?&nbsp;…</p>
+<p>In case you wonder, I hope this tutorial will help you understand one among some common and most simple approaches. The diagram below depicts how we will use Google Cloud Platform to do the job in a batch-processing manner.</p>
+<div class="column-page">
+<p><a href="https://cdn-images-1.medium.com/max/1200/1*xb0UAAcHwbus-dfXLu5SCw.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://cdn-images-1.medium.com/max/1200/1*xb0UAAcHwbus-dfXLu5SCw.png" class="img-fluid"></a></p>
+</div>
+<p>I choose the <a href="https://archive.ics.uci.edu/ml/datasets/iris">Iris data set</a> as our input to help you see how our approach works with small-sized problems. All the codes are in <a href="https://github.com/dvquy13/gcp_ml_pipeline">this repo</a>.</p>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Like many other self-taught data people, I am familiar with manipulating data and develop a model on my laptop.</p>
+<p>However, when you’re solving real-world problems, your duty does not stop after you deliver a presentation. You will have to think about how to bring that solution to the production environment.</p>
+<p>Over the last few months, I have tried to deploy multiple computing pipelines. They are different in their scopes and complexity, ranging from processing a dozen of MB to 400 GB data per run. In this article, I want to summarize and share what I learned.</p>
+</section>
+<section id="the-targeted-audience" class="level1">
+<h1>The targeted&nbsp;audience</h1>
+<p>This post is for data analysts/scientists who want to deploy their local solution, especially those without a software engineering background.</p>
+<p>You will need Cloud Dataproc to proceed. This product allows you to spin up a cluster of machines to run your computing job in a distributed manner. Please refer to <a href="https://cloud.google.com/dataproc/">this documentation</a> if you don’t know what Dataproc is.</p>
+</section>
+<section id="agenda" class="level1">
+<h1>Agenda</h1>
+<ol type="1">
+<li>Discuss the approach</li>
+<li>Step-by-step instructions to create the infrastructure and run the pipeline</li>
+<li>Explain codebase</li>
+<li>Introduce other extended components, including Big Data processing with Apache Spark, scheduler with Airflow, local development environment, unit testing</li>
+<li>Summary</li>
+</ol>
+</section>
+<section id="approaches" class="level1">
+<h1>Approaches</h1>
+<section id="about-writing-codes" class="level2">
+<h2 class="anchored" data-anchor-id="about-writing-codes">About writing&nbsp;codes</h2>
+<p><strong>Instead of writing a long script to do everything, we break a pipeline into tasks and checkpoint interim data to disk.</strong> For example, after doing preprocess on train and test data, we dump both the data outputs and the transformer to Google Cloud Storage. We then load those objects as inputs for the next step.</p>
+<p>This strategy has several purposes. First, for a long-running task, if a job fails at one of the last steps, we can re-run the pipeline from the nearest checkpoint rather than wasting time and resources restarting the whole pipeline. Second, it allows us to (1) debug more easily, (2) get alert when things break and (3) monitor interim outputs. Lastly, decoupled components can be understood more clearly, and easier to be replaced or extended later.</p>
+</section>
+<section id="about-computing-resources" class="level2">
+<h2 class="anchored" data-anchor-id="about-computing-resources">About computing resources</h2>
+<p>Normally for a small input size, we are fine with setting up a single virtual machine on the cloud. However, in some companies with mature cloud practice, the overhead of managing that VM is a type of cost that is difficult to justify. Especially when we have better options. <strong>For instance, Cloud Dataproc provides us with virtual machines that only live for the duration of one run, thereby free us from managing the machines.</strong> In this post, we explore Dataproc as our main engine for all the computing process.</p>
+</section>
+</section>
+<section id="step-by-step-instructions" class="level1 page-columns page-full">
+<h1>Step-by-step instructions</h1>
+<section id="create-a-gcp-project-and-enable-necessary-components" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="create-a-gcp-project-and-enable-necessary-components">Create a GCP project and enable necessary components</h2>
+<ol type="1">
+<li>👉 Create a free GCP account with $300 credit by going to <a href="https://console.cloud.google.com/getting-started">console.cloud.google.com</a>. <strong>Beware that by following this tutorial, you might incur a cost of about $0.2–$0.5.</strong></li>
+</ol>
+<div class="column-page">
+<p><a href="https://cdn-images-1.medium.com/max/800/1*gNpMH0Knm_ElpJSexisAag.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="https://cdn-images-1.medium.com/max/800/1*gNpMH0Knm_ElpJSexisAag.png" class="img-fluid"></a></p>
+</div>
+<ol start="2" type="1">
+<li>👉 Click Billing at the left sidebar and initiate a billing account to be able to use the components used in this tutorial</li>
+</ol>
+<div class="column-page">
+<p><a href="https://cdn-images-1.medium.com/max/800/1*HRbgGB_s3KwK8kxRiaTUPQ.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="https://cdn-images-1.medium.com/max/800/1*HRbgGB_s3KwK8kxRiaTUPQ.png" class="img-fluid"></a></p>
+</div>
+<ol start="3" type="1">
+<li><p>👉 Select <strong>Library</strong>, then search and enable the following API: Cloud Dataproc, Cloud Storage and Cloud Firestore.</p></li>
+<li><p>👉 Navigate to the Firestore either by scrolling the sidebar to the left or search from the top menu bar. When you arrive at the below screen, choose <strong>SELECT NATIVE MODE</strong>, then choose <code>us-east1</code> as the location.</p></li>
+</ol>
+<div class="column-page">
+<p><a href="https://cdn-images-1.medium.com/max/800/1*mBmW_jb_412UYimWp9QaoQ.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="https://cdn-images-1.medium.com/max/800/1*mBmW_jb_412UYimWp9QaoQ.png" class="img-fluid"></a></p>
+</div>
+</section>
+<section id="environment-setup" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="environment-setup">Environment setup</h2>
+<section id="step-1-launch-terminal-window" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="step-1-launch-terminal-window">Step 1: Launch terminal window</h3>
+<ol start="5" type="1">
+<li>👉 At the home page of your GCP project, select the command button to the right of your menubar. The CloudShell window then appears as you can see below:</li>
+</ol>
+<div class="column-page">
+<p><a href="https://cdn-images-1.medium.com/max/800/1*6HVcsv6LqFEaf8eOIt6Xyg.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="https://cdn-images-1.medium.com/max/800/1*6HVcsv6LqFEaf8eOIt6Xyg.png" class="img-fluid"></a></p>
+</div>
+<ol type="1">
+<li>👉 Launch Cloud Shell Editor:</li>
+</ol>
+<div class="column-page">
+<p><a href="https://cdn-images-1.medium.com/max/800/1*T5WH0YKLnpH3gWq1Lj_BZA.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="https://cdn-images-1.medium.com/max/800/1*T5WH0YKLnpH3gWq1Lj_BZA.png" class="img-fluid"></a></p>
+</div>
+<p>It’s recommended to use Cloud Shell to follow this tutorial. However, if you’re using Linux and want to use terminal on your local machine, make sure you first <a href="https://cloud.google.com/sdk/install">install the Google Cloud SDK</a> and firebase CLI.</p>
+</section>
+<section id="step-2-clone-github-repo" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="step-2-clone-github-repo">Step 2: Clone Github repo</h3>
+<ol start="7" type="1">
+<li>👉 In the Terminal window:</li>
+</ol>
+<pre class="shell"><code>git clonehttps://github.com/dvquy13/gcp_ml_pipeline.git
+cd gcp_ml_pipeline</code></pre>
+<ol start="8" type="1">
+<li>👉 Select <code>File</code> then open the file <code>gcp_ml_pipeline/configs/.project_env</code>:</li>
+</ol>
+<div class="column-page">
+<p><a href="https://cdn-images-1.medium.com/max/800/1*cqPTo5ebmac4e7aO-Alnug.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7"><img src="https://cdn-images-1.medium.com/max/800/1*cqPTo5ebmac4e7aO-Alnug.png" class="img-fluid"></a></p>
+</div>
+<ol start="9" type="1">
+<li>👉 Replace the values enclosed by &lt;&gt;. For the <code>GCP_PROJECT</code>, you need to provide the <code>id</code> of your GCP project. For the remaining, feel free to choose some random names for the global variables that identify your resources. The final output looks like this:</li>
+</ol>
+<pre class="shell"><code>GCP_PROJECT='zinc-primer-230105'
+GCS_BUCKET=dvquys-tut-gcp-ml-pipeline
+DATA_LOCATION=us-east1
+BQ_DATASET=tut_iris
+BQ_ORG_TABLE=F_ORIGINAL
+CLUSTER_NAME=iris-pred</code></pre>
+<ol start="10" type="1">
+<li>👉 Grant <code>execute</code> permission to the folder scripts by running the command: <code>chmod +x -R&nbsp;./scripts</code>. Then, run&nbsp;<code>./scripts/00_import_data_to_bigquery.sh</code>. <a href="https://github.com/dvquy13/gcp_ml_pipeline/blob/master/scripts/00_import_data_to_bigquery.sh">Link to the script</a>.</li>
+</ol>
+</section>
+<section id="step-3-create-dataproc-cluster-and-submit-jobs" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="step-3-create-dataproc-cluster-and-submit-jobs">Step 3: Create Dataproc cluster and submit&nbsp;jobs</h3>
+<p>We use Makefile to orchestrate our actions. You can find it here: https://github.com/dvquy13/gcp_ml_pipeline/blob/master/Makefile.</p>
+<p>️Now, run the following commands in sequence:</p>
+<ol type="1">
+<li><p><code>make create-dataproc-cluster</code>: <strong>This command creates a Dataproc cluster</strong>. The <code>single-node</code> flag indicates that this is a cluster containing only one machine. <code>n1-standard-1</code> is the cheapest machine we can rent. To install Python packages, we supply the <code>metadata</code> and <code>initialization-actions</code> params.</p></li>
+<li><p><code>make build</code>: <strong>Package your code</strong>, including your source code and other 3rd party libraries that you can not pre-install when creating the cluster (PyYAML for example). To submit a job to the cluster, we will send these codes to those machines via the <code>gcloud dataproc jobs submit pyspark</code> command.</p></li>
+<li><p><code>make submit-job ENV=dev MODULE=data_import TASK=query_train_pred</code>: <strong>Submit job cloning input data for training and predicting.</strong> The <code>submit-job</code> <code>make</code> command allows you to use this interface to run on both local and development environments.</p></li>
+<li><p><code>make submit-job ENV=dev MODULE=feature_engineer TASK=normalize</code>: <strong>Prepare features.</strong> In this illustrative example, we choose to include only normalization in the pipeline. After learning the normalization parameters from the train data set, we save those configurations for later usage.</p></li>
+<li><p><code>make submit-job ENV=dev MODULE=model TASK=fit</code>: <strong>Train model.</strong> Here we build a pipeline consisting of 2 steps, Normalization and Logistic Regression. After that, we persist the fit pipeline.</p></li>
+<li><p><code>make submit-job ENV=dev MODULE=predict TASK=batch_predict</code>: <strong>Batch predict.</strong> This job demonstrates the process when you use your learned model to make predictions.</p></li>
+<li><p><code>make submit-job ENV=dev MODULE=predict TASK=store_predictions</code>: <strong>Store predictions.</strong> The reason we do not combine this with the above step is two-fold. First, writing to a database often takes time and requires several retries. Second, we write to a document database like Cloud Firestore because when other team uses, they typically retrieve one document per query. However, there are times when we want to inspect the whole batch of predictions (e.g.&nbsp;debugging, count number of documents scored more than 0.9). For this query pattern, we will better off using the persisted outputs from the previous step, stored as parquet files in Cloud Storage.</p></li>
+<li><p><code>make delete-dataproc-cluster</code>: <strong>Delete Dataproc cluster.</strong> After the process finishes, delete the cluster so no further cost incurs.</p></li>
+</ol>
+<div class="column-page">
+<p><a href="https://cdn-images-1.medium.com/max/800/1*meEStEyORtyi06DTLioGVg.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8"><img src="https://cdn-images-1.medium.com/max/800/1*meEStEyORtyi06DTLioGVg.png" class="img-fluid"></a></p>
+</div>
+<p>Succeeded Dataproc&nbsp;jobs</p>
+<p>You can see that your predictions are stored at Cloud Firestore by accessing its web console.</p>
+<div class="column-page">
+<p><a href="https://cdn-images-1.medium.com/max/800/1*XEcsap97Y0cCiYoPbgSa3g.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9"><img src="https://cdn-images-1.medium.com/max/800/1*XEcsap97Y0cCiYoPbgSa3g.png" class="img-fluid"></a></p>
+</div>
+<p>Firestore populated with predictions</p>
+<p>Along the way, you will see that the output data of each step is persisted in Cloud Storage. I use <code>parquet</code> rather than <code>CSV</code> as the serialization format because it can embed schema information (therefore you do not have to specify column types when reading) and reduce storage size. For more detail, please refer to <a href="https://towardsdatascience.com/the-best-format-to-save-pandas-data-414dca023e0d">this benchmark</a>.</p>
+</section>
+</section>
+<section id="clean-up" class="level2">
+<h2 class="anchored" data-anchor-id="clean-up">Clean up</h2>
+<ol start="11" type="1">
+<li>👉 Finally, when you’re done exploring the results, you can delete all resources by running these commands:</li>
+</ol>
+<pre class="shell"><code>./scripts/01_erase_resources.sh
+./scripts/02_disable_resources.sh
+./scripts/03_delete_project.sh</code></pre>
+</section>
+</section>
+<section id="explain-codebase" class="level1">
+<h1>Explain codebase</h1>
+<p><code>scripts/</code>: This directory contains some initial scripts, which are the steps to help you set things up. In practice, I also favor using script rather than user interfaces such as web console because it is self-documented and easy for others to follow the exact steps.</p>
+<p><code>configs/</code>: Store all the arguments that need to be set initially.&nbsp;<code>.project_env</code> is a file to store the global variables used to work with GCP. We also have the <code>runtime.yaml</code>, where we <a href="https://medium.com/@kinghuang/docker-compose-anchors-aliases-extensions-a1e4105d70bd">use Anchor, Alias and Extension in YAML</a> to define runtime parameters for multiple environments. Both of these files serve as a centralized config store so that we can easily look up and make changes, instead of finding the configs scattered elsewhere in the code.</p>
+<p><code>Makefile</code>: Originally Makefile is used to orchestrate the build process in C programming language. But it has done so well out of being just a shortcut so people start using it to facilitate ML model development. I have seen many tutorials using this tool, including <a href="https://developerzen.com/best-practices-writing-production-grade-pyspark-jobs-cb688ac4d20f">the one that inspires me to design my Pyspark codebase</a>.In this small project, we also use Makefile to save us a lot of time. As you can see above in <strong>Step 3</strong>, I put there our frequently used commands so that I can easily type <code>make &lt;something&gt;</code> to run a particular step.</p>
+<p><code>iris_pred/</code>: Source code.</p>
+<p><code>main.py</code>: is the interface to all tasks. This file parses the arguments to load config and get the job name, then call <code>analyze</code> function in <code>entry_point.py</code> from the appropriate module.</p>
+<p><code>jobs/</code>: contain tasks as modules. Inside <code>jobs</code>, we have one module corresponding to a step in our pipeline. All these modules expose an <code>entry_point.py</code> file where we unify the API to easily and consistently communicate with <code>main.py</code>.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>iris_pred/jobs/model/train.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb4" data-filename="iris_pred/jobs/model/train.py" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> logging</span>
+<span id="cb4-2">logger <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> logging.getLogger(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__name__</span>)</span>
+<span id="cb4-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> subprocess</span>
+<span id="cb4-4"></span>
+<span id="cb4-5"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> shared.io_handler <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> IOHandler</span>
+<span id="cb4-6"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> jobs.feature_engineer.normalize <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> FeatureNormalizer</span>
+<span id="cb4-7"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.externals <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> joblib</span>
+<span id="cb4-8"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.linear_model <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> LogisticRegression</span>
+<span id="cb4-9"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.pipeline <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> make_pipeline</span>
+<span id="cb4-10"></span>
+<span id="cb4-11"></span>
+<span id="cb4-12"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> Trainer:</span>
+<span id="cb4-13">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, params, load: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">bool</span>):</span>
+<span id="cb4-14">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.params <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> params</span>
+<span id="cb4-15"></span>
+<span id="cb4-16">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.io_handler <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> IOHandler(params)</span>
+<span id="cb4-17">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.interim_output_path, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.final_output_path <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb4-18">            <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._get_fpath()</span>
+<span id="cb4-19"></span>
+<span id="cb4-20">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.normalizer <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span></span>
+<span id="cb4-21">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.learner <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span></span>
+<span id="cb4-22">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.pipeline <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span></span>
+<span id="cb4-23"></span>
+<span id="cb4-24">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _get_fpath(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb4-25">        interim_output_path <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb4-26">            <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'../</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>params<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>io<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>pipeline<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">/pipeline.joblib'</span></span>
+<span id="cb4-27">        final_output_path <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb4-28">            <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>io_handler<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>fpath_dict<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>pipeline<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">/pipeline.joblib'</span></span>
+<span id="cb4-29">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> interim_output_path, final_output_path</span>
+<span id="cb4-30"></span>
+<span id="cb4-31">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _load_train_data(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb4-32">        X_train <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.io_handler.load(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'X_train'</span>)</span>
+<span id="cb4-33">        y_train <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.io_handler.load(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'y_train'</span>)[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'species'</span>]</span>
+<span id="cb4-34">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> X_train, y_train</span>
+<span id="cb4-35"></span>
+<span id="cb4-36">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _load_transformer(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb4-37">        normalizer_wrapper <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> FeatureNormalizer(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.params, load<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb4-38">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.normalizer <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> normalizer_wrapper.normalizer</span>
+<span id="cb4-39"></span>
+<span id="cb4-40">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _initiate_learner(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb4-41">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.learner <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> LogisticRegression()</span>
+<span id="cb4-42"></span>
+<span id="cb4-43">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _make_pipeline(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb4-44">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.pipeline <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> make_pipeline(</span>
+<span id="cb4-45">            <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.normalizer,</span>
+<span id="cb4-46">            <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.learner)</span>
+<span id="cb4-47"></span>
+<span id="cb4-48">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _fit(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, X_train, y_train):</span>
+<span id="cb4-49">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.pipeline.fit(X_train, y_train)</span>
+<span id="cb4-50"></span>
+<span id="cb4-51">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _persist_pipeline(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb4-52">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Temporarily save model to disk</span></span>
+<span id="cb4-53">        joblib.dump(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.pipeline, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.interim_output_path)</span>
+<span id="cb4-54"></span>
+<span id="cb4-55">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Copy model to GCS</span></span>
+<span id="cb4-56">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.params.env_name <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'local'</span>:</span>
+<span id="cb4-57">            logger.info(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Persisting </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>final_output_path<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">..."</span>)</span>
+<span id="cb4-58">            subprocess.check_output([</span>
+<span id="cb4-59">                <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'gsutil'</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'-m'</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'cp'</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'-r'</span>,</span>
+<span id="cb4-60">                <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.interim_output_path,</span>
+<span id="cb4-61">                <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.final_output_path])</span>
+<span id="cb4-62"></span>
+<span id="cb4-63">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> run(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb4-64">        X_train, y_train <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._load_train_data()</span>
+<span id="cb4-65">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._load_transformer()</span>
+<span id="cb4-66">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._initiate_learner()</span>
+<span id="cb4-67">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._make_pipeline()</span>
+<span id="cb4-68">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._fit(X_train, y_train)</span>
+<span id="cb4-69">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._persist_pipeline()</span></code></pre></div>
+</div>
+<p>As you can see in the snippet above, the class <code>Trainer</code> expose a function <code>run</code>. Each step in the process corresponds to a private function declared in the same class.</p>
+<p><code>shared/</code>: functions and classes to be reused across modules</p>
+<p>In <code>io_handler.py</code>, the class IOHandler applies the principle <a href="https://en.wikipedia.org/wiki/Composition_over_inheritance">Composition Over Inheritance</a> to ease the process of loading outputs from the previous step.</p>
+</section>
+<section id="further-discussion" class="level1 page-columns page-full">
+<h1>Further discussion</h1>
+<p>To completely build and operate a pipeline, there is still more to be considered.</p>
+<section id="apache-spark-for-bigger-data" class="level2">
+<h2 class="anchored" data-anchor-id="apache-spark-for-bigger-data">Apache Spark for bigger&nbsp;data</h2>
+<p>In this tutorial, we rent one small machine from Dataproc and use pandas as our preprocessing engine, which perfectly handles the case of data fit into the memory of that machine. However, often data input in real-world situations will be much bigger, therefore require us to use a distributed computing framework for scalability. In that case, you can just switch to using Apache Spark. From version 1.3, Spark introduces its DataFrame API, which greatly bears resemblance to Pandas counterpart. After porting your code from Pandas to Spark, to be able to run jobs across multiple machines, you just need to create a bigger cluster with a master and multiple workers.</p>
+</section>
+<section id="apache-airflow-for-orchestration" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="apache-airflow-for-orchestration">Apache Airflow for orchestration</h2>
+<p>Most of the batch job is not ad hoc. If it is, we should not even think about putting effort to standardize the process in the first place. <a href="https://airflow.apache.org/">Apache Airflow</a> can play the role of both a scheduler and a monitor. It keeps metadata of each run and can send you alerts when things fail.</p>
+<div class="page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><a href="https://cdn-images-1.medium.com/max/800/1*2DPJcNVFajHrm4WjTqI9dA.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-10" title="Example of Airflow DAG: Source"><img src="https://cdn-images-1.medium.com/max/800/1*2DPJcNVFajHrm4WjTqI9dA.png" class="img-fluid figure-img column-page" alt="Example of Airflow DAG: Source"></a></p>
+<figcaption>Example of Airflow DAG: <a href="https://www.google.com/url?sa=i&amp;source=images&amp;cd=&amp;ved=2ahUKEwiHu5jc1dfmAhWULqYKHaQKBBAQjRx6BAgBEAQ&amp;url=https%3A%2F%2Fwww.astronomer.io%2Fguides%2Fsubdags&amp;psig=AOvVaw1KeFNXmbAOrSVsWWG3HOSK&amp;ust=1577599347094494">Source</a></figcaption>
+</figure>
+</div>
+</div>
+<p>An alternative is Dataproc Workflows. This is a native solution offered by GCP, but I haven’t tried it myself so I will just leave the documentation <a href="https://cloud.google.com/dataproc/docs/concepts/workflows/using-workflows">here</a>.</p>
+</section>
+<section id="local-development" class="level2">
+<h2 class="anchored" data-anchor-id="local-development">Local development</h2>
+<p>Because rarely our codes work the first time we write them, it’s very important to be able to quickly test without having to go through all the boilerplate steps from setting up variables to requesting cloud resources. My suggestion is that we should set up our local environment asap. We can install Apache Spark 2.4.3+ to act as our runner engine, and MongoDB to be our alternative for Cloud Firestore. Here in the code repo, you can still refer to some line containing what I call the “environment branching logic”, which enables you to switch between running the same code on both local and cloud environments.</p>
+</section>
+<section id="unit-testing" class="level2">
+<h2 class="anchored" data-anchor-id="unit-testing">Unit testing</h2>
+<p>Many people have already talked about unit testing, so I won’t go too detailed here. I also don’t do unit testing in this tutorial for the sake of simplicity. However, I strongly encourage you to add testing yourself. Whatever it takes, unit testing forces us to modularize our code and add a layer of alerting. This is very important because things in data science often break in silence.</p>
+</section>
+</section>
+<section id="summary" class="level1">
+<h1>Summary</h1>
+<p>Here is a summary of what you have learned in this tutorial:</p>
+<ol type="1">
+<li>How to utilize different Google Cloud Platform components to build a batch job pipeline (whether it involves ML or not).</li>
+<li>A product named Google Cloud Dataproc, where you can both submit a light-weight job via single-node mode and easily scale to a cluster of computers.</li>
+<li>One approach to structurize ML pipeline codebase: <a href="https://github.com/dvquy13/gcp_ml_pipeline">Link to the repo</a>.</li>
+<li>Some convenient components in model development, e.g.&nbsp;Makefile, runtime config, parquet persistence. This mostly helps people with little or no software engineering background.</li>
+</ol>
+<p>Again, one of my main goals in writing this article is to receive feedback from the community, so I can do my job better. Please feel free me leave me comments, and I hope you guys enjoy this tutorial.</p>
+</section>
+<section id="references" class="level1">
+<h1>References</h1>
+<ol type="1">
+<li><p>Ricky Kim. (Dec 2018). PySpark Sentiment Analysis on Google Dataproc. towardsdatascience.com. <a href="https://towardsdatascience.com/step-by-step-tutorial-pyspark-sentiment-analysis-on-google-dataproc-fef9bef46468">https://towardsdatascience.com/step-by-step-tutorial-pyspark-sentiment-analysis-on-google-dataproc-fef9bef46468</a>.</p></li>
+<li><p>Evan Kampf. (Jan 2017). Best Practices Writing Production-Grade PySpark Jobs. developerzen.com. <a href="https://developerzen.com/best-practices-writing-production-grade-pyspark-jobs-cb688ac4d20f">https://developerzen.com/best-practices-writing-production-grade-pyspark-jobs-cb688ac4d20f</a>.</p></li>
+<li><p>King Chung Huang. (Oct 2017). Don’t Repeat Yourself with Anchors, Aliases and Extensions in Docker Compose Files. medium.com. <a href="https://medium.com/@kinghuang/docker-compose-anchors-aliases-extensions-a1e4105d70bd">https://medium.com/<span class="citation" data-cites="kinghuang/docker-compose-anchors-aliases-extensions-a1e4105d70bd">@kinghuang/docker-compose-anchors-aliases-extensions-a1e4105d70bd</span></a>.</p></li>
+</ol>
+<hr>
+</section>
+<section id="credits" class="level1">
+<h1>Credits</h1>
+<p>Kudos to Bido for reviewing my work; to anh Khanh, anh Linh, anh Tuan for providing me feedback.</p>
+<p><br> If you find this article helpful, please cite this writeup as:</p>
+<blockquote class="blockquote">
+<p>Quy, Dinh. (Feb 2020). From Model to Production: Deploying Your Machine Learning Solution on Google Cloud. dvquys.com. https://dvquys.com/posts/deploy-ml-gcp/.</p>
+</blockquote>
+
+
+</section>
+
+ ]]></description>
+  <category>tech</category>
+  <category>machine learning</category>
+  <guid>https://dvquys.com/posts/deploy-ml-gcp/</guid>
+  <pubDate>Sun, 16 Feb 2020 16:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>

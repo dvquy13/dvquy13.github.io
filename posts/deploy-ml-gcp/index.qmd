@@ -1,9 +1,8 @@
 ---
-title: "What I learned about deploying Machine Learning application"
+title: "From Model to Production: Deploying Your Machine Learning Solution on Google Cloud"
+subtitle: Transforming a Laptop-Trained ML Model into a Scalable Batch Processing Pipeline using GCP’s Dataproc
 date: "2020-02-17"
 categories: [tech, machine learning]
-feed: true
-subtitle: A tutorial on building custom ML training workflow using Google Cloud Platform
 keywords: cloud, google cloud platform
 layout: full
 ---

@@ -1,9 +1,8 @@
 ---
-title: "A Site-Search Engineer’s Journal Approaching Relevance Challenges in Elasticsearch Query Construction"
+title: "A Hierarchical approach with Elasticsearch: Lessons from 22 Months of Iteration"
+subtitle: A Practical Guide to Designing Query Templates, Boosting Relevance, and Addressing Site-Search Challenges
 date: "2023-06-01"
 categories: [tech, search]
-feed: true
-subtitle: A hierarchical keyword-matching approach
 keywords: full-text search, elasticsearch
 ---
 
@@ -639,7 +638,7 @@ Before start designing a new query template, we can take a step back and really 
 2.  Exact matches does not take into account field length or word/document frequencies. If two documents have the same exact match in a field, they should have the same keyword matching score;
 3.  Within the same level of matching (whether exact or fuzzy), while the initial keyword matching scores should be the same, they can be reranked by certain modifiers such as distance, popularity, … However, the modified scores should not make the final score to exceed the base score of the upper level, e.g. modifed fuzzy score should not be greater than exact base score. This is to ensure the essential #1.
 
-If you watch football, this resembles how the leagues such as Premiere League rank their teams. No matter how much more goals the team L has scored compared to team M’s or their head-to-head results, if team M has more points than team M has a higher ranking. The other measures are for tie-breaker only.
+If you watch football, this is similar to how the leagues such as Premiere League rank their teams. No matter how much more goals the team L has scored compared to team M’s or their head-to-head results, if team M has more points than team M has a higher ranking. The other measures are for tie-breaker only.
 
 This understanding can be then transferred to how we use Elasticsearch to express our model.
 
