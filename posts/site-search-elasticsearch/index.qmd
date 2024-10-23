@@ -6,7 +6,6 @@ categories: [tech, search]
 keywords: full-text search, elasticsearch
 ---
 
-
 ::: {.callout-note appearance="simple"}
 ## This article is originally published in [Towards Data Science](https://medium.com/towards-data-science/a-site-search-engineers-journal-approaching-relevance-challenges-in-elasticsearch-query-1eca29283da5)
 :::
@@ -27,8 +26,9 @@ We now play the role of a search engineer for a restaurant platform, which allow
 
 Alright, let’s dive into it. First off, we make sure user can search for restaurant by name. Here we can rely on the simple default `query-match` to get the job done.
 
-``` shell
-# Index our first two restaurants
+<details>
+<summary>Code: Index our first two restaurants</summary>
+```shell
 POST _bulk
 { "index" : { "_index" : "restaurant", "_id" : "001sabichuong" } }
 { "restaurant_name": "Sa Bi Chuong", "cuisine": "Vietnamese", "rating": 5.0 }
@@ -44,6 +44,7 @@ GET restaurant/_search
   }
 }
 ```
+</details>
 
 The above snippet can be run at Kibana’s Dev Tools \> Console, which will be available at your `localhost:5601` if you follow the repo.
 
@@ -51,10 +52,13 @@ The code is self-explained. We ask Elasticsearch to return restaurants whose nam
 
 But we quickly find out that name is not the only place we want to look for when user submit a query. Given keyword`vietnamese` we should also return the restaurant `Sa Bi Chuong`, because it’s a Vietnamese restaurant as tagged in the `cuisine`. A `multi_match` query allows us to do exactly that.
 
-``` shell
-# Matching multiple fields
+<details>
+<summary>Code: Matching multiple fields</summary>
+```{.python code-overflow-wrap}
 # Should return all 2 Vietnamese restaurant with the Vietnamese Pho Noodle on top
 GET restaurant/_search
+```
+```json
 {
   "query" : {
     "multi_match" : {
@@ -64,9 +68,11 @@ GET restaurant/_search
   }
 }
 ```
+</details>
 
-``` shell
-# Result
+<details>
+<summary>Result</summary>
+```json
 "hits": {
     ...
     "hits": [
@@ -93,6 +99,7 @@ GET restaurant/_search
     ]
   }
 ```
+</details>
 
 # Problems with the default TFIDF
 
@@ -100,10 +107,13 @@ Notice the above scores. The first one is like 4 times higher than the second, i
 
 Whenever we have doubts, we can use Elasticsearch `explain` to get a detailed breakdown of its scoring components.
 
-``` shell
-# Let's use explain=true to see what happens under the hood
+<details>
+<summary>Code: Let's use explain=true to see what happens under the hood</summary>
+```{.python .code-overflow-wrap}
 # Vietnamese Pho Noodle is on top because of the default implementation of TFIDF that penalizes the matching at cuisine field because there are multiple restaurants with cuisine=Vietnamese while there are only one restaurant with name=Vietnamese
 # Question: But why having the name Vietnamese in its name makes it more Vietnamese than other restaurants?
+```
+```json
 GET restaurant/_search
 {
   "query" : {
@@ -115,9 +125,10 @@ GET restaurant/_search
   "explain": true
 }
 ```
-
-``` shell
-# Result
+```{.python}
+# Result 👇
+```
+```json
 "hits": {
     "hits": [
       {
@@ -176,6 +187,7 @@ GET restaurant/_search
     ]
   }
 ```
+</details>
 
 Above we can see that Vietnamese Pho Noodle is on top because of the default implementation of TFIDF that penalizes the matching at cuisine field because there are multiple restaurants with `cuisine=Vietnamese` while there are only one restaurant with `name=Vietnamese`.
 
@@ -185,8 +197,9 @@ Whether we should encourage this behavior is a question. Is it true that having 
 
 Another problem with TFIDF is that it takes into account the length of the field.
 
-```         
-# Let's add another restaurant
+<details>
+<summary>Code: Let's add another restaurant</summary>
+```json
 POST _bulk
 { "index" : { "_index" : "restaurant", "_id" : "003vietnamesepho" } }
 { "restaurant_name": "Vietnamese Pho", "cuisine": "Vietnamese", "rating": 3.0 }
@@ -203,14 +216,17 @@ GET restaurant/_search
   "explain": true
 }
 ```
+</details>
 
 You can find the detailed and lengthy result in Appendix #1 at the end of the post. In short, we see that the result ranks restaurant Vietnamese Pho first and then Vietnamese Pho Noodle. Analyzing the component scores indicates that the key difference is that Vietnamese Pho has `length=2` (words) while Vietnamese Pho Noodle has `length=3`. It feels unintuitive since we know that the second restaurant has higher rating, given that both, in practice, are equally matching to user’s keyword.
 
 # Reranking (boosting) with function_score
 
-As we talk about `rating`, we can wrap our query with`function_score` to incorporate that information to modify our matching scores, hence have a better control over our ranking.
+As we talk about `rating`, we can wrap our query with `function_score` to incorporate that information to modify our matching scores, hence have a better control over our ranking.
 
-```         
+<details>
+<summary>Code: Function score</summary>
+```json
 GET restaurant/_search
 {
   "query": {
@@ -242,9 +258,10 @@ GET restaurant/_search
   }
 }
 ```
-
-```         
-# Result
+</details>
+<details>
+<summary>Result</summary>
+```json
 {
   "hits": {
     "hits": [
@@ -282,12 +299,15 @@ GET restaurant/_search
   }
 }
 ```
+</details>
 
 The higher rating restaurant is on top now. But how about restaurant `Sa Bi Chuong` with `rating=5`? It being the last result seems like we haven’t boosted “enough”.
 
 We might start tinkering a bit more with `function_score` to make that happen. Here is one of the implementation which models the boosting in a non-linear manner to effectively apply a strong boost on documents with `rating=5`.
 
-```         
+<details>
+<summary>Code: Non-linear function score boosting</summary>
+```json
 GET restaurant/_search
 {
   "query": {
@@ -330,9 +350,10 @@ GET restaurant/_search
   }
 }
 ```
-
-```         
-# Result
+</details>
+<details>
+<summary>Result</summary>
+```json
 {
   "hits": {
     "hits": [
@@ -370,6 +391,7 @@ GET restaurant/_search
   }
 }
 ```
+</details>
 
 We might ponder that: “Isn’t the function boosting now looking too arbitrary? Will it work for other cases?”. Indeed, that’s the question we should ask ourselves. Overtime, with more and more requirements, our query template will grow in complexity, leading to conflicts between the modifications we make.
 
@@ -379,8 +401,12 @@ Let’s move to the next example to illustrate what I mean by “conflict”.
 
 While not vital, the ability to handle user’s typo is always a nice-to-have feature, especially when they are now familiar with smart search engine like Google’s. Elasticsearch has a built-in mechanism called `fuzzy matching`, which is configurable with the option `fuzziness`.
 
-```         
+<details>
+<summary>Code: fuzzy matching</summary>
+```{.python}
 # The use of `bool` query below is to implement the logic: At least one condition should match
+```
+```json
 PUT _scripts/01-default-fuzzy-search-template
 {
   "script": {
@@ -449,10 +475,11 @@ PUT _scripts/01-default-fuzzy-search-template
   }
 }
 ```
+</details>
 
 Notice that we just created a query template instead of running a query. We can now invoke the query with paramaters, which is a nice feature Elasticsearch introduces to make our code look less overwhelming. Like this:
 
-```         
+```json
 GET /_search/template
 {
   "id": "01-default-fuzzy-search-template",
@@ -468,7 +495,7 @@ Well, the interesting bit lies elsewhere. One day, our sales team suddenly comes
 
 Here are the restaurants:
 
-```         
+```json
 POST _bulk
 { "index" : { "_index" : "restaurant", "_id" : "004parkhangseokbbq" } }
 { "restaurant_name": "Park Hang-seo's KBBQ", "cuisine": "Korean", "rating": 2.0 }
@@ -478,7 +505,7 @@ POST _bulk
 
 Query:
 
-```         
+```
 {
   "id": "01-default-fuzzy-search-template",
   "params": {
@@ -487,9 +514,9 @@ Query:
 }
 ```
 
-Result:
-
-```         
+<details>
+<summary>Result</summary>
+```
 {
   "hits": {
     "hits": [
@@ -517,6 +544,7 @@ Result:
   }
 }
 ```
+</details>
 
 To understand what is happening, we need to enable `explain=true` to see what contributes to the final scores. As this time the output is too verbose, here are the findings:
 
@@ -532,7 +560,9 @@ IMHO, the first challenge is about moving data. The queries and the documents ca
 
 Here we look at how we can use Elasticsearch Ranking Evaluation API to implement such evaluation scheme:
 
-```         
+<details>
+<summary>Code: Evaluation API</summary>
+```json
 GET restaurant/_rank_eval
 {
   # Query template comes in really handy when used in conjunction with _rank_eval
@@ -580,10 +610,11 @@ GET restaurant/_rank_eval
   }
 }
 ```
+</details>
 
-The result:
-
-```         
+<details>
+<summary>Result</summary>
+```json
 {
   "metric_score": 0.8549048706984328,  # This is the overall metric score, best is 1.0, worst is 0.0
   "details": {
@@ -627,6 +658,7 @@ The result:
   "failures": {}
 }
 ```
+</details>
 
 Let’s try to better our search by introducing changes that move the evaluation score closer to the perfect 1.0.
 
@@ -644,7 +676,9 @@ This understanding can be then transferred to how we use Elasticsearch to expres
 
 One approach is to use `dis_max` query combined with `constant_score` query. The idea is to categorize each type of matching into different levels of score where one level will have twice the score of the below level. The documents fall into one level of matching (tie) will be reranked by modifiers but eventually the new scores will not exceed the upper base score. Here is the new query template:
 
-```         
+<details>
+<summary>Code: New query template</summary>
+```json
 PUT _scripts/02-constant-score-search-template
 {
   "script": {
@@ -726,6 +760,7 @@ PUT _scripts/02-constant-score-search-template
   }
 }
 ```
+</details>
 
 When we re-run the evaluation, we can observe that the normalized DCG metric now has score equal to 1.0, denoting a perfect accuracy!
 
@@ -751,8 +786,9 @@ Thanks all!
 
 ## Appendix 1: Detailed breakdown of default TFIDF matching where length of the field value affect overall matching score
 
-```         
-# Result
+<details>
+<summary>Results</summary>
+```json
 {
   "hits": {
     "hits": [
@@ -915,6 +951,7 @@ Thanks all!
   }
 }
 ```
+</details>
 
 <br>
 If you find this article helpful, please cite this writeup as:

@@ -24,6 +24,7 @@ format:
     theme:
       - united
       - custom.scss
+    code-fold: true
     css: styles.css
     mainfont: "InterVariable, Inter, sans-serif"
     highlight-style: github

@@ -7,7 +7,10 @@ freeze: true
 # Enable banner style title blocks
 title-block-banner: true
 
-comments: 
-  utterances:
+comments:
+  giscus: 
     repo: dvquy13/icy-touch-comments
+    reactions-enabled: true
+    loading: lazy
+    input-position: top
     

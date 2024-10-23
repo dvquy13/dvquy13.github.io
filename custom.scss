@@ -1,4 +1,71 @@
 /*-- scss:defaults --*/
 $primary: #114b8f;
 $code-color: #114b8f;
+
 /*-- scss:rules --*/
+/* Change listing's post metadata's reading time */
+div.listing-reading-time {
+  font-size: 0.8em;
+}
+
+/* Change listing's post metadata size */
+div.quarto-post .metadata {
+  flex-basis: 20%;
+  text-align: right;
+  font-size: 1em;
+  margin-top: 0;
+}
+
+/* Change Note Callout color */
+div.callout-note.callout {
+  border-left-color: #114b8f;
+}
+
+/* Update the line spacing between TOC items */
+.sidebar nav[role=doc-toc]>ul li a {
+  padding-bottom: 0.7rem;
+}
+
+/* Increase the space between the Search bar and the listing */
+div.listing-actions-group {
+  margin-bottom: 20px;
+}
+
+/* Change subtitle color */
+/* Need to place before hover change else hover does not take effect */
+div.quarto-post .listing-subtitle a {
+  color: #797979;
+}
+
+/* Change hover color */
+div.category:hover {
+  color: #114b8f;
+}
+
+div.quarto-post .listing-categories .listing-category:hover {
+  color: white;
+  background-color: #114b8f;
+  border-color: #114b8f;
+}
+
+div.quarto-post a:hover {
+  color: #114b8f;
+}
+
+div.quarto-title .quarto-categories .quarto-category:hover {
+  background-color: white;
+  color: #114b8f;
+  opacity: 100%;
+}
+
+/* Change About text align */
+div.quarto-about-jolla main {
+  text-align: left;
+  /* Do not change width like this since it would break on mobile */
+  /* width: 500px; */
+}
+
+// Change subtitle font size
+p.subtitle.lead {
+  font-size: 16px;
+}

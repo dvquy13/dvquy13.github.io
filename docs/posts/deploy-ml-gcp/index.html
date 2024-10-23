@@ -429,6 +429,10 @@ CLUSTER_NAME=iris-pred</code></pre>
 <p><code>iris_pred/</code>: Source code.</p>
 <p><code>main.py</code>: is the interface to all tasks. This file parses the arguments to load config and get the job name, then call <code>analyze</code> function in <code>entry_point.py</code> from the appropriate module.</p>
 <p><code>jobs/</code>: contain tasks as modules. Inside <code>jobs</code>, we have one module corresponding to a step in our pipeline. All these modules expose an <code>entry_point.py</code> file where we unify the API to easily and consistently communicate with <code>main.py</code>.</p>
+<details>
+<summary>
+Code: train.py
+</summary>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>iris_pred/jobs/model/train.py</strong></pre>
@@ -503,6 +507,7 @@ CLUSTER_NAME=iris-pred</code></pre>
 <span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._fit(X_train, y_train)</span>
 <span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._persist_pipeline()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</details>
 <p>As you can see in the snippet above, the class <code>Trainer</code> expose a function <code>run</code>. Each step in the process corresponds to a private function declared in the same class.</p>
 <p><code>shared/</code>: functions and classes to be reused across modules</p>
 <p>In <code>io_handler.py</code>, the class IOHandler applies the principle <a href="https://en.wikipedia.org/wiki/Composition_over_inheritance">Composition Over Inheritance</a> to ease the process of loading outputs from the previous step.</p>
@@ -988,8 +993,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<script src="https://giscus.app/client.js" data-repo="dvquy13/icy-touch-comments" data-repo-id="R_kgDONEpzPA" data-category="General" data-category-id="DIC_kwDONEpzPM4Cjn8n" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" data-loading="lazy" async="">
+</script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","openEffect":"zoom","selector":".lightbox","descPosition":"bottom","loop":false});
+<script>var lightboxQuarto = GLightbox({"descPosition":"bottom","closeEffect":"zoom","loop":false,"selector":".lightbox","openEffect":"zoom"});
 (function() {
   let previousOnload = window.onload;
   window.onload = () => {
