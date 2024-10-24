@@ -21,6 +21,7 @@ website:
         href: index.xml
   google-analytics: "G-NH6GYY9FZV"
   cookie-consent: true
+  favicon: avatar.png
 
 format:
   html:
