@@ -4,3 +4,4 @@ _site
 /.quarto/
 .obsidian/
 .venv/
+**/.DS_Store
