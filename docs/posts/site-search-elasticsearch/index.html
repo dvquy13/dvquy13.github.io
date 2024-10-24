@@ -279,15 +279,15 @@ This article is originally published in <a href="https://medium.com/towards-data
 
 </div>
 </div>
-<section id="intro" class="level1">
-<h1>Intro</h1>
+<section id="intro" class="level2">
+<h2 class="anchored" data-anchor-id="intro">Intro</h2>
 <p>Over the last 22 months I have been working as a site-search engineer who uses Elasticsearch to help improve relevance in our restaurant platform. I have deployed in total 83 releases including 3 major versions.</p>
 <p>With roughly one release per week, I can say that not only our search engine is much better than it was 2 years ago, but I have also learned quite a lot. Though still far from a great search engine, here are some things worth sharing in my opinion. More importantly, I really want to get feedback about them.</p>
 <p>This blog post is to provide an approach to design the Elasticsearch query template to deal with common site-search problems including searching for matches across different fields, boosting results and testing. Together we will identify issues with the default approach and then gradually come up with a new one to address the issues altogether.</p>
 <p>This <a href="https://github.com/dvquy13/elasticsearch-sharing">Github repo</a> contains the examples and code discussed in this post.</p>
 </section>
-<section id="main" class="level1">
-<h1>Main</h1>
+<section id="main" class="level2">
+<h2 class="anchored" data-anchor-id="main">Main</h2>
 <p>We now play the role of a search engineer for a restaurant platform, which allows diners to discover and make reservation for their next meals. We haven’t had much experience, but luckily the app does not require accuracy level of Google from the start. The key is to make gradual visible progresses!</p>
 <p>Alright, let’s dive into it. First off, we make sure user can search for restaurant by name. Here we can rely on the simple default <code>query-match</code> to get the job done.</p>
 <details>
@@ -357,8 +357,8 @@ Result
 <span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </section>
-<section id="problems-with-the-default-tfidf" class="level1">
-<h1>Problems with the default&nbsp;TFIDF</h1>
+<section id="problems-with-the-default-tfidf" class="level2">
+<h2 class="anchored" data-anchor-id="problems-with-the-default-tfidf">Problems with the default&nbsp;TFIDF</h2>
 <p>Notice the above scores. The first one is like 4 times higher than the second, indicating that it’s much more relevant given query <code>vietnamese</code>. One might have an assumption that because matching at multiple fields will make the score higher.</p>
 <p>Whenever we have doubts, we can use Elasticsearch <code>explain</code> to get a detailed breakdown of its scoring components.</p>
 <details>
@@ -460,10 +460,10 @@ Code: Let’s add another restaurant
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"explain"</span><span class="fu">:</span> <span class="kw">true</span></span>
 <span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<p>You can find the detailed and lengthy result in Appendix #1 at the end of the post. In short, we see that the result ranks restaurant Vietnamese Pho first and then Vietnamese Pho Noodle. Analyzing the component scores indicates that the key difference is that Vietnamese Pho has <code>length=2</code> (words) while Vietnamese Pho Noodle has <code>length=3</code>. It feels unintuitive since we know that the second restaurant has higher rating, given that both, in practice, are equally matching to user’s keyword.</p>
+<p>You can find the detailed and lengthy result in <a href="#appendix-1-detailed-breakdown-of-default-tfidf-matching-where-length-of-the-field-value-affect-overall-matching-score">Appendix 1</a> at the end of the post. In short, we see that the result ranks restaurant Vietnamese Pho first and then Vietnamese Pho Noodle. Analyzing the component scores indicates that the key difference is that Vietnamese Pho has <code>length=2</code> (words) while Vietnamese Pho Noodle has <code>length=3</code>. It feels unintuitive since we know that the second restaurant has higher rating, given that both, in practice, are equally matching to user’s keyword.</p>
 </section>
-<section id="reranking-boosting-with-function_score" class="level1">
-<h1>Reranking (boosting) with function_score</h1>
+<section id="reranking-boosting-with-function_score" class="level2">
+<h2 class="anchored" data-anchor-id="reranking-boosting-with-function_score">Reranking (boosting) with function_score</h2>
 <p>As we talk about <code>rating</code>, we can wrap our query with <code>function_score</code> to incorporate that information to modify our matching scores, hence have a better control over our ranking.</p>
 <details>
 <summary>
@@ -633,8 +633,8 @@ Result
 <p>We might ponder that: “Isn’t the function boosting now looking too arbitrary? Will it work for other cases?”. Indeed, that’s the question we should ask ourselves. Overtime, with more and more requirements, our query template will grow in complexity, leading to conflicts between the modifications we make.</p>
 <p>Let’s move to the next example to illustrate what I mean by “conflict”.</p>
 </section>
-<section id="the-complexity-comes-with-fuzzy-matching" class="level1">
-<h1>The complexity comes with fuzzy&nbsp;matching</h1>
+<section id="the-complexity-comes-with-fuzzy-matching" class="level2">
+<h2 class="anchored" data-anchor-id="the-complexity-comes-with-fuzzy-matching">The complexity comes with fuzzy&nbsp;matching</h2>
 <p>While not vital, the ability to handle user’s typo is always a nice-to-have feature, especially when they are now familiar with smart search engine like Google’s. Elasticsearch has a built-in mechanism called <code>fuzzy matching</code>, which is configurable with the option <code>fuzziness</code>.</p>
 <details>
 <summary>
@@ -771,8 +771,8 @@ Result
 </ul>
 <p>One way to frame the issue is that we have imperfect boosting. Say we have a better formula that strikes the right balances, then the problem should be solved. But it’s close to impossible to guarantee that the new formula will not cause any other issues. We don’t want these kinds of issue creep into the system without any notice and then some day being flagged out by stakeholders. We want to be the first to be aware of those issues, especially whenever we make any changes. Therefore, before discussing potential solutions, I hope we all agree that the very next important thing we should do is (yes, you are probably thinking about the same thing as I am) setting up a testing/evaluation mechanism.</p>
 </section>
-<section id="how-should-we-create-test-cases-for-this-search-application" class="level1">
-<h1>How should we create test cases for this search application?</h1>
+<section id="how-should-we-create-test-cases-for-this-search-application" class="level2">
+<h2 class="anchored" data-anchor-id="how-should-we-create-test-cases-for-this-search-application">How should we create test cases for this search application?</h2>
 <p>IMHO, the first challenge is about moving data. The queries and the documents can both grow over time, so a static mock dataset might not be a very good representative of the search relevance anymore after a month. The next bit is related to our mindset. Sometimes we might need to think about whether we need 100% passed test cases in order to fix this new very urgent issue. For example, there are cases where if you fix some issues then the search result orderings of the other test cases might alter a bit. If we hard-code the rankings, then we might sweat ourselves trying to tweak our query template. But in practice a lot of the times we neither don’t need the ranking to be exactly pre-defined nor we are perfectly sure about which ordering is actually optimal. We should consider using a soft mechanism where we quantify the relevance of the system and using threshold instead.</p>
 <p>Here we look at how we can use Elasticsearch Ranking Evaluation API to implement such evaluation scheme:</p>
 <details>
@@ -875,8 +875,8 @@ Result
 </details>
 <p>Let’s try to better our search by introducing changes that move the evaluation score closer to the perfect 1.0.</p>
 </section>
-<section id="our-revised-search-model" class="level1">
-<h1>Our revised search&nbsp;model</h1>
+<section id="our-revised-search-model" class="level2">
+<h2 class="anchored" data-anchor-id="our-revised-search-model">Our revised search&nbsp;model</h2>
 <p>Before start designing a new query template, we can take a step back and really think about how we should model the search engine. Below are the essentials:</p>
 <ol type="1">
 <li>Exact matching will always surface on top of not-exact ones like fuzzy matching;</li>
@@ -973,8 +973,8 @@ Code: New query template
 </details>
 <p>When we re-run the evaluation, we can observe that the normalized DCG metric now has score equal to 1.0, denoting a perfect accuracy!</p>
 </section>
-<section id="summary" class="level1">
-<h1>Summary</h1>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
 <p>This blog post focuses on putting you in the shoe of an Elasticsearch engineer who has to derive query templates that fit the needs of a site-search enginer. We have briefly coverred the following topics:</p>
 <ul>
 <li>Keyword matching with multiple fields</li>
@@ -986,13 +986,13 @@ Code: New query template
 <li>Constructing query with <code>dis_max</code>and <code>constant_score</code></li>
 </ul>
 <p>Though definitely not optimal, I hope that parts of the blog post help you come closer to utilize Elasticsearch to help solve your own problems.</p>
-<p>I also much appreciate any comments or feedbacks. If you want to discuss more, please comment on this post or open an issue in the Github repo: https://github.com/dvquy13/elasticsearch-sharing.</p>
+<p>I also much appreciate any comments or feedbacks. If you want to discuss more, please comment on this post or open an issue in the <a href="https://github.com/dvquy13/elasticsearch-sharing">Github repo</a>.</p>
 <p>Thanks all!</p>
 </section>
-<section id="appendix" class="level1">
-<h1>Appendix</h1>
-<section id="appendix-1-detailed-breakdown-of-default-tfidf-matching-where-length-of-the-field-value-affect-overall-matching-score" class="level2">
-<h2 class="anchored" data-anchor-id="appendix-1-detailed-breakdown-of-default-tfidf-matching-where-length-of-the-field-value-affect-overall-matching-score">Appendix 1: Detailed breakdown of default TFIDF matching where length of the field value affect overall matching&nbsp;score</h2>
+<section id="appendix" class="level2">
+<h2 class="anchored" data-anchor-id="appendix">Appendix</h2>
+<section id="appendix-1-detailed-breakdown-of-default-tfidf-matching-where-length-of-the-field-value-affect-overall-matching-score" class="level3">
+<h3 class="anchored" data-anchor-id="appendix-1-detailed-breakdown-of-default-tfidf-matching-where-length-of-the-field-value-affect-overall-matching-score">Appendix 1: Detailed breakdown of default TFIDF matching where length of the field value affect overall matching&nbsp;score</h3>
 <details>
 <summary>
 Results

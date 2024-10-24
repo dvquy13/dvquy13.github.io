@@ -240,16 +240,16 @@ cookieconsent.run({
 
 </div>
 </div>
-<section id="demo" class="level1">
-<h1>Demo</h1>
+<section id="demo" class="level2">
+<h2 class="anchored" data-anchor-id="demo">Demo</h2>
 <div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/4trTuAV3RnY?si=s7s5pjbgoSopGJja" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
 </section>
-<section id="problem-statement" class="level1">
-<h1>Problem Statement</h1>
+<section id="problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="problem-statement">Problem Statement</h2>
 <p>Listing/reservation businesses like Yelp offer value to users by providing useful information to make them find out where to go next. Good search and recommendation systems go a long way, but they are still far from delivering the ultimate experience where users can interact naturally with the system for complex queries or have a conversation to drill down their needs.</p>
 </section>
-<section id="approach" class="level1">
-<h1>Approach</h1>
+<section id="approach" class="level2">
+<h2 class="anchored" data-anchor-id="approach">Approach</h2>
 <p>Build a chatbot assistant to assist users in <strong>discovering places to go and booking</strong>.</p>
 <p>Workflow:</p>
 <ol type="1">
@@ -261,8 +261,8 @@ cookieconsent.run({
 <li>Build RAG Agent based on OpenAI API with Query Engine tool and Reservation Service tool. Chatbot UI is built with Chainlit.</li>
 </ol>
 </section>
-<section id="evaluation" class="level1">
-<h1>Evaluation</h1>
+<section id="evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="evaluation">Evaluation</h2>
 <p>Evaluation results can be found <a href="https://drive.google.com/file/d/1GU0gnChJBBlB-xfaMEcnmGiHhUFKzfqb/view?usp=sharing">here</a>.</p>
 <p>Two proposed key metrics are <strong>Retrieval Hit Rate</strong> and <strong>Response Correctness</strong>.</p>
 <p>Retrieval is a critical component in any RAG system. Along with data prep, retrieval sits at the top of the pipeline so any improvements in these fronts is more likely to improve the overall system. <strong>Hit rate</strong> is chosen as a key metric because since we can employ rerank as a subsequent step, we have room to optimize for the ranking issues.&nbsp;</p>
@@ -270,8 +270,8 @@ cookieconsent.run({
 <p>For reference, Response Correctness on synthetic dataset has improved <strong>+166%</strong> from 1.75 / 5.00 from MVP version to <strong>4.67 / 5.00</strong> on the current version. The current <strong>Retrieval Hit Rate @ 50</strong> reaches <strong>73%</strong>, not directly comparable but at MVP version <strong>Retrieval Hit Rate @ 10</strong> was 20%.</p>
 <p>As next steps, while there is not much room to improve Response Correctness, we ought to increase Retrieval Hit Rate to 90% which should be doable since this dataset only contains a small amount of data.</p>
 </section>
-<section id="learningsremarks" class="level1">
-<h1>Learnings/Remarks</h1>
+<section id="learningsremarks" class="level2">
+<h2 class="anchored" data-anchor-id="learningsremarks">Learnings/Remarks</h2>
 <ul>
 <li>Using question-style query leads to 5-20% uplift in retrieval hit rate compared to using keyword search</li>
 <li>BM25 Retriever alone results in 200% increase in retrieval effectiveness including hit rate, average precision, MRR and NDCG</li>
@@ -280,20 +280,20 @@ cookieconsent.run({
 <li>Using TreeSummarize with custom prompt yields a +10% uplift on response correctness evaluation, from 3.97 to 4.37. Based on eyeballing we also see a way better response that is recommendation-like</li>
 </ul>
 </section>
-<section id="challenges" class="level1">
-<h1>Challenges</h1>
-<section id="challenge-1-auto-retrieval-not-reliable" class="level4">
-<h4 class="anchored" data-anchor-id="challenge-1-auto-retrieval-not-reliable">Challenge 1: Auto-retrieval not reliable</h4>
+<section id="challenges" class="level2">
+<h2 class="anchored" data-anchor-id="challenges">Challenges</h2>
+<section id="challenge-1-auto-retrieval-not-reliable" class="level5">
+<h5 class="anchored" data-anchor-id="challenge-1-auto-retrieval-not-reliable">Challenge 1: Auto-retrieval not reliable</h5>
 <p>While theoretically both precision and recall should be greatly improved if we are able to apply the right filters for User questions instead of relying on embedding/keyword matching, my first attempt to apply auto-retrieval with ChromaDB did not yield promising results. There were at least two syntactic issues which broke the agentic workflow. Even after fixing those two the unreliable nature of this approach is still there and I also witnessed a -10% degradation in Retrieval Hit Rate.</p>
 <p>In the end I forfeited the feature but nevertheless look forward to a way to re-applying this technique.</p>
 </section>
-<section id="challenges-2-indexing-pipeline-takes-too-long" class="level4">
-<h4 class="anchored" data-anchor-id="challenges-2-indexing-pipeline-takes-too-long">Challenges 2: Indexing pipeline takes too long</h4>
+<section id="challenges-2-indexing-pipeline-takes-too-long" class="level5">
+<h5 class="anchored" data-anchor-id="challenges-2-indexing-pipeline-takes-too-long">Challenges 2: Indexing pipeline takes too long</h5>
 <p>Indexing 70K nodes from 30K reviews for 400 businesses takes more than 6 hours!</p>
 </section>
 </section>
-<section id="future-improvements" class="level1">
-<h1>Future Improvements</h1>
+<section id="future-improvements" class="level2">
+<h2 class="anchored" data-anchor-id="future-improvements">Future Improvements</h2>
 <ul>
 <li>Guardrail system inputs and outputs</li>
 <li>Experiment with Contextual Compression and Filters</li>

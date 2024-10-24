@@ -6,22 +6,28 @@ categories: [tech, llm]
 keywords: [llm, rag, chatbot, llamaindex]
 draft: false
 image: thumbnail.svg
+# format:
+#   html:
+#     code-links:
+#       - text: Github Repo
+#         icon: github
+#         href: https://github.com/dvquy13/review-rec-bot
 ---
 
 ::: {.callout-note appearance="simple"}
 ## [Project Details](https://github.com/dvquy13/review-rec-bot)
 :::
 
-# Demo
+## Demo
 
 {{< video https://youtu.be/4trTuAV3RnY?si=s7s5pjbgoSopGJja >}}
 
-# Problem Statement
+## Problem Statement
 
 Listing/reservation businesses like Yelp offer value to users by providing useful information to make them find out where to go next. Good search and recommendation systems go a long way, but they are still far from delivering the ultimate experience where users can interact naturally with the system for complex queries or have a conversation to drill down their needs.
 
 
-# Approach
+## Approach
 
 Build a chatbot assistant to assist users in **discovering places to go and booking**.
 
@@ -34,7 +40,7 @@ Workflow:
 5. Conduct error analysis and look at the model's output to come up with new iteration ideas. Run a total of 10 experiments to improve the RAG, with notable attempts including: Replacing Llama-8.1B with GPT-4o-mini, Fine-tuning Embedding Model, Hybrid Retrievers, Semantic Chunking, BGE Reranker, Query Expansion
 6. Build RAG Agent based on OpenAI API with Query Engine tool and Reservation Service tool. Chatbot UI is built with Chainlit.
 
-# Evaluation
+## Evaluation
 
 Evaluation results can be found [here](https://drive.google.com/file/d/1GU0gnChJBBlB-xfaMEcnmGiHhUFKzfqb/view?usp=sharing).
 
@@ -48,7 +54,7 @@ For reference, Response Correctness on synthetic dataset has improved **+166%** 
 
 As next steps, while there is not much room to improve Response Correctness, we ought to increase Retrieval Hit Rate to 90% which should be doable since this dataset only contains a small amount of data.
 
-# Learnings/Remarks
+## Learnings/Remarks
 
 - Using question-style query leads to 5-20% uplift in retrieval hit rate compared to using keyword search
 - BM25 Retriever alone results in 200% increase in retrieval effectiveness including hit rate, average precision, MRR and NDCG
@@ -57,20 +63,20 @@ As next steps, while there is not much room to improve Response Correctness, we 
 - Using TreeSummarize with custom prompt yields a +10% uplift on response correctness evaluation, from 3.97 to 4.37. Based on eyeballing we also see a way better response that is recommendation-like
 
 
-# Challenges
+## Challenges
 
-#### Challenge 1: Auto-retrieval not reliable
+##### Challenge 1: Auto-retrieval not reliable
 
 While theoretically both precision and recall should be greatly improved if we are able to apply the right filters for User questions instead of relying on embedding/keyword matching, my first attempt to apply auto-retrieval with ChromaDB did not yield promising results. There were at least two syntactic issues which broke the agentic workflow. Even after fixing those two the unreliable nature of this approach is still there and I also witnessed a -10% degradation in Retrieval Hit Rate.
 
 In the end I forfeited the feature but nevertheless look forward to a way to re-applying this technique.
 
-#### Challenges 2: Indexing pipeline takes too long
+##### Challenges 2: Indexing pipeline takes too long
 
 Indexing 70K nodes from 30K reviews for 400 businesses takes more than 6 hours!
 
 
-# Future Improvements
+## Future Improvements
 
 - Guardrail system inputs and outputs
 - Experiment with Contextual Compression and Filters

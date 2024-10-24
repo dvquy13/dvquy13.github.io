@@ -5,21 +5,27 @@ date: "2024-06-21"
 categories: [tech, machine learning]
 keywords: [k8s, ml system, mlflow, jenkins, kserve, mlserver]
 draft: false
+# format:
+#   html:
+#     code-links:
+#       - text: Github Repo
+#         icon: github
+#         href: https://github.com/dvquy13/reviews-parsing-mlsys
 ---
 
-This project focuses on applying engineering practices to build a Machine Learning System in the domain of public reviews data.
+This project focuses on applying engineering practices to build a Machine Learning System using Kubernetes and deploy on Google Cloud Platform.
 
 ::: {.callout-note appearance="simple"}
 ## [Project Details](https://github.com/dvquy13/reviews-parsing-mlsys)
 :::
 
-# Architecture
+## Architecture
 
 :::{.column-page}
 ![](./architecture.svg){.lightbox}
 :::
 
-# Demo
+## Demo
 
 {{< video https://youtu.be/O-8_Q1GgJpM?si=VA9XK7fBDAl6ngH3 >}}
 

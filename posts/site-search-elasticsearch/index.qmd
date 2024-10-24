@@ -4,13 +4,19 @@ subtitle: A Practical Guide to Designing Query Templates, Boosting Relevance, an
 date: "2023-06-01"
 categories: [tech, search]
 keywords: full-text search, elasticsearch
+# format:
+#   html:
+#     code-links:
+#       - text: Github Repo
+#         icon: github
+#         href: https://github.com/dvquy13/elasticsearch-sharing
 ---
 
 ::: {.callout-note appearance="simple"}
 ## This article is originally published in [Towards Data Science](https://medium.com/towards-data-science/a-site-search-engineers-journal-approaching-relevance-challenges-in-elasticsearch-query-1eca29283da5)
 :::
 
-# Intro
+## Intro
 
 Over the last 22 months I have been working as a site-search engineer who uses Elasticsearch to help improve relevance in our restaurant platform. I have deployed in total 83 releases including 3 major versions.
 
@@ -20,7 +26,7 @@ This blog post is to provide an approach to design the Elasticsearch query templ
 
 This [Github repo](https://github.com/dvquy13/elasticsearch-sharing) contains the examples and code discussed in this post.
 
-# Main
+## Main
 
 We now play the role of a search engineer for a restaurant platform, which allows diners to discover and make reservation for their next meals. We haven’t had much experience, but luckily the app does not require accuracy level of Google from the start. The key is to make gradual visible progresses!
 
@@ -101,7 +107,7 @@ GET restaurant/_search
 ```
 </details>
 
-# Problems with the default TFIDF
+## Problems with the default TFIDF
 
 Notice the above scores. The first one is like 4 times higher than the second, indicating that it’s much more relevant given query `vietnamese`. One might have an assumption that because matching at multiple fields will make the score higher.
 
@@ -218,9 +224,9 @@ GET restaurant/_search
 ```
 </details>
 
-You can find the detailed and lengthy result in Appendix #1 at the end of the post. In short, we see that the result ranks restaurant Vietnamese Pho first and then Vietnamese Pho Noodle. Analyzing the component scores indicates that the key difference is that Vietnamese Pho has `length=2` (words) while Vietnamese Pho Noodle has `length=3`. It feels unintuitive since we know that the second restaurant has higher rating, given that both, in practice, are equally matching to user’s keyword.
+You can find the detailed and lengthy result in [Appendix 1](#appendix-1-detailed-breakdown-of-default-tfidf-matching-where-length-of-the-field-value-affect-overall-matching-score) at the end of the post. In short, we see that the result ranks restaurant Vietnamese Pho first and then Vietnamese Pho Noodle. Analyzing the component scores indicates that the key difference is that Vietnamese Pho has `length=2` (words) while Vietnamese Pho Noodle has `length=3`. It feels unintuitive since we know that the second restaurant has higher rating, given that both, in practice, are equally matching to user’s keyword.
 
-# Reranking (boosting) with function_score
+## Reranking (boosting) with function_score
 
 As we talk about `rating`, we can wrap our query with `function_score` to incorporate that information to modify our matching scores, hence have a better control over our ranking.
 
@@ -397,7 +403,7 @@ We might ponder that: “Isn’t the function boosting now looking too arbitrary
 
 Let’s move to the next example to illustrate what I mean by “conflict”.
 
-# The complexity comes with fuzzy matching
+## The complexity comes with fuzzy matching
 
 While not vital, the ability to handle user’s typo is always a nice-to-have feature, especially when they are now familiar with smart search engine like Google’s. Elasticsearch has a built-in mechanism called `fuzzy matching`, which is configurable with the option `fuzziness`.
 
@@ -554,7 +560,7 @@ To understand what is happening, we need to enable `explain=true` to see what co
 
 One way to frame the issue is that we have imperfect boosting. Say we have a better formula that strikes the right balances, then the problem should be solved. But it’s close to impossible to guarantee that the new formula will not cause any other issues. We don’t want these kinds of issue creep into the system without any notice and then some day being flagged out by stakeholders. We want to be the first to be aware of those issues, especially whenever we make any changes. Therefore, before discussing potential solutions, I hope we all agree that the very next important thing we should do is (yes, you are probably thinking about the same thing as I am) setting up a testing/evaluation mechanism.
 
-# How should we create test cases for this search application?
+## How should we create test cases for this search application?
 
 IMHO, the first challenge is about moving data. The queries and the documents can both grow over time, so a static mock dataset might not be a very good representative of the search relevance anymore after a month. The next bit is related to our mindset. Sometimes we might need to think about whether we need 100% passed test cases in order to fix this new very urgent issue. For example, there are cases where if you fix some issues then the search result orderings of the other test cases might alter a bit. If we hard-code the rankings, then we might sweat ourselves trying to tweak our query template. But in practice a lot of the times we neither don’t need the ranking to be exactly pre-defined nor we are perfectly sure about which ordering is actually optimal. We should consider using a soft mechanism where we quantify the relevance of the system and using threshold instead.
 
@@ -662,7 +668,7 @@ GET restaurant/_rank_eval
 
 Let’s try to better our search by introducing changes that move the evaluation score closer to the perfect 1.0.
 
-# Our revised search model
+## Our revised search model
 
 Before start designing a new query template, we can take a step back and really think about how we should model the search engine. Below are the essentials:
 
@@ -764,7 +770,7 @@ PUT _scripts/02-constant-score-search-template
 
 When we re-run the evaluation, we can observe that the normalized DCG metric now has score equal to 1.0, denoting a perfect accuracy!
 
-# Summary
+## Summary
 
 This blog post focuses on putting you in the shoe of an Elasticsearch engineer who has to derive query templates that fit the needs of a site-search enginer. We have briefly coverred the following topics:
 
@@ -778,13 +784,13 @@ This blog post focuses on putting you in the shoe of an Elasticsearch engineer w
 
 Though definitely not optimal, I hope that parts of the blog post help you come closer to utilize Elasticsearch to help solve your own problems.
 
-I also much appreciate any comments or feedbacks. If you want to discuss more, please comment on this post or open an issue in the Github repo: https://github.com/dvquy13/elasticsearch-sharing.
+I also much appreciate any comments or feedbacks. If you want to discuss more, please comment on this post or open an issue in the [Github repo](https://github.com/dvquy13/elasticsearch-sharing).
 
 Thanks all!
 
-# Appendix
+## Appendix
 
-## Appendix 1: Detailed breakdown of default TFIDF matching where length of the field value affect overall matching score
+### Appendix 1: Detailed breakdown of default TFIDF matching where length of the field value affect overall matching score
 
 <details>
 <summary>Results</summary>

@@ -225,7 +225,7 @@ cookieconsent.run({
 
 
 
-<p>This project focuses on applying engineering practices to build a Machine Learning System in the domain of public reviews data.</p>
+<p>This project focuses on applying engineering practices to build a Machine Learning System using Kubernetes and deploy on Google Cloud Platform.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -239,14 +239,14 @@ cookieconsent.run({
 
 </div>
 </div>
-<section id="architecture" class="level1 page-columns page-full">
-<h1>Architecture</h1>
+<section id="architecture" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="architecture">Architecture</h2>
 <div class="column-page">
 <p><a href="./architecture.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="./architecture.svg" class="img-fluid"></a></p>
 </div>
 </section>
-<section id="demo" class="level1">
-<h1>Demo</h1>
+<section id="demo" class="level2">
+<h2 class="anchored" data-anchor-id="demo">Demo</h2>
 <div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/O-8_Q1GgJpM?si=VA9XK7fBDAl6ngH3" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
 <p><br> If you find this article helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
@@ -363,6 +363,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         if (link.dataset.originalHref !== undefined) {
           link.href = link.dataset.originalHref;
         }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
       }
     }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -695,7 +700,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>
   </div>
 </footer>
-<script>var lightboxQuarto = GLightbox({"descPosition":"bottom","openEffect":"zoom","selector":".lightbox","loop":false,"closeEffect":"zoom"});
+<script>var lightboxQuarto = GLightbox({"selector":".lightbox","openEffect":"zoom","descPosition":"bottom","closeEffect":"zoom","loop":false});
 (function() {
   let previousOnload = window.onload;
   window.onload = () => {
