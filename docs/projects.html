@@ -299,7 +299,7 @@ Sep 22, 2024
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="tech,machine learning" data-listing-date-sort="1718899200000" data-listing-file-modified-sort="1729787316516" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="54">
+<div class="quarto-post image-right" data-index="1" data-categories="tech,machine learning" data-listing-date-sort="1718899200000" data-listing-file-modified-sort="1729787323985" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="54">
 <div class="thumbnail">
 <p><a href="./projects/reviews-parsing-mlsys/index.html" class="no-external"></a></p><a href="./projects/reviews-parsing-mlsys/index.html" class="no-external">
 <p class="card-img-top"><img src="projects/reviews-parsing-mlsys/architecture.svg"  class="thumbnail-image card-img"/></p>
@@ -443,6 +443,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         if (link.dataset.originalHref !== undefined) {
           link.href = link.dataset.originalHref;
         }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
       }
     }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {

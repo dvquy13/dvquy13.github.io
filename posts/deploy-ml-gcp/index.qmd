@@ -140,7 +140,7 @@ CLUSTER_NAME=iris-pred
 
 #### Step 3: Create Dataproc cluster and submit jobs
 
-We use Makefile to orchestrate our actions. You can find it here: https://github.com/dvquy13/gcp_ml_pipeline/blob/master/Makefile.
+We use Makefile to orchestrate our actions. You can find it [here](https://github.com/dvquy13/gcp_ml_pipeline/blob/master/Makefile).
 
 ️Now, run the following commands in sequence:
 

@@ -412,7 +412,7 @@ CLUSTER_NAME=iris-pred</code></pre>
 </section>
 <section id="step-3-create-dataproc-cluster-and-submit-jobs" class="level4 page-columns page-full">
 <h4 class="anchored" data-anchor-id="step-3-create-dataproc-cluster-and-submit-jobs">Step 3: Create Dataproc cluster and submit&nbsp;jobs</h4>
-<p>We use Makefile to orchestrate our actions. You can find it here: https://github.com/dvquy13/gcp_ml_pipeline/blob/master/Makefile.</p>
+<p>We use Makefile to orchestrate our actions. You can find it <a href="https://github.com/dvquy13/gcp_ml_pipeline/blob/master/Makefile">here</a>.</p>
 <p>️Now, run the following commands in sequence:</p>
 <ol type="1">
 <li><p><code>make create-dataproc-cluster</code>: <strong>This command creates a Dataproc cluster</strong>. The <code>single-node</code> flag indicates that this is a cluster containing only one machine. <code>n1-standard-1</code> is the cheapest machine we can rent. To install Python packages, we supply the <code>metadata</code> and <code>initialization-actions</code> params.</p></li>
@@ -704,6 +704,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         if (link.dataset.originalHref !== undefined) {
           link.href = link.dataset.originalHref;
         }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
       }
     }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -1036,7 +1041,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>
   </div>
 </footer>
-<script>var lightboxQuarto = GLightbox({"loop":false,"descPosition":"bottom","closeEffect":"zoom","selector":".lightbox","openEffect":"zoom"});
+<script>var lightboxQuarto = GLightbox({"loop":false,"selector":".lightbox","descPosition":"bottom","closeEffect":"zoom","openEffect":"zoom"});
 (function() {
   let previousOnload = window.onload;
   window.onload = () => {

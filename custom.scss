@@ -79,6 +79,11 @@ div.quarto-about-jolla main {
 
 /* // Change subtitle font size */
 p.subtitle.lead {
-  font-variation-settings: 'wght' 300;
+  font-variation-settings: 'wght' 400;
   font-size: 14.67px;
+}
+
+// Change title font weight
+a.navbar-brand {
+  font-variation-settings: 'wght' 600;
 }
