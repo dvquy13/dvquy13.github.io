@@ -1,18 +1,21 @@
 ---
-title: How to switch career?
+title: Career Switch
 subtitle: The story of me teaching myself Data Science
 date: 2024-10-25
 categories:
   - life
   - career
-keywords: career switch
+keywords: self-taught
 layout: full
 draft: true
+# editor:
+#   render-on-save: true
 ---
 
 ## Internal
 
 Status:
+
 - 🧊 **→** **Wandering**
 - **→   Organize**
 - **→   Shorten**
@@ -22,17 +25,19 @@ Status:
 - **→   Publish**
 
 Objective:
+
 - Help readers who is considering career switching be more confident that they can do it
 - Help those readers understand what it takes to switch career into a technical field
 
 Questions:
 
 
+
 ---
 
 Occasionally someone asks me how I made my switch from studying finance to working as an engineer building data science products. I will attempt to give an answer here.
 
-So, where to start? For those who’ve read this far, I hope my personal story helps. It took me exactly 6 months to transition from a Banking and Finance student at Foreign Trade University to being qualified for a Data Mining Engineer position at Viettel.
+It took me exactly 6 months to transition from a Banking and Finance student at Foreign Trade University to being qualified for a Data Mining Engineer position at Viettel.
 
 There are three main points:
 
@@ -40,7 +45,7 @@ There are three main points:
 2. **Learn and seek application opportunities simultaneously:** Let people around you KNOW you’re looking for problems to solve!
 3. **Expand your network, find companions**
 
-Once I decided I wanted to try data, I immediately looked for practical work to see if I really liked it. I chose an internship at a “data-driven” startup in the Business Analytics department. Meanwhile, I read and learned every day.
+Once I decided I wanted to try data, I immediately looked for practical work to see if I really liked it. I chose an internship at a “data-driven” startup in the Business Analytics department. Meanwhile, I read and learned every day. 
 
 During the 3-month BA stint, I used a bit of my prior programming knowledge to solve some operational automation problems. When a newbie codes, they’re bound to hit roadblocks. Whenever stuck, I’d run to the tech room. The guys liked me, saying I was slow but eager to learn. I joined company discussions, shared my views, and indirectly announced I was learning about machine learning.
 

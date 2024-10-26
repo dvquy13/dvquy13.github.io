@@ -81,7 +81,7 @@
     "href": "posts/site-search-elasticsearch/index.html#intro",
     "title": "A Hierarchical approach with Elasticsearch: Lessons from 22 Months of Iteration",
     "section": "Intro",
-    "text": "Intro\nOver the last 22 months I have been working as a site-search engineer who uses Elasticsearch to help improve relevance in our restaurant platform. I have deployed in total 83 releases including 3 major versions.\nWith roughly one release per week, I can say that not only our search engine is much better than it was 2 years ago, but I have also learned quite a lot. Though still far from a great search engine, here are some things worth sharing in my opinion. More importantly, I really want to get feedback about them.\nThis blog post is to provide an approach to design the Elasticsearch query template to deal with common site-search problems including searching for matches across different fields, boosting results and testing. Together we will identify issues with the default approach and then gradually come up with a new one to address the issues altogether.\nThis Github repo contains the examples and code discussed in this post."
+    "text": "Intro\nOver the last 22 months I have been working as a site-search engineer who uses Elasticsearch to help improve relevance in our restaurant platform. I have deployed in total 83 releases including 3 major versions.\nWith roughly one release per week, I can say that not only our search engine is much better than it was 2 years ago, but I have also learned quite a lot. Though still far from a great search engine, here are some things worth sharing in my opinion. More importantly, I want to get feedback about them.\nThis blog post is to provide an approach to design the Elasticsearch query template to deal with common site-search problems including searching for matches across different fields, boosting results and testing. Together we will identify issues with the default approach and then gradually come up with a new one to address the issues altogether.\nThis Github repo contains the examples and code discussed in this post."
   },
   {
     "objectID": "posts/site-search-elasticsearch/index.html#main",
@@ -240,7 +240,7 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Blog Posts",
+    "title": "Blog",
     "section": "",
     "text": "Building a Conversational Assistant for Restaurant Discovery and Booking\n\n\nLessons from Creating a Chatbot Using RAG, LLMs, and Advanced Retrieval Techniques\n\n\n\ntech\n\n\nllm\n\n\n\n\n\n\nSep 22, 2024\n\n\n4 min\n\n\n\n\n\n\n\nLet’s build an ML system\n\n\nEnd-to-end set up and deploy on Kubernetes\n\n\n\ntech\n\n\nmachine learning\n\n\n\n\n\n\nJun 21, 2024\n\n\n1 min\n\n\n\n\n\n\n\nA Hierarchical approach with Elasticsearch: Lessons from 22 Months of Iteration\n\n\nA Practical Guide to Designing Query Templates, Boosting Relevance, and Addressing Site-Search Challenges\n\n\n\ntech\n\n\nsearch\n\n\n\n\n\n\nJun 1, 2023\n\n\n57 min\n\n\n\n\n\n\n\nFrom Model to Production: Deploying Your Machine Learning Solution on Google Cloud\n\n\nTransforming a Laptop-Trained ML Model into a Scalable Batch Processing Pipeline using GCP’s Dataproc\n\n\n\ntech\n\n\nmachine learning\n\n\n\n\n\n\nFeb 17, 2020\n\n\n14 min\n\n\n\n\n\n\nNo matching items"
   }

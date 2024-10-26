@@ -32,7 +32,7 @@ format:
     css: styles.css
     mainfont: "InterVariable, Inter, sans-serif"
     highlight-style: github
-    fontsize: 16px
+    fontsize: 15.33px
     linestretch: 1.7
     linkcolor: "#114b8f"
     smooth-scroll: true
