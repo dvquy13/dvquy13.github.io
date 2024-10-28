@@ -60,10 +60,11 @@ But we quickly find out that name is not the only place we want to look for when
 
 <details>
 <summary>Code: Matching multiple fields</summary>
-```{.python code-overflow-wrap}
+```{code-overflow-wrap}
 # Should return all 2 Vietnamese restaurant with the Vietnamese Pho Noodle on top
 GET restaurant/_search
 ```
+
 ```json
 {
   "query" : {
@@ -115,7 +116,7 @@ Whenever we have doubts, we can use Elasticsearch `explain` to get a detailed br
 
 <details>
 <summary>Code: Let's use explain=true to see what happens under the hood</summary>
-```{.python .code-overflow-wrap}
+```{code-overflow-wrap}
 # Vietnamese Pho Noodle is on top because of the default implementation of TFIDF that penalizes the matching at cuisine field because there are multiple restaurants with cuisine=Vietnamese while there are only one restaurant with name=Vietnamese
 # Question: But why having the name Vietnamese in its name makes it more Vietnamese than other restaurants?
 ```

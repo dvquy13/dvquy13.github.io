@@ -93,7 +93,12 @@ body.nav-fixed.quarto-light {
   color: black;
 }
 
-// Change tilte font color
+// Change listing title font color
+div.quarto-post a {
+  color: black;
+}
+
+// Change title font color
 // .quarto-title-banner .quarto-title .title {
 //   color: white;
 //   opacity: 80%;

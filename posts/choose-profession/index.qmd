@@ -1,0 +1,35 @@
+---
+title: How to choose your profession?
+subtitle: to live your life
+date: 2024-10-25
+categories:
+  - life
+  - career
+layout: full
+draft: true
+---
+
+## Internal
+
+### Status
+- 🧊 Questions
+- Wandering
+- Organize
+- Shorten
+- Draft
+- Review
+- Edit
+- Publish
+
+### Objective
+- 
+
+### Questions
+- Why is it important?
+- What is the mindset to think about it?
+	- A picture with puzzling pieces
+- Why this mindset is a good framework to adopt?
+- What to look for?
+	- The puzzles
+
+---

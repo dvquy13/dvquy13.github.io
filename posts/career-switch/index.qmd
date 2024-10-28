@@ -1,6 +1,6 @@
 ---
 title: Career Switch
-subtitle: The story of me teaching myself Data Science
+subtitle: How to make a career switch into a technical field?
 date: 2024-10-25
 categories:
   - life
@@ -8,36 +8,50 @@ categories:
 keywords: self-taught
 layout: full
 draft: true
-# editor:
-#   render-on-save: true
 ---
 
 ## Internal
 
-Status:
+### Status
+- 🧊 Questions
+- Wandering
+- Organize
+- Shorten
+- Draft
+- Review
+- Edit
+- Publish
 
-- 🧊 **→** **Wandering**
-- **→   Organize**
-- **→   Shorten**
-- **→   Draft**
-- **→   Review**
-- **→   Edit**
-- **→   Publish**
-
-Objective:
-
+### Objective
 - Help readers who is considering career switching be more confident that they can do it
 - Help those readers understand what it takes to switch career into a technical field
+- Help people understand how I made my career switch
 
-Questions:
-
-
+### Questions
+- Why do people want to make career switch?
+	- What to get out of current state
+		- Tired of the current job
+	- Interested in a specificed career
+		- Reason 1: Aspired by the prospects of the new trendy industry
+		- Reason 2: Genuinely interested in solving the problems in that area
+- What are the blockers that make people less confident?
+- In which cases this article would be able to help?
+- How did I do it myself?
+- What are the key lessons?
+	- Start with learning how to learn: pomodoro and spaced repetition
+- What does not work?
+- When to go full commitment?
+- What are the potentially unexpected challenges awaiting you ahead?
+- What are the advantages we have?
+	- We keep our feet on the ground, always open to learning new things
+- How to know if you have reached the crossline—you can safely consider yourself an insider?
+- What you should do now after reading this article?
 
 ---
 
 Occasionally someone asks me how I made my switch from studying finance to working as an engineer building data science products. I will attempt to give an answer here.
 
-It took me exactly 6 months to transition from a Banking and Finance student at Foreign Trade University to being qualified for a Data Mining Engineer position at Viettel.
+It took me exactly 6 months to transition from a Banking and Finance student at Foreign Trade University to being qualified for a Data Mining Engineer position at Viettel. 
 
 There are three main points:
 
