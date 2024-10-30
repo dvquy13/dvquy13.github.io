@@ -461,7 +461,7 @@ Code: Let’s add another restaurant
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"explain"</span><span class="fu">:</span> <span class="kw">true</span></span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<p>You can find the detailed and lengthy result in <a href="#appendix-1-detailed-breakdown-of-default-tfidf-matching-where-length-of-the-field-value-affect-overall-matching-score">Appendix 1</a> at the end of the post. In short, we see that the result ranks restaurant Vietnamese Pho first and then Vietnamese Pho Noodle. Analyzing the component scores indicates that the key difference is that Vietnamese Pho has <code>length=2</code> (words) while Vietnamese Pho Noodle has <code>length=3</code>. It feels unintuitive since we know that the second restaurant has higher rating, given that both, in practice, are equally matching to user’s keyword.</p>
+<p>You can find the detailed and lengthy result in <a href="#appendix-1-detailed-breakdown-of-default-tfidf-matching-where-length-of-the-field-value-affect-overall-matching-score">Appendix 1</a>. In short, we see that the result ranks restaurant Vietnamese Pho first and then Vietnamese Pho Noodle. Analyzing the component scores indicates that the key difference is that Vietnamese Pho has <code>length=2</code> (words) while Vietnamese Pho Noodle has <code>length=3</code>. It feels unintuitive since we know that the second restaurant has higher rating, given that both, in practice, are equally matching to user’s keyword.</p>
 </section>
 <section id="reranking-boosting-with-function_score" class="level2">
 <h2 class="anchored" data-anchor-id="reranking-boosting-with-function_score">Reranking (boosting) with function_score</h2>
@@ -631,7 +631,7 @@ Result
 <span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
 <span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<p>We might ponder that: “Isn’t the function boosting now looking too arbitrary? Will it work for other cases?”. Indeed, that’s the question we should ask ourselves. Overtime, with more and more requirements, our query template will grow in complexity, leading to conflicts between the modifications we make.</p>
+<p>You may wonder that: “Isn’t the function boosting now looking too arbitrary? Will it work for other cases?”. Indeed, that’s the question we should ask ourselves. Overtime, with more and more requirements, our query template will grow in complexity, leading to conflicts between the modifications we make.</p>
 <p>Let’s move to the next example to illustrate what I mean by “conflict”.</p>
 </section>
 <section id="the-complexity-comes-with-fuzzy-matching" class="level2">

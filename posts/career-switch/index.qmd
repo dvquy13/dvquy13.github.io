@@ -32,7 +32,7 @@ draft: true
 	- What to get out of current state
 		- Tired of the current job
 	- Interested in a specificed career
-		- Reason 1: Aspired by the prospects of the new trendy industry
+		- **Reason** 1: Aspired by the prospects of the new trendy industry
 		- Reason 2: Genuinely interested in solving the problems in that area
 - What are the blockers that make people less confident?
 - In which cases this article would be able to help?

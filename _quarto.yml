@@ -5,7 +5,7 @@ project:
 website:
   title: "DvQ"
   site-url: https://dvquys.com
-  description: "DvQ Personal Blog"
+  description: "DvQ Personal Website"
   navbar:
     right:
       - about.qmd

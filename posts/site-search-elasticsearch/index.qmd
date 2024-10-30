@@ -225,7 +225,7 @@ GET restaurant/_search
 ```
 </details>
 
-You can find the detailed and lengthy result in [Appendix 1](#appendix-1-detailed-breakdown-of-default-tfidf-matching-where-length-of-the-field-value-affect-overall-matching-score) at the end of the post. In short, we see that the result ranks restaurant Vietnamese Pho first and then Vietnamese Pho Noodle. Analyzing the component scores indicates that the key difference is that Vietnamese Pho has `length=2` (words) while Vietnamese Pho Noodle has `length=3`. It feels unintuitive since we know that the second restaurant has higher rating, given that both, in practice, are equally matching to user’s keyword.
+You can find the detailed and lengthy result in [Appendix 1](#appendix-1-detailed-breakdown-of-default-tfidf-matching-where-length-of-the-field-value-affect-overall-matching-score). In short, we see that the result ranks restaurant Vietnamese Pho first and then Vietnamese Pho Noodle. Analyzing the component scores indicates that the key difference is that Vietnamese Pho has `length=2` (words) while Vietnamese Pho Noodle has `length=3`. It feels unintuitive since we know that the second restaurant has higher rating, given that both, in practice, are equally matching to user’s keyword.
 
 ## Reranking (boosting) with function_score
 
@@ -400,7 +400,7 @@ GET restaurant/_search
 ```
 </details>
 
-We might ponder that: “Isn’t the function boosting now looking too arbitrary? Will it work for other cases?”. Indeed, that’s the question we should ask ourselves. Overtime, with more and more requirements, our query template will grow in complexity, leading to conflicts between the modifications we make.
+You may wonder that: “Isn’t the function boosting now looking too arbitrary? Will it work for other cases?”. Indeed, that’s the question we should ask ourselves. Overtime, with more and more requirements, our query template will grow in complexity, leading to conflicts between the modifications we make.
 
 Let’s move to the next example to illustrate what I mean by “conflict”.
 

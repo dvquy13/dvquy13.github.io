@@ -20,6 +20,10 @@ div.listing-reading-time {
   font-size: 0.8em;
 }
 
+div.quarto-post .thumbnail {
+  flex-basis: 25%;
+}
+
 /* Change listing's post metadata size */
 div.quarto-post .metadata {
   flex-basis: 20%;
