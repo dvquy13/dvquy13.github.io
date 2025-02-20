@@ -20,7 +20,7 @@ layout: full
 
 Imagine a company named Rainbow imports boxes of flowers and need to classify them into species. For six months, they have some staff label the boxes manually. Now, they hire you to build a Machine Learning model to do the task.
 
-![Source: [Hackernoon](https://hackernoon.com/top-5-machine-learning-projects-for-beginners-47b184e7837f)](https://cdn-images-1.medium.com/max/800/1*7bnLKsChXq94QjtAiRn40w.png)
+![Source: [Hackernoon](https://hackernoon.com/top-5-machine-learning-projects-for-beginners-47b184e7837f)](./img-1.webp)
 
 With a small amount of labelled data as input and tons of experience working on Kaggle projects, you quickly develop a 95% accuracy using simple RandomForestClassifier from the popular scikit-learn library. Nice. Stakeholders approve and ask you when you could **deploy that model to production.**
 
@@ -29,7 +29,7 @@ Hmm, deploy a model from my laptop? …
 In case you wonder, I hope this tutorial will help you understand one among some common and most simple approaches. The diagram below depicts how we will use Google Cloud Platform to do the job in a batch-processing manner.
 
 :::{.column-page}
-![](https://cdn-images-1.medium.com/max/1200/1*xb0UAAcHwbus-dfXLu5SCw.png){.lightbox}
+![](./img-2.png){.lightbox}
 :::
 
 I choose the [Iris data set](https://archive.ics.uci.edu/ml/datasets/iris) as our input to help you see how our approach works with small-sized problems. All the codes are in [this repo](https://github.com/dvquy13/gcp_ml_pipeline).
@@ -75,13 +75,13 @@ Normally for a small input size, we are fine with setting up a single virtual ma
 1. 👉 Create a free GCP account with $300 credit by going to [console.cloud.google.com](https://console.cloud.google.com/getting-started). **Beware that by following this tutorial, you might incur a cost of about $0.2–$0.5.**
 
 :::{.column-page}
-![](https://cdn-images-1.medium.com/max/800/1*gNpMH0Knm_ElpJSexisAag.png){.lightbox}
+![](./img-3.png){.lightbox}
 :::
 
 2. 👉 Click Billing at the left sidebar and initiate a billing account to be able to use the components used in this tutorial
 
 :::{.column-page}
-![](https://cdn-images-1.medium.com/max/800/1*HRbgGB_s3KwK8kxRiaTUPQ.png){.lightbox}
+![](./img-4.png){.lightbox}
 :::
 
 3. 👉 Select **Library**, then search and enable the following API: Cloud Dataproc, Cloud Storage and Cloud Firestore.
@@ -89,24 +89,22 @@ Normally for a small input size, we are fine with setting up a single virtual ma
 4. 👉 Navigate to the Firestore either by scrolling the sidebar to the left or search from the top menu bar. When you arrive at the below screen, choose **SELECT NATIVE MODE**, then choose `us-east1` as the location.
 
 :::{.column-page}
-![](https://cdn-images-1.medium.com/max/800/1*mBmW_jb_412UYimWp9QaoQ.png){.lightbox}
+![](./img-5.png){.lightbox}
 :::
 
 ### Environment setup
 
 #### Step 1: Launch terminal window
 
-5. 👉 At the home page of your GCP project, select the command button to the right of your menubar. The CloudShell window then appears as you can see below:
+1. 👉 At the home page of your GCP project, select the command button to the right of your menubar. The CloudShell window then appears as you can see below:
 
 :::{.column-page}
-![](https://cdn-images-1.medium.com/max/800/1*6HVcsv6LqFEaf8eOIt6Xyg.png){.lightbox}
+![](./img-6.png){.lightbox}
 :::
 
-1. 👉 Launch Cloud Shell Editor:
+6. 👉 Launch Cloud Shell Editor:
 
-:::{.column-page}
-![](https://cdn-images-1.medium.com/max/800/1*T5WH0YKLnpH3gWq1Lj_BZA.png){.lightbox}
-:::
+![](./img-10.png){.lightbox fig-align="center"}
 
 It’s recommended to use Cloud Shell to follow this tutorial. However, if you’re using Linux and want to use terminal on your local machine, make sure you first [install the Google Cloud SDK](https://cloud.google.com/sdk/install) and firebase CLI.
 
@@ -122,10 +120,10 @@ cd gcp_ml_pipeline
 8. 👉 Select `File` then open the file `gcp_ml_pipeline/configs/.project_env`:
 
 :::{.column-page}
-![](https://cdn-images-1.medium.com/max/800/1*cqPTo5ebmac4e7aO-Alnug.png){.lightbox}
+![](./img-7.png){.lightbox}
 :::
 
-9. 👉 Replace the values enclosed by <>. For the `GCP_PROJECT`, you need to provide the `id` of your GCP project. For the remaining, feel free to choose some random names for the global variables that identify your resources. The final output looks like this:
+1. 👉 Replace the values enclosed by <>. For the `GCP_PROJECT`, you need to provide the `id` of your GCP project. For the remaining, feel free to choose some random names for the global variables that identify your resources. The final output looks like this:
 
 ```shell
 GCP_PROJECT='zinc-primer-230105'
@@ -161,7 +159,7 @@ We use Makefile to orchestrate our actions. You can find it [here](https://githu
 8. `make delete-dataproc-cluster`: **Delete Dataproc cluster.** After the process finishes, delete the cluster so no further cost incurs.
 
 :::{.column-page}
-![](https://cdn-images-1.medium.com/max/800/1*meEStEyORtyi06DTLioGVg.png){.lightbox}
+![](./img-8.png){.lightbox}
 :::
 
 Succeeded Dataproc jobs
@@ -169,7 +167,7 @@ Succeeded Dataproc jobs
 You can see that your predictions are stored at Cloud Firestore by accessing its web console.
 
 :::{.column-page}
-![](https://cdn-images-1.medium.com/max/800/1*XEcsap97Y0cCiYoPbgSa3g.png){.lightbox}
+![](./img-9.png){.lightbox}
 :::
 
 Firestore populated with predictions
@@ -294,7 +292,7 @@ In this tutorial, we rent one small machine from Dataproc and use pandas as our 
 Most of the batch job is not ad hoc. If it is, we should not even think about putting effort to standardize the process in the first place. [Apache Airflow](https://airflow.apache.org/) can play the role of both a scheduler and a monitor. It keeps metadata of each run and can send you alerts when things fail.
 
 :::{.column-page}
-![Example of Airflow DAG: [Source](https://www.google.com/url?sa=i&source=images&cd=&ved=2ahUKEwiHu5jc1dfmAhWULqYKHaQKBBAQjRx6BAgBEAQ&url=https%3A%2F%2Fwww.astronomer.io%2Fguides%2Fsubdags&psig=AOvVaw1KeFNXmbAOrSVsWWG3HOSK&ust=1577599347094494)](https://cdn-images-1.medium.com/max/800/1*2DPJcNVFajHrm4WjTqI9dA.png){.lightbox}
+![Example of Airflow DAG: [Source](https://www.google.com/url?sa=i&source=images&cd=&ved=2ahUKEwiHu5jc1dfmAhWULqYKHaQKBBAQjRx6BAgBEAQ&url=https%3A%2F%2Fwww.astronomer.io%2Fguides%2Fsubdags&psig=AOvVaw1KeFNXmbAOrSVsWWG3HOSK&ust=1577599347094494)](./img-11.png){.lightbox}
 :::
 
 An alternative is Dataproc Workflows. This is a native solution offered by GCP, but I haven’t tried it myself so I will just leave the documentation [here](https://cloud.google.com/dataproc/docs/concepts/workflows/using-workflows).

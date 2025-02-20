@@ -1,2 +1,8 @@
 .PHONY:
-.ONESHELL
+.ONESHELL:
+
+run:
+	quarto preview
+
+build:
+	quarto render

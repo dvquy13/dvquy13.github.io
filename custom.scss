@@ -1,6 +1,6 @@
 /*-- scss:defaults --*/
-$primary: #114b8f;
-$code-color: #114b8f;
+$primary: #0057a3;
+$code-color: #0057a3;
 
 /*-- scss:rules --*/
 /* Change listing's post metadata's reading time */
@@ -34,7 +34,7 @@ div.quarto-post .metadata {
 
 /* Change Note Callout color */
 div.callout-note.callout {
-  border-left-color: #114b8f;
+  border-left-color: #0057a3;
 }
 
 /* Update the line spacing between TOC items */
@@ -55,22 +55,22 @@ div.quarto-post .listing-subtitle a {
 
 /* Change hover color */
 div.category:hover {
-  color: #114b8f;
+  color: #0057a3;
 }
 
 div.quarto-post .listing-categories .listing-category:hover {
   color: white;
-  background-color: #114b8f;
-  border-color: #114b8f;
+  background-color: #0057a3;
+  border-color: #0057a3;
 }
 
 div.quarto-post a:hover {
-  color: #114b8f;
+  color: #0057a3;
 }
 
 div.quarto-title .quarto-categories .quarto-category:hover {
   background-color: white;
-  color: #114b8f;
+  color: #0057a3;
   opacity: 100%;
 }
 
