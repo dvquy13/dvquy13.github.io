@@ -16,4 +16,4 @@ Hi, I'm Quy—an Applied Data Scientist. I'm from Hanoi, Vietnam 🇻🇳. Curre
 
 I blog about [RecSys](/#category=recsys), [ML](/#category=machine%20learning), [Productivity](/#category=productivity) and other random things. You can find some of my side projects [here](/projects.html).
 
-Current I spend some of my free time sharing experiences working on RecSys projects at [FullStackDataScience](https://fullstackdatascience.com/courses/igds).
+I teach a RecSys course for practitioners at [FullStackDataScience](https://fullstackdatascience.com/courses/igds).

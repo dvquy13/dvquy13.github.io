@@ -6,3 +6,4 @@ To render preview at local:
 
 To deploy changes:
 - Run `quarto render` to prepare `/docs` files
+- Push the changes to `main` branch. The deployment is configured at Repo Settings > Pages.

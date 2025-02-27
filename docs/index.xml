@@ -10,7 +10,7 @@
 <atom:link href="https://dvquys.com/index.xml" rel="self" type="application/rss+xml"/>
 <description>DvQ Personal Website</description>
 <generator>quarto-1.6.40</generator>
-<lastBuildDate>Sat, 21 Sep 2024 17:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 21 Sep 2024 16:00:00 GMT</lastBuildDate>
 <item>
   <title>Building a Conversational Assistant for Restaurant Discovery and Booking</title>
   <link>https://dvquys.com/projects/review-rec-bot/</link>
@@ -107,7 +107,7 @@
   <category>tech</category>
   <category>llm</category>
   <guid>https://dvquys.com/projects/review-rec-bot/</guid>
-  <pubDate>Sat, 21 Sep 2024 17:00:00 GMT</pubDate>
+  <pubDate>Sat, 21 Sep 2024 16:00:00 GMT</pubDate>
   <media:content url="https://dvquys.com/projects/review-rec-bot/thumbnail.svg" medium="image" type="image/svg+xml"/>
 </item>
 <item>
@@ -154,7 +154,7 @@
   <category>tech</category>
   <category>machine learning</category>
   <guid>https://dvquys.com/projects/reviews-parsing-mlsys/</guid>
-  <pubDate>Thu, 20 Jun 2024 17:00:00 GMT</pubDate>
+  <pubDate>Thu, 20 Jun 2024 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>A Hierarchical approach with Elasticsearch: Lessons from 22 Months of Iteration</title>
@@ -5437,7 +5437,7 @@ font-style: inherit;">}</span></span></code></pre></div>
   <category>tech</category>
   <category>search</category>
   <guid>https://dvquys.com/posts/site-search-elasticsearch/</guid>
-  <pubDate>Wed, 31 May 2023 17:00:00 GMT</pubDate>
+  <pubDate>Wed, 31 May 2023 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>From Model to Production: Deploying Your Machine Learning Solution on Google Cloud</title>
@@ -6026,7 +6026,7 @@ font-style: inherit;">self</span>._persist_pipeline()</span></code></pre></div>
   <category>tech</category>
   <category>machine learning</category>
   <guid>https://dvquys.com/posts/deploy-ml-gcp/</guid>
-  <pubDate>Sun, 16 Feb 2020 17:00:00 GMT</pubDate>
+  <pubDate>Sun, 16 Feb 2020 16:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
