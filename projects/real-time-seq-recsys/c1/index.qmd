@@ -1,5 +1,5 @@
 ---
-title: "Building Real-time RecSys\nChapter 1 - Introduction and Project Overview"
+title: "Building Real-time RecSys Chapter 1 - Introduction and Project Overview"
 subtitle: "Understanding session-based recommendations and setting up your development environment"
 date: "2025-05-24"
 categories: [recsys]
@@ -7,7 +7,7 @@ image: "../static/recommender%20system.png"
 format:
   html:
     code-fold: false
-    code-tools: true
+# draft: true
 ---
 
 ## Introduction
@@ -18,7 +18,13 @@ If this sounds familiar, this tutorial series is for you.
 
 Over the next several chapters, I'll walk you through building a complete **real-time recommendation system** that learns from user behavior sequences. We'll go from raw data to a complete recommender system that personalizes recommendations as users interact with your platform.
 
-Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.
+::: {.callout-note appearance="simple"}
+## Enough Talking, Show Me the Code!
+
+If you're familiar with RecSys and just want to see the code, here it is: [github.com/dvquy13/real-time-seq-recsys](https://github.com/dvquy13/real-time-seq-recsys).
+:::
+
+For those who aren't well aware of what a recommender system is, here is a quick recap. Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.
 
 :::{.column-page}
 ![](../static/recommender%20system.png){.lightbox}

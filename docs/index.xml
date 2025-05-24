@@ -25,7 +25,20 @@
 <p>Imagine you’re building an e-commerce site and your CEO asks: <em>“Why don’t we show personalized recommendations that update in real-time as users browse?”</em> You think to yourself—sounds simple enough, but then reality hits: How do you capture user intent from their session behavior? How do you serve recommendations fast enough to feel real-time? How do you handle the complexity of sequence modeling at scale?</p>
 <p>If this sounds familiar, this tutorial series is for you.</p>
 <p>Over the next several chapters, I’ll walk you through building a complete <strong>real-time recommendation system</strong> that learns from user behavior sequences. We’ll go from raw data to a complete recommender system that personalizes recommendations as users interact with your platform.</p>
-<p>Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Enough Talking, Show Me the Code!
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If you’re familiar with RecSys and just want to see the code, here it is: <a href="https://github.com/dvquy13/real-time-seq-recsys">github.com/dvquy13/real-time-seq-recsys</a>.</p>
+</div>
+</div>
+<p>For those who aren’t well aware of what a recommender system is, here is a quick recap. Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.</p>
 <div class="column-page">
 <p><a href="../static/recommender system.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://dvquys.com/projects/real-time-seq-recsys/static/recommender system.png" class="img-fluid"></a></p>
 </div>
@@ -304,8 +317,6 @@ font-style: inherit;"># Start the frontend demo</span></span></code></pre></div>
 <p>Quy, Dinh. (May 2025). Building Real-time RecSys Chapter 1 - Introduction and Project Overview. dvquys.com. https://dvquys.com/projects/real-time-seq-recsys/c1/.</p>
 </blockquote>
 
-
-<!-- -->
 
 </section>
 
