@@ -1,0 +1,205 @@
+---
+title: "Building Real-time RecSys\nChapter 1 - Introduction and Project Overview"
+subtitle: "Understanding session-based recommendations and setting up your development environment"
+date: "2025-05-24"
+categories: [recsys]
+image: "../static/recommender%20system.png"
+format:
+  html:
+    code-fold: false
+    code-tools: true
+---
+
+## Introduction
+
+Welcome to this comprehensive tutorial series on building a **real-time recommendation system** based on user behaviors! Over the next several chapters, we'll walk through creating a complete system that can personalize recommendations in real-time using session-based modeling and sequence learning.
+
+Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.
+
+:::{.column-page}
+![](../static/recommender%20system.png){.lightbox}
+:::
+
+From a business standpoint, the primary goals of a recommender system are to create a sense of “we understand you” for each user and to drive revenue through personalized cross-selling opportunities. By tailoring recommendations to each user, companies can boost engagement and average order value. From the user’s perspective, these systems help uncover content or products they might never have discovered on their own and save time by surfacing the most relevant options up front.
+
+In practice, recommender systems power some of the world’s largest digital platforms. For example, Amazon’s “Frequently Bought Together” suggestions guide shoppers toward complementary products, Facebook uses recommendation algorithms to prioritize posts and ads in users’ feeds, and Netflix’s home screen is largely driven by personalized movie and show recommendations.
+
+:::{.column-page}
+![](../static/recsys-biz-value.gif)
+:::
+
+
+The impact of these systems is profound: According to [this report from McKinsey](https://www.mckinsey.com/industries/retail/our-insights/how-retailers-can-keep-up-with-consumers), roughly 75 percent of Netflix viewing hours come from recommended titles, 35 percent of Amazon’s purchases are influenced by its recommendations, and Netflix alone [saves around $1 billion per year](https://dl.acm.org/doi/pdf/10.1145/2843948) through improved user retention and engagement. These metrics underscore why recommender systems have become a critical component of modern digital businesses.
+
+## What You'll Build
+
+By the end of this series, you'll have constructed a sophisticated recommendation engine that:
+
+- **Personalizes recommendations** based on users' recent interaction sequences
+- **Serves predictions in real-time** through a FastAPI service
+- **Scales efficiently** using vector databases and caching
+- **Tracks experiments** with MLflow for reproducible ML workflows
+- **Package the project** using Docker and modern ML infrastructure
+- **Interactive demo** with a frontend (though not covered but there would be example UI code)
+
+:::{.column-page}
+![Demo of the recommendation system](../static/session-based%20retriever%20-%20demo%20v2.gif){.lightbox}
+:::
+
+## Target Audience
+
+This tutorial series is designed for:
+
+- **Data Scientists** looking beyond training models and into ML services
+- **ML Engineers** building scalable recommendation systems  
+- **Backend Developers** interested in ML/RecSys architecture
+- **Anyone** curious about a modern and real-time end-to-end RecSys project
+
+## Session-Based vs Traditional Recommendations
+
+### Traditional Collaborative Filtering
+
+Traditional recommendation systems often rely on collaborative filtering, which uses historical user-item interaction matrices to find similar users or items. While effective, these approaches have limitations:
+
+- **Static representations**: User preferences are treated as fixed
+- **Cold start problems**: Difficulty with new users or items
+- **Limited temporal understanding**: Doesn't capture evolving user interests within a session
+
+### Session-Based Recommendations
+
+Session-based recommendation systems address these limitations by:
+
+- **Modeling sequences**: Understanding the order and timing of user interactions
+- **Capturing short-term intent**: Focusing on recent behaviors within a session
+- **Handling anonymity**: Working even without persistent user identifiers
+- **Real-time adaptation**: Continuously updating recommendations as users interact
+
+## Why Sequence Modeling Matters
+
+User behavior is inherently sequential. Consider an e-commerce browsing session:
+
+1. User searches for "wireless headphones"
+2. Views a Sony model
+3. Checks reviews for Audio-Technica alternatives
+4. Compares prices across brands
+
+Each step provides context for the next recommendation. Traditional systems might miss this sequential pattern, while sequence models capture the evolving intent throughout the session.
+
+:::{.column-page}
+![Data signals](../static/L2%20-%20Data%20signals.excalidraw.png){.lightbox}
+:::
+
+## Real-Time Architecture: A Simplified Payload Approach
+
+In production, real-time recommendation systems typically leverage **streaming architectures** with event pipelines (Kafka, Kinesis, etc.) that process user interactions. The streaming system is normally built in a centralized manner by a platform team with the aim to provide real-time data processing capabilities to multiple downstream usages. This approach also ensures scalability and reliability.
+
+However, for the purpose of this tutorial, we'll use the **simplified request-payload approach** to focus on the ML aspects rather than streaming infrastructure complexity. Basically we would include the real-time events in the payload of the requests coming in to RecSys APIs. In real-world, implementation can be done by frontend capturing user interactions locally (clicks, views, etc.) and includes recent session history in each API request. While this approach looks like a hacky-workaround ways, I have seen teams using this in production for early-stage real-time ML RecSys. In the end, the idea in and of itself has some merits such as minimal signal delay, users not needing to refresh to get updated recommendations and easier to implement and debug.
+
+In the below screenshot you can see that in the POST request payload sending to a recommendation endpoint, we include the recent user interacted item IDs in `item_seq_raw` in the payload.
+
+:::{.column-page}
+![Example request payload](../static/api-payload.png){.lightbox}
+:::
+
+## Our Technology Stack
+
+Below is a list of the technology frameworks we use in this project. There is no need to understand all of them in detail, so do not worry too much if you are not familiar. However, I do encourage you to at least learn the basics of each of them. Where possible I would also explain the rationale and what roles they play in the system that we build together.
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **ML Framework** | PyTorch | Deep learning model training |
+| **API Server** | FastAPI | High-performance API endpoints |
+| **Experiment Tracking** | MLflow | Model versioning and experiments |
+| **Vector Database** | Qdrant | Similarity search and retrieval |
+| **Caching** | Redis | Real-time data storage |
+| **Package Management** | uv | Fast Python dependency management |
+| **Containerization** | Docker | Consistent deployment environments |
+
+## Project Structure Overview
+
+The codebase can be found here: [https://github.com/dvquy13/recsys-seq-model](https://github.com/dvquy13/recsys-seq-model)
+
+Below is its final structure.
+
+```
+recsys-seq-model/
+├── notebooks/           # Progressive tutorial notebooks
+│   ├── 000-prep-data.ipynb
+│   ├── 001-features.ipynb
+│   ├── 002-negative-sample.ipynb
+│   ├── 010-baseline-popular.ipynb
+│   ├── 011-sequence-modeling.ipynb
+│   ├── 020-ann-index.ipynb
+│   └── 021-redis-prep.ipynb
+├── src/                 # Core implementation modules
+│   ├── cfg.py          # Configuration management
+│   ├── dataset.py      # Data loading utilities  
+│   ├── id_mapper.py    # ID mapping functionality
+│   ├── negative_sampling.py  # Sampling strategies
+│   ├── sequence/       # Sequence model implementations
+│   ├── eval/          # Evaluation frameworks
+│   └── vectorstore.py # Qdrant integration
+├── api/                # FastAPI service
+│   ├── app.py         # Main application
+│   ├── services.py    # Business logic
+│   └── models.py      # Request/response schemas
+├── mlflow/            # MLflow configuration
+├── data/              # Dataset storage
+└── compose.yml        # Docker orchestration
+```
+
+### Progressive Notebook Approach
+
+Notice the **numbered notebook sequence** (000, 001, 002, etc.). This design ensures you build knowledge progressively:
+
+- **000-series**: Data preparation and exploration
+- **010-series**: Model training and evaluation  
+- **020-series**: Production deployment preparation
+
+Each notebook represents a complete milestone, allowing you to pause and resume at any point.
+
+### A note on the commonly used commands
+
+You may found the below commands useful, as I have myself running them regularly when developing the projects. Treating them as shortcuts, I have put them in the Makefile:
+
+```bash
+# Environment Management
+make ml-platform-up      # Start MLflow, Qdrant, Redis
+make ml-platform-down    # Stop all services
+make ml-platform-logs    # View service logs
+
+# Development
+uv sync --all-groups     # Install/update dependencies
+make requirements-txt    # Export requirements for Docker
+
+# API Operations (covered in later chapters)
+make api-up             # Start the FastAPI service
+make api-test           # Run API tests
+
+# UI Demo (optional)
+make ui-up              # Start the frontend demo
+```
+
+## Summarize of what we have discussed so far
+
+- **Understanding of session-based recommendations** and why they matter  
+- **Working development environment** with all services running  
+- **Project structure familiarity** to navigate the codebase confidently  
+- **Foundation knowledge** for the upcoming chapters  
+
+## Next Steps
+
+To get a hands on the system that we will build together, you can clone the repo and follow the instructions in the README to get the project running.
+
+In **Chapter 2**, we'll dive into the data! You'll learn about:
+
+- Amazon product dataset characteristics and structure
+- Feature engineering techniques for sequence models  
+- Data preprocessing pipelines for recommendation systems
+- Creating proper train/validation/test splits for temporal data
+
+The journey from raw data to intelligent recommendations starts with understanding your data deeply - and that's exactly what we'll cover in the next chapter.
+
+---
+
+Ready to build something amazing? Let's continue to Chapter 2 where we'll explore the data that powers our recommendation engine! 🚀 
