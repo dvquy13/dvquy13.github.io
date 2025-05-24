@@ -22,7 +22,9 @@
 
 <section id="introduction" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Welcome to this comprehensive tutorial series on building a <strong>real-time recommendation system</strong> based on user behaviors! Over the next several chapters, we’ll walk through creating a complete system that can personalize recommendations in real-time using session-based modeling and sequence learning.</p>
+<p>Imagine you’re building an e-commerce site and your CEO asks: <em>“Why don’t we show personalized recommendations that update in real-time as users browse?”</em> You think to yourself—sounds simple enough, but then reality hits: How do you capture user intent from their session behavior? How do you serve recommendations fast enough to feel real-time? How do you handle the complexity of sequence modeling at scale?</p>
+<p>If this sounds familiar, this tutorial series is for you.</p>
+<p>Over the next several chapters, I’ll walk you through building a complete <strong>real-time recommendation system</strong> that learns from user behavior sequences. We’ll go from raw data to a complete recommender system that personalizes recommendations as users interact with your platform.</p>
 <p>Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.</p>
 <div class="column-page">
 <p><a href="../static/recommender system.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://dvquys.com/projects/real-time-seq-recsys/static/recommender system.png" class="img-fluid"></a></p>
@@ -36,20 +38,19 @@
 </section>
 <section id="what-youll-build" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="what-youll-build">What You’ll Build</h2>
-<p>By the end of this series, you’ll have constructed a sophisticated recommendation engine that:</p>
+<p>By the end of this series, you’ll have constructed an end-to-end recommendation system while know how to:</p>
 <ul>
-<li><strong>Personalizes recommendations</strong> based on users’ recent interaction sequences</li>
-<li><strong>Serves predictions in real-time</strong> through a FastAPI service</li>
-<li><strong>Scales efficiently</strong> using vector databases and caching</li>
-<li><strong>Tracks experiments</strong> with MLflow for reproducible ML workflows</li>
+<li><strong>Design and Train Session-based RecSys models</strong> using PyTorch to <strong>personalizes recommendations in real-time</strong> based on users’ recent interaction sequences</li>
+<li><strong>Track experiments</strong> with MLflow for reproducible ML workflows</li>
+<li><strong>Serve predictions</strong> through a FastAPI service in conjunction with a vector database and caching</li>
 <li><strong>Package the project</strong> using Docker and modern ML infrastructure</li>
-<li><strong>Interactive demo</strong> with a frontend (though not covered but there would be example UI code)</li>
+<li><strong>Launch aninteractive demo</strong> with a frontend<sup>1</sup></li>
 </ul>
 <div class="page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
-<p class="page-columns page-full"><a href="../static/session-based retriever - demo v2.gif" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-2" title="Demo of the recommendation system"><img src="https://dvquys.com/projects/real-time-seq-recsys/static/session-based retriever - demo v2.gif" class="img-fluid figure-img column-page" alt="Demo of the recommendation system"></a></p>
-<figcaption>Demo of the recommendation system</figcaption>
+<p class="page-columns page-full"><a href="../static/session-based retriever - demo v2.gif" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-2" title="The Demo"><img src="https://dvquys.com/projects/real-time-seq-recsys/static/session-based retriever - demo v2.gif" class="img-fluid figure-img column-page" alt="The Demo"></a></p>
+<figcaption>The Demo</figcaption>
 </figure>
 </div>
 </div>
@@ -109,7 +110,9 @@
 <section id="real-time-architecture-a-simplified-payload-approach" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="real-time-architecture-a-simplified-payload-approach">Real-Time Architecture: A Simplified Payload Approach</h2>
 <p>In production, real-time recommendation systems typically leverage <strong>streaming architectures</strong> with event pipelines (Kafka, Kinesis, etc.) that process user interactions. The streaming system is normally built in a centralized manner by a platform team with the aim to provide real-time data processing capabilities to multiple downstream usages. This approach also ensures scalability and reliability.</p>
-<p>However, for the purpose of this tutorial, we’ll use the <strong>simplified request-payload approach</strong> to focus on the ML aspects rather than streaming infrastructure complexity. Basically we would include the real-time events in the payload of the requests coming in to RecSys APIs. In real-world, implementation can be done by frontend capturing user interactions locally (clicks, views, etc.) and includes recent session history in each API request. While this approach looks like a hacky-workaround ways, I have seen teams using this in production for early-stage real-time ML RecSys. In the end, the idea in and of itself has some merits such as minimal signal delay, users not needing to refresh to get updated recommendations and easier to implement and debug.</p>
+<p>However, for the purpose of this tutorial, we’ll use the <strong>simplified request-payload approach</strong> to focus on the ML aspects rather than streaming infrastructure complexity.</p>
+<p>Basically we would include the real-time events in the payload of the requests coming in to RecSys APIs. In real-world, implementation can be done by frontend capturing user interactions locally (clicks, views, etc.) and includes recent session history in each API request.</p>
+<p>While this approach looks like a hacky-workaround ways, I have seen teams using this in production for early-stage real-time ML RecSys. In the end, the idea in and of itself has some merits such as minimal signal delay, users not needing to refresh to get updated recommendations and easier to implement and debug.</p>
 <p>In the below screenshot you can see that in the POST request payload sending to a recommendation endpoint, we include the recent user interacted item IDs in <code>item_seq_raw</code> in the payload.</p>
 <div class="page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
@@ -122,7 +125,7 @@
 </section>
 <section id="our-technology-stack" class="level2">
 <h2 class="anchored" data-anchor-id="our-technology-stack">Our Technology Stack</h2>
-<p>Below is a list of the technology frameworks we use in this project. There is no need to understand all of them in detail, so do not worry too much if you are not familiar. However, I do encourage you to at least learn the basics of each of them. Where possible I would also explain the rationale and what roles they play in the system that we build together.</p>
+<p>Below is a list of the technology frameworks we use in this project. There is no need to understand all of them in detail, so do not worry too much if you are not familiar. However, I do encourage you to at least learn the basics of each of them. Wherever possible I would also explain the rationale and what roles they play in the system that we build together.</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -172,8 +175,7 @@
 </section>
 <section id="project-structure-overview" class="level2">
 <h2 class="anchored" data-anchor-id="project-structure-overview">Project Structure Overview</h2>
-<p>The codebase can be found here: <a href="https://github.com/dvquy13/recsys-seq-model">https://github.com/dvquy13/recsys-seq-model</a></p>
-<p>Below is its final structure.</p>
+<p>The codebase can be found <a href="https://github.com/dvquy13/recsys-seq-model">here</a>. Below is a quick glance into its structure.</p>
 <pre><code>recsys-seq-model/
 ├── notebooks/           # Progressive tutorial notebooks
 │   ├── 000-prep-data.ipynb
@@ -271,39 +273,49 @@ background-color: null;
 font-style: inherit;"># Start the frontend demo</span></span></code></pre></div>
 </section>
 </section>
-<section id="summarize-of-what-we-have-discussed-so-far" class="level2">
-<h2 class="anchored" data-anchor-id="summarize-of-what-we-have-discussed-so-far">Summarize of what we have discussed so far</h2>
+<section id="what-weve-covered" class="level2">
+<h2 class="anchored" data-anchor-id="what-weve-covered">What We’ve Covered</h2>
+<p>To get a hands on the system that we will build together, you can clone the repo and follow the instructions in the README to get the project running.</p>
+<p>After that you should have:</p>
 <ul>
-<li><strong>Understanding of session-based recommendations</strong> and why they matter<br>
+<li><strong>A clear picture</strong> of what session-based recommendations are and why they’re useful</li>
+<li><strong>Your development environment</strong> ready to go with all services running<br>
 </li>
-<li><strong>Working development environment</strong> with all services running<br>
+<li><strong>Familiarity with the project structure</strong> so you can navigate the codebase<br>
 </li>
-<li><strong>Project structure familiarity</strong> to navigate the codebase confidently<br>
-</li>
-<li><strong>Foundation knowledge</strong> for the upcoming chapters</li>
+<li><strong>The foundation knowledge</strong> to tackle the upcoming chapters</li>
 </ul>
 </section>
-<section id="next-steps" class="level2">
-<h2 class="anchored" data-anchor-id="next-steps">Next Steps</h2>
-<p>To get a hands on the system that we will build together, you can clone the repo and follow the instructions in the README to get the project running.</p>
-<p>In <strong>Chapter 2</strong>, we’ll dive into the data! You’ll learn about:</p>
+<section id="whats-next" class="level2">
+<h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
+<p>In <strong>Chapter 2</strong>, we’ll get our hands dirty with the data:</p>
 <ul>
-<li>Amazon product dataset characteristics and structure</li>
-<li>Feature engineering techniques for sequence models<br>
+<li>Exploring the Amazon product dataset</li>
+<li>Building features for sequence models<br>
 </li>
-<li>Data preprocessing pipelines for recommendation systems</li>
+<li>Setting up preprocessing pipelines</li>
 <li>Creating proper train/validation/test splits for temporal data</li>
 </ul>
-<p>The journey from raw data to intelligent recommendations starts with understanding your data deeply - and that’s exactly what we’ll cover in the next chapter.</p>
+<p>The key to good recommendations is understanding your data deeply. That’s exactly what we’ll tackle next.</p>
+<p>Ready to dive in? Let’s continue to Chapter 2 where we’ll explore the data that powers our recommendation engine! 🚀</p>
 <hr>
-<p>Ready to build something amazing? Let’s continue to Chapter 2 where we’ll explore the data that powers our recommendation engine! 🚀</p>
+<p><br> If you find this tutorial helpful, please cite this writeup as:</p>
+<blockquote class="blockquote">
+<p>Quy, Dinh. (May 2025). Building Real-time RecSys Chapter 1 - Introduction and Project Overview. dvquys.com. https://dvquys.com/projects/real-time-seq-recsys/c1/.</p>
+</blockquote>
 
 
 <!-- -->
 
 </section>
 
- ]]></description>
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Though not covered in this tutorial, there would be example UI code in the repo.↩︎</p></li>
+</ol>
+</section></div> ]]></description>
   <category>recsys</category>
   <guid>https://dvquys.com/projects/real-time-seq-recsys/c1/</guid>
   <pubDate>Fri, 23 May 2025 16:00:00 GMT</pubDate>
