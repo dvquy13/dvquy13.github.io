@@ -24,13 +24,13 @@ All code for this chapter is available in the `notebooks/000-prep-data.ipynb` an
 
 ## Dataset Overview: Amazon Reviews 2023
 
-A good dataset for this kind of sequential recommenandation project would typically have the following characteristics:
+A good dataset for this kind of sequential recommendation project would typically have the following characteristics:
 
 1. **Temporal richness**: Each interaction has a timestamp, enabling sequence modeling
 2. **Scale**: Millions of interactions across thousands of users and items
 3. **Real-world patterns**: Authentic user behavior with natural sparsity
 
-Among some of the well known public data sources, I choose to use the [Amazon Reviews 2023](https://amazon-reviews-2023.github.io/) dataset from the McAuley Lab, specifically focusing on the "Books" category. Apart from possessing the above characteristics, this dataset also contains other potentially useful features regarding both users, items and their interactions like reviews, with a decent amount of observations.
+Among the well-known public datasets, I chose the [Amazon Reviews 2023](https://amazon-reviews-2023.github.io/) dataset from the McAuley Lab, specifically the "Books" category. Beyond the characteristics above, this dataset has other useful features—like reviews for both users and items—with plenty of observations to work with.
 
 ::: {.column-page}
 ![](../static/dataset.png)
@@ -65,11 +65,8 @@ from src.cfg import ConfigLoader
 cfg = ConfigLoader("cfg/common.yaml")
 ```
 
-Throughout the project, we will define a central place to store most of the configuration in `cfg/common.yaml` to have notebooks and scripts more easily access their inputs and outputs. Also, as running multiple experiments is a nature of working in ML, this design aims to make it easier to try different sets of configurations.
+Throughout this project, we store most configuration in `cfg/common.yaml`. This design does not only make it easier for notebooks and scripts to access their inputs and outputs but also help us try different configurations quickly.
 :::
-
-
-The data flows through several key preprocessing steps:
 
 ## Data Sampling and Filtering
 
@@ -97,7 +94,7 @@ actual interactions = 500,000 → sparsity = 99.5%
 
 Each new user adds an entire **row** of mostly empty interactions, and each new item adds an entire **column** of mostly empty interactions. Since users typically interact with only a tiny fraction of available items, the interaction matrix becomes increasingly sparse as the catalog grows.
 
-In RecSys, the interaction distribution is typically long tail—a lot of noisy items or users have just a few interactions. So while randomly sampling may work just fine for many ML use cases, we need to apply it a bit more carefully here. Remember that ultimately we want to have a sample dataset where each user/item has at least X interactions.
+In recommendation systems, interactions follow a long-tailed distribution—many users and items have only a few interactions. So while randomly sampling may work just fine for many ML use cases, we need to apply it a bit more carefully here. Ultimately we want to have a sample dataset where each user/item has at least X interactions.
 
 The tricky part is that a basic random sampling of users and items would create **sparsity cascade**—a domino effect that breaks your dataset.
 
@@ -105,7 +102,7 @@ Here's what happens: You start with users and items that look fine on their own.
 
 It's like pulling threads from a sweater—everything starts unraveling.
 
-To deal with this problem, we can take an iterative approach where we gradually drop random users from the dataset while keeping an eye on the conditions and our sampling target. The trade-off is that we would no longer have an exact fixed number of users and items in the dataset as we would like, but rather defining minimum acceptable thresholds, like below:
+To solve this, we take an iterative approach. We gradually drop random users from the dataset while watching our conditions and sampling targets. The trade-off is that while it's hard to get an exact predefined number of users and items, we can control the minimum acceptable thresholds:
 
 ```python
 # From cfg/common.yaml
@@ -151,14 +148,14 @@ len(sample_users)=19,734 len(sample_items)=7,388
 ## [InteractionDataSampler implementation](https://github.com/dvquy13/recsys-seq-model/blob/main/src/sample.py#L8)
 :::
 
-In the end, we would not have exact like 10000 users, but the numbers would be close to that. The distribution of the interaction is shown below:
+In the end, we won't have exactly 10,000 users, but the numbers will be close. The distribution of interactions is shown below:
 
 ::: {.column-page}
 ![](../static/sample-interaction-dist.png){.lightbox}
 :::
 
-## Train-test split
-We need to have a validation test dataset to evaluate our models, so that we can have an estimate of how well it performs on unseen data.
+## Train-Test Split
+After sampling our data, we need to split it into a train and validation dataset to evaluate our models. The validation dataset plays a critical role in providing an estimate of how well the model performs on unseen data.
 
 There are two main types of train-test-split in RecSys:
 
@@ -166,11 +163,13 @@ There are two main types of train-test-split in RecSys:
 ![](../static/train-test-split.png)
 :::
 
-AFAIK, the last-one-out is often used more in academic settings while **absolute timestamp** is more common in industry, as whatever model you have deployed on production would be tested against data in the next day.
+From what I've seen, last-one-out is used more in academic settings, while **absolute timestamp** is more common in industry. This makes sense from the perspective that any model deployed in production gets tested against future data.
 
-## ID Mapping: From Strings to Indices
+## Feature Engineering
 
-We discuss in the introduction chapter that we would formulate and model our problem in a neural network setting. Deep learning models work with numerical indices, not string IDs, so we have our [IDMapper](https://github.com/dvquy13/recsys-seq-model/blob/main/src/id_mapper.py) to provide deterministic mapping of user and item IDs to indice:
+### ID Mapping: From Strings to Indices
+
+As discussed in Chapter 1, we're modeling this problem with neural networks. Deep learning models work with numerical indices, not string IDs. So we use our [IDMapper](https://github.com/dvquy13/recsys-seq-model/blob/main/src/id_mapper.py) to provide deterministic mapping from user and item IDs to indices:
 
 ```python
 from src.id_mapper import IDMapper
@@ -184,13 +183,26 @@ idm.fit(unique_user_ids, unique_item_ids)
 
 # Save for later use in model serving
 idm.save("data/idm.json")
+
+# Below is the example output of the indice mapping for user IDs:
+display(idm.user_to_index)
 ```
 
-## Sequence Generation
+```json
+{
+  "AE224PFXAEAT66IXX43GRJSWHXCA": 0,
+  "AE225Y3KDZ44DHLUKLE4RJ63HC5Q": 1,
+  "AE226YVDC3MAGJZMZ4IBGE7RFJSQ": 2,
+  "AE22EJZ4354VB7MN4IE2CDGHA2DQ": 3,
+  "AE22O3TURLPFCJKL7YCX5CPF22OA": 4
+}
+```
 
-At this point, you may wonder about all the sequences etc I mentioned earlier. How does user-item rating data have anything to do with sequences? 
+### Sequence Generation
 
-Traditional collaborative filtering approaches like Matrix Factorization only use the user-item rating matrix. But there is one important signal being left-out: the timestamps.
+At this point, you might wonder about the sequences I mentioned earlier. How does user-item rating data relate to sequences?
+
+Traditional collaborative filtering approaches like Matrix Factorization only use the user-item rating matrix. But one important signal gets left out: the timestamps.
 
 The key insight is simple: when a user interacts with items over time, those interactions tell a story. We group each user's interactions chronologically to create sequences of items, with the assumption that items a user engages with have meaningful relationships to each other.
 
@@ -229,15 +241,17 @@ df_with_sequences = generate_item_sequences(
     padding=True,
     padding_value=-1,
 )
+
+display(df_with_sequences)
 ```
 
 ![](./sequence-gen-test.png){.lightbox}
 
 As you can see, the above item_sequence column contains the sequence of items in chronological order which holds the context for the model to understand user preferences and make sequential predictions.
 
-In this project we choose to have user's last 10 items as the sequence length, but this parameter is very much configurable. It depends though on experimentation, but generally the tradeoff is that longer sequences provide more context but higher memory usage, while shorter sequences may not have access to full context but more focused on the recent items as well as faster processing.
+In this project, we use the user's last 10 items as the sequence length, but this is configurable. The choice depends on experimentation, but generally there's a trade-off: longer sequences provide more context but use more memory, while shorter sequences focus on recent items and process faster.
 
-Note that we need to pad the sequence to the same length to be able to batch process them in our PyTorch model.
+Do take note that we need to pad sequences to the same length so we can batch process them in our PyTorch model.
 
 ```python
 # From cfg/common.yaml
@@ -248,11 +262,11 @@ train:
 
 ## Recap
 
-In this chapter, we have:
+In this chapter, we covered:
 
-1. **Data Sampling and Filtering**: Discuss problems with basic random sampling with dyadic data and introduce our iterative sampling approach
-2. **ID Mapping**: Convert string IDs to numerical indices  
-3. **Sequence Generation**: Create item sequence features
+1. **Data Sampling and Filtering**: We discussed problems with basic random sampling of dyadic data and introduced our iterative sampling approach
+2. **ID Mapping**: We converted string IDs to numerical indices to work with PyTorch model
+3. **Sequence Generation**: We created item sequence features based on user's chronological interactions
 
 ::: {.callout-note appearance="simple"}
 ## Code
@@ -261,7 +275,7 @@ All code for this chapter is available in the `notebooks/000-prep-data.ipynb` an
 
 ## What's Next
 
-In [Chapter 3](../c3/index.qmd), we'll tackle the critical challenge of **negative sampling**. If the model only observes positive interactions (ratings), it would not be able to learn meaningful patterns to generalize. We need to generate negative examples as well so that model can learn to differentiate between positive and negative interactions.
+In [Chapter 3](../c3/index.qmd), we'll tackle the critical challenge of **negative sampling**. If our model only sees positive interactions (ratings), it can't learn meaningful patterns for generalization. We need to generate negative examples so the model can distill the patterns by learning to distinguish between positive and negative interactions.
 
 ---
 
