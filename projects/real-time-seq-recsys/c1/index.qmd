@@ -2,7 +2,7 @@
 title: "Building Real-time RecSys Chapter 1 - Introduction and Project Overview"
 subtitle: "Understanding session-based recommendations and setting up your development environment"
 date: "2025-05-24"
-categories: [recsys]
+categories: [recsys, recsys-real-time-series]
 image: "../static/recommender%20system.png"
 format:
   html:
@@ -21,7 +21,7 @@ Over the next several chapters, I'll walk you through building a complete **real
 ::: {.callout-note appearance="simple"}
 ## Enough Talking, Show Me the Code!
 
-If you're familiar with RecSys and just want to see the code, here it is: [github.com/dvquy13/real-time-seq-recsys](https://github.com/dvquy13/real-time-seq-recsys).
+If you're familiar with RecSys and just want to see the code, here it is: [https://github.com/dvquy13/recsys-seq-model](https://github.com/dvquy13/recsys-seq-model).
 :::
 
 For those who aren't well aware of what a recommender system is, here is a quick recap. Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.
@@ -193,7 +193,7 @@ make api-test           # Run API tests
 make ui-up              # Start the frontend demo
 ```
 
-## What We've Covered
+## Recap
 
 To get a hands on the system that we will build together, you can clone the repo and follow the instructions in the README to get the project running.
 
@@ -206,16 +206,7 @@ After that you should have:
 
 ## What's Next
 
-In **Chapter 2**, we'll get our hands dirty with the data:
-
-- Exploring the Amazon product dataset
-- Building features for sequence models  
-- Setting up preprocessing pipelines
-- Creating proper train/validation/test splits for temporal data
-
-The key to good recommendations is understanding your data deeply. That's exactly what we'll tackle next.
-
-Ready to dive in? Let's continue to Chapter 2 where we'll explore the data that powers our recommendation engine! 🚀
+In [Chapter 2](../c2/index.qmd), we'll get our hands dirty while setting up the input data in a format that's designed for sequence modeling.
 
 ---
 

@@ -35,7 +35,7 @@ Enough Talking, Show Me the Code!
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>If you’re familiar with RecSys and just want to see the code, here it is: <a href="https://github.com/dvquy13/real-time-seq-recsys">github.com/dvquy13/real-time-seq-recsys</a>.</p>
+<p>If you’re familiar with RecSys and just want to see the code, here it is: <a href="https://github.com/dvquy13/recsys-seq-model">https://github.com/dvquy13/recsys-seq-model</a>.</p>
 </div>
 </div>
 <p>For those who aren’t well aware of what a recommender system is, here is a quick recap. Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.</p>
@@ -286,8 +286,8 @@ background-color: null;
 font-style: inherit;"># Start the frontend demo</span></span></code></pre></div>
 </section>
 </section>
-<section id="what-weve-covered" class="level2">
-<h2 class="anchored" data-anchor-id="what-weve-covered">What We’ve Covered</h2>
+<section id="recap" class="level2">
+<h2 class="anchored" data-anchor-id="recap">Recap</h2>
 <p>To get a hands on the system that we will build together, you can clone the repo and follow the instructions in the README to get the project running.</p>
 <p>After that you should have:</p>
 <ul>
@@ -301,16 +301,7 @@ font-style: inherit;"># Start the frontend demo</span></span></code></pre></div>
 </section>
 <section id="whats-next" class="level2">
 <h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
-<p>In <strong>Chapter 2</strong>, we’ll get our hands dirty with the data:</p>
-<ul>
-<li>Exploring the Amazon product dataset</li>
-<li>Building features for sequence models<br>
-</li>
-<li>Setting up preprocessing pipelines</li>
-<li>Creating proper train/validation/test splits for temporal data</li>
-</ul>
-<p>The key to good recommendations is understanding your data deeply. That’s exactly what we’ll tackle next.</p>
-<p>Ready to dive in? Let’s continue to Chapter 2 where we’ll explore the data that powers our recommendation engine! 🚀</p>
+<p>In <a href="../../../projects/real-time-seq-recsys/c2/index.html">Chapter 2</a>, we’ll get our hands dirty while setting up the input data in a format that’s designed for sequence modeling.</p>
 <hr>
 <p><br> If you find this tutorial helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
@@ -328,9 +319,539 @@ font-style: inherit;"># Start the frontend demo</span></span></code></pre></div>
 </ol>
 </section></div> ]]></description>
   <category>recsys</category>
+  <category>recsys-real-time-series</category>
   <guid>https://dvquys.com/projects/real-time-seq-recsys/c1/</guid>
   <pubDate>Fri, 23 May 2025 16:00:00 GMT</pubDate>
   <media:content url="https://dvquys.com/projects/real-time-seq-recsys/static/recommender%20system.png" medium="image" type="image/png"/>
+</item>
+<item>
+  <title>Building Real-time RecSys Chapter 2 - Understanding the Data and Feature Engineering</title>
+  <link>https://dvquys.com/projects/real-time-seq-recsys/c2/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In <a href="../../../projects/real-time-seq-recsys/c1/index.html">Chapter 1</a>, we set up our development environment and explored the project architecture. Now it’s time to dive into the heart of any recommendation system: <strong>data</strong>. The quality of our recommendations depends entirely on how well we understand, process, and engineer features from our data.</p>
+<p>This chapter focuses on the data pipeline from raw data to model-ready features. We’ll explore the Amazon product dataset, understand user-item interaction sequences, and build the feature engineering pipeline that will power our session-based recommender.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Code
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>All code for this chapter is available in the <code>notebooks/000-prep-data.ipynb</code> and <code>notebooks/001-features.ipynb</code> files in the <a href="https://github.com/dvquy13/recsys-seq-model">project repository</a>.</p>
+</div>
+</div>
+</section>
+<section id="dataset-overview-amazon-reviews-2023" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="dataset-overview-amazon-reviews-2023">Dataset Overview: Amazon Reviews 2023</h2>
+<p>A good dataset for this kind of sequential recommenandation project would typically have the following characteristics:</p>
+<ol type="1">
+<li><strong>Temporal richness</strong>: Each interaction has a timestamp, enabling sequence modeling</li>
+<li><strong>Scale</strong>: Millions of interactions across thousands of users and items</li>
+<li><strong>Real-world patterns</strong>: Authentic user behavior with natural sparsity</li>
+</ol>
+<p>Among some of the well known public data sources, I choose to use the <a href="https://amazon-reviews-2023.github.io/">Amazon Reviews 2023</a> dataset from the McAuley Lab, specifically focusing on the “Books” category. Apart from possessing the above characteristics, this dataset also contains other potentially useful features regarding both users, items and their interactions like reviews, with a decent amount of observations.</p>
+<div class="column-page">
+<p><img src="https://dvquys.com/projects/real-time-seq-recsys/static/dataset.png" class="img-fluid"></p>
+</div>
+<div class="column-page">
+<p><img src="https://dvquys.com/projects/real-time-seq-recsys/static/dataset-info.png" class="img-fluid"></p>
+</div>
+<p>The main schema of the dataset is as simple as follows:</p>
+<div class="sourceCode" id="annotated-cell-1" style="background: #f1f3f5;"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-1-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># From cfg/common.yaml</span></span>
+<span id="annotated-cell-1-2">data:</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1">1</button><span id="annotated-cell-1-3" class="code-annotation-target">  user_col: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"user_id"</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="2">2</button><span id="annotated-cell-1-4" class="code-annotation-target">  item_col: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"parent_asin"</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="3">3</button><span id="annotated-cell-1-5" class="code-annotation-target">  rating_col: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"rating"</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="4">4</button><span id="annotated-cell-1-6" class="code-annotation-target">  timestamp_col: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"timestamp"</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div>
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-1" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="3" data-code-annotation="1">Unique user identifier</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="4" data-code-annotation="2">Product identifier (in our case, the ASIN—Amazon Standard Identification Number)</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="5" data-code-annotation="3">User rating (1-5 scale)</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="6" data-code-annotation="4">Interaction timestamp</span>
+</dd>
+</dl>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Configuration Management
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> src.cfg <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> ConfigLoader</span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Load configuration</span></span>
+<span id="cb1-4">cfg <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ConfigLoader(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cfg/common.yaml"</span>)</span></code></pre></div>
+<p>Throughout the project, we will define a central place to store most of the configuration in <code>cfg/common.yaml</code> to have notebooks and scripts more easily access their inputs and outputs. Also, as running multiple experiments is a nature of working in ML, this design aims to make it easier to try different sets of configurations.</p>
+</div>
+</div>
+</div>
+<p>The data flows through several key preprocessing steps:</p>
+</section>
+<section id="data-sampling-and-filtering" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="data-sampling-and-filtering">Data Sampling and Filtering</h2>
+<p>As ML is mostly about iterative development, the main rationale of sampling and filtering is to have a small but decent enough dataset to experiment different ideas <strong>fast</strong>. The more experiments we run, the more likely we would introduce improvements to our models.</p>
+<p>What does it mean for a decent RecSys dataset? One of the key criteria is <strong>sparsity</strong>—the ratio of observed interactions to all possible user-item pairs.</p>
+<p>To understand why sparsity is problematic, consider the interaction matrix where each cell represents a potential user-item interaction:</p>
+<ul>
+<li><strong>Matrix size</strong>: <code>num_users × num_items</code> (total possible interactions)</li>
+<li><strong>Actual interactions</strong>: Much smaller number of observed ratings/clicks</li>
+<li><strong>Sparsity</strong>: <code>1 - (actual_interactions / (num_users × num_items))</code></li>
+</ul>
+<p>The sparsity problem gets <strong>quadratically worse</strong> as datasets grow:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Small dataset example</span></span>
+<span id="cb2-2">users <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">000</span>, items <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">000</span> → possible interactions <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">M</span></span>
+<span id="cb2-3">actual interactions <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">000</span> → sparsity <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">95</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%</span></span>
+<span id="cb2-4"></span>
+<span id="cb2-5"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Larger dataset </span></span>
+<span id="cb2-6">users <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">000</span>, items <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">000</span> → possible interactions <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span><span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">M</span>  </span>
+<span id="cb2-7">actual interactions <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">000</span> → sparsity <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">99.5</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%</span></span></code></pre></div>
+<p>Each new user adds an entire <strong>row</strong> of mostly empty interactions, and each new item adds an entire <strong>column</strong> of mostly empty interactions. Since users typically interact with only a tiny fraction of available items, the interaction matrix becomes increasingly sparse as the catalog grows.</p>
+<p>In RecSys, the interaction distribution is typically long tail—a lot of noisy items or users have just a few interactions. So while randomly sampling may work just fine for many ML use cases, we need to apply it a bit more carefully here. Remember that ultimately we want to have a sample dataset where each user/item has at least X interactions.</p>
+<p>The tricky part is that a basic random sampling of users and items would create <strong>sparsity cascade</strong>—a domino effect that breaks your dataset.</p>
+<p>Here’s what happens: You start with users and items that look fine on their own. User A has 10 interactions, Item X has 15 interactions. When you remove User B, you also lose all of User B’s interactions with Item X. Suddenly Item X only has 8 interactions. Oops, now it’s too sparse, so you remove it too. But removing Item X means User A loses some interactions and might become too sparse as well.</p>
+<p>It’s like pulling threads from a sweater—everything starts unraveling.</p>
+<p>To deal with this problem, we can take an iterative approach where we gradually drop random users from the dataset while keeping an eye on the conditions and our sampling target. The trade-off is that we would no longer have an exact fixed number of users and items in the dataset as we would like, but rather defining minimum acceptable thresholds, like below:</p>
+<div class="sourceCode" id="annotated-cell-3" style="background: #f1f3f5;"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-3-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># From cfg/common.yaml</span></span>
+<span id="annotated-cell-3-2">sample:</span>
+<span id="annotated-cell-3-3">  sample_users: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10000</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1">1</button><span id="annotated-cell-3-4" class="code-annotation-target">  min_val_records: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5000</span></span>
+<span id="annotated-cell-3-5">  min_user_interactions: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span></span>
+<span id="annotated-cell-3-6">  min_item_interactions: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div>
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="4" data-code-annotation="1">We need to ensure sufficient validation data to evaluate our models.</span>
+</dd>
+</dl>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> src.sample <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> InteractionDataSampler</span>
+<span id="cb3-2"></span>
+<span id="cb3-3">data_sampler <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> InteractionDataSampler(</span>
+<span id="cb3-4">    user_col<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.data.user_col,</span>
+<span id="cb3-5">    item_col<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.data.item_col,</span>
+<span id="cb3-6">    sample_users<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.sample.sample_users,</span>
+<span id="cb3-7">    min_val_records<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.sample.min_val_records,</span>
+<span id="cb3-8">    random_seed<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.run.random_seed,</span>
+<span id="cb3-9">    min_item_interactions<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.sample.min_item_interactions,</span>
+<span id="cb3-10">    min_user_interactions<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.sample.min_user_interactions,</span>
+<span id="cb3-11">    perc_users_removed_each_round<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span>,</span>
+<span id="cb3-12">    debug<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>,</span>
+<span id="cb3-13">)</span></code></pre></div>
+<pre class="plaintext code-overflow-wrap"><code>...
+
+Randomly removing 2960 users - Round 18 started
+After randomly removing users - round 18: num_users=29,605
+Number of users 29,605 are still greater than expected, keep removing...
+
+Randomly removing 2413 users - Round 19 started
+After randomly removing users - round 19: num_users=24,137
+Number of users 24,137 are still greater than expected, keep removing...
+Number of val_df records 4,282 are falling below expected threshold, stop and use `sample_df` as final output...
+len(sample_users)=19,734 len(sample_items)=7,388</code></pre>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<a href="https://github.com/dvquy13/recsys-seq-model/blob/main/src/sample.py#L8">InteractionDataSampler implementation</a>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+
+</div>
+</div>
+<p>In the end, we would not have exact like 10000 users, but the numbers would be close to that. The distribution of the interaction is shown below:</p>
+<div class="column-page">
+<p><a href="../static/sample-interaction-dist.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://dvquys.com/projects/real-time-seq-recsys/static/sample-interaction-dist.png" class="img-fluid"></a></p>
+</div>
+</section>
+<section id="train-test-split" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="train-test-split">Train-test split</h2>
+<p>We need to have a validation test dataset to evaluate our models, so that we can have an estimate of how well it performs on unseen data.</p>
+<p>There are two main types of train-test-split in RecSys:</p>
+<div class="column-page">
+<p><img src="https://dvquys.com/projects/real-time-seq-recsys/static/train-test-split.png" class="img-fluid"></p>
+</div>
+<p>AFAIK, the last-one-out is often used more in academic settings while <strong>absolute timestamp</strong> is more common in industry, as whatever model you have deployed on production would be tested against data in the next day.</p>
+</section>
+<section id="id-mapping-from-strings-to-indices" class="level2">
+<h2 class="anchored" data-anchor-id="id-mapping-from-strings-to-indices">ID Mapping: From Strings to Indices</h2>
+<p>We discuss in the introduction chapter that we would formulate and model our problem in a neural network setting. Deep learning models work with numerical indices, not string IDs, so we have our <a href="https://github.com/dvquy13/recsys-seq-model/blob/main/src/id_mapper.py">IDMapper</a> to provide deterministic mapping of user and item IDs to indice:</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> src.id_mapper <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> IDMapper</span>
+<span id="cb5-2"></span>
+<span id="cb5-3">user_ids <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> train_df[cfg.data.user_col].values</span>
+<span id="cb5-4">item_ids <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> train_df[cfg.data.item_col].values</span>
+<span id="cb5-5">unique_user_ids <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>(user_ids))</span>
+<span id="cb5-6">unique_item_ids <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>(item_ids))</span>
+<span id="cb5-7">idm <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> IDMapper()</span>
+<span id="cb5-8">idm.fit(unique_user_ids, unique_item_ids)</span>
+<span id="cb5-9"></span>
+<span id="cb5-10"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Save for later use in model serving</span></span>
+<span id="cb5-11">idm.save(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data/idm.json"</span>)</span></code></pre></div>
+</section>
+<section id="sequence-generation" class="level2">
+<h2 class="anchored" data-anchor-id="sequence-generation">Sequence Generation</h2>
+<p>At this point, you may wonder about all the sequences etc I mentioned earlier. How does user-item rating data have anything to do with sequences?</p>
+<p>Traditional collaborative filtering approaches like Matrix Factorization only use the user-item rating matrix. But there is one important signal being left-out: the timestamps.</p>
+<p>The key insight is simple: when a user interacts with items over time, those interactions tell a story. We group each user’s interactions chronologically to create sequences of items, with the assumption that items a user engages with have meaningful relationships to each other.</p>
+<p>Let’s trace through an example to understand how sequence generation works:</p>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># User interactions over time:</span></span>
+<span id="cb6-2"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Time 1: User buys "Python Programming" (item_indice: 42)</span></span>
+<span id="cb6-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Time 2: User buys "Machine Learning" (item_indice: 73) </span></span>
+<span id="cb6-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Time 3: User buys "Deep Learning" (item_indice: 91)</span></span>
+<span id="cb6-5"></span>
+<span id="cb6-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Generated sequences:</span></span>
+<span id="cb6-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Row 1: item_sequence = [-1, -1, ..., -1]           # No previous items</span></span>
+<span id="cb6-8"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Row 2: item_sequence = [-1, -1, ..., 42]          # Previous: Python book</span></span>
+<span id="cb6-9"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Row 3: item_sequence = [-1, -1, ..., 42, 73]      # Previous: Python, ML books</span></span></code></pre></div>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Sample DataFrame</span></span>
+<span id="cb7-2">data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {</span>
+<span id="cb7-3">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"user_indices"</span>: [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>],</span>
+<span id="cb7-4">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"item_indices"</span>: [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>],</span>
+<span id="cb7-5">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"timestamp"</span>: [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>],</span>
+<span id="cb7-6">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"ratings"</span>: [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>],</span>
+<span id="cb7-7">}</span>
+<span id="cb7-8"></span>
+<span id="cb7-9">df <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.DataFrame(data)</span>
+<span id="cb7-10"></span>
+<span id="cb7-11"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Generate the item sequences</span></span>
+<span id="cb7-12">df_with_sequences <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> generate_item_sequences(</span>
+<span id="cb7-13">    df,</span>
+<span id="cb7-14">    user_col<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"user_indices"</span>,</span>
+<span id="cb7-15">    item_col<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"item_indices"</span>,</span>
+<span id="cb7-16">    timestamp_col<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"timestamp"</span>,</span>
+<span id="cb7-17">    sequence_length<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>,</span>
+<span id="cb7-18">    padding<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>,</span>
+<span id="cb7-19">    padding_value<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>,</span>
+<span id="cb7-20">)</span></code></pre></div>
+<p><a href="./sequence-gen-test.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="https://dvquys.com/projects/real-time-seq-recsys/c2/sequence-gen-test.png" class="img-fluid"></a></p>
+<p>As you can see, the above item_sequence column contains the sequence of items in chronological order which holds the context for the model to understand user preferences and make sequential predictions.</p>
+<p>In this project we choose to have user’s last 10 items as the sequence length, but this parameter is very much configurable. It depends though on experimentation, but generally the tradeoff is that longer sequences provide more context but higher memory usage, while shorter sequences may not have access to full context but more focused on the recent items as well as faster processing.</p>
+<p>Note that we need to pad the sequence to the same length to be able to batch process them in our PyTorch model.</p>
+<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># From cfg/common.yaml</span></span>
+<span id="cb8-2">train:</span>
+<span id="cb8-3">  sequence:</span>
+<span id="cb8-4">    sequence_length: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Keep last 10 items as context</span></span></code></pre></div>
+</section>
+<section id="recap" class="level2">
+<h2 class="anchored" data-anchor-id="recap">Recap</h2>
+<p>In this chapter, we have:</p>
+<ol type="1">
+<li><strong>Data Sampling and Filtering</strong>: Discuss problems with basic random sampling with dyadic data and introduce our iterative sampling approach</li>
+<li><strong>ID Mapping</strong>: Convert string IDs to numerical indices<br>
+</li>
+<li><strong>Sequence Generation</strong>: Create item sequence features</li>
+</ol>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Code
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>All code for this chapter is available in the <code>notebooks/000-prep-data.ipynb</code> and <code>notebooks/001-features.ipynb</code> files in the <a href="https://github.com/dvquy13/recsys-seq-model">project repository</a>.</p>
+</div>
+</div>
+</section>
+<section id="whats-next" class="level2">
+<h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
+<p>In <a href="../c3/index.qmd">Chapter 3</a>, we’ll tackle the critical challenge of <strong>negative sampling</strong>. If the model only observes positive interactions (ratings), it would not be able to learn meaningful patterns to generalize. We need to generate negative examples as well so that model can learn to differentiate between positive and negative interactions.</p>
+<hr>
+<p><br> If you find this tutorial helpful, please cite this writeup as:</p>
+<blockquote class="blockquote">
+<p>Quy, Dinh. (May 2025). Building Real-time RecSys Chapter 2 - Understanding the Data and Feature Engineering. dvquys.com. https://dvquys.com/projects/real-time-seq-recsys/c2/.</p>
+</blockquote>
+
+
+</section>
+
+ ]]></description>
+  <category>recsys</category>
+  <category>recsys-real-time-series</category>
+  <guid>https://dvquys.com/projects/real-time-seq-recsys/c2/</guid>
+  <pubDate>Fri, 23 May 2025 16:00:00 GMT</pubDate>
+  <media:content url="https://dvquys.com/projects/real-time-seq-recsys/static/L2%20-%20Data%20signals.excalidraw.png" medium="image" type="image/png"/>
 </item>
 <item>
   <title>Building a Conversational Assistant for Restaurant Discovery and Booking</title>

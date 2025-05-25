@@ -1,0 +1,271 @@
+---
+title: "Building Real-time RecSys Chapter 2 - Understanding the Data and Feature Engineering"
+subtitle: "Exploring Amazon product dataset and building features for sequence models"
+date: "2025-05-24"
+categories: [recsys, recsys-real-time-series]
+image: "../static/L2%20-%20Data%20signals.excalidraw.png"
+format:
+  html:
+    code-fold: false
+    code-annotations: hover
+# draft: true
+---
+
+## Introduction
+
+In [Chapter 1](../c1/index.qmd), we set up our development environment and explored the project architecture. Now it's time to dive into the heart of any recommendation system: **data**. The quality of our recommendations depends entirely on how well we understand, process, and engineer features from our data.
+
+This chapter focuses on the data pipeline from raw data to model-ready features. We'll explore the Amazon product dataset, understand user-item interaction sequences, and build the feature engineering pipeline that will power our session-based recommender.
+
+::: {.callout-note appearance="simple"}
+## Code
+All code for this chapter is available in the `notebooks/000-prep-data.ipynb` and `notebooks/001-features.ipynb` files in the [project repository](https://github.com/dvquy13/recsys-seq-model).
+:::
+
+## Dataset Overview: Amazon Reviews 2023
+
+A good dataset for this kind of sequential recommenandation project would typically have the following characteristics:
+
+1. **Temporal richness**: Each interaction has a timestamp, enabling sequence modeling
+2. **Scale**: Millions of interactions across thousands of users and items
+3. **Real-world patterns**: Authentic user behavior with natural sparsity
+
+Among some of the well known public data sources, I choose to use the [Amazon Reviews 2023](https://amazon-reviews-2023.github.io/) dataset from the McAuley Lab, specifically focusing on the "Books" category. Apart from possessing the above characteristics, this dataset also contains other potentially useful features regarding both users, items and their interactions like reviews, with a decent amount of observations.
+
+::: {.column-page}
+![](../static/dataset.png)
+:::
+
+::: {.column-page}
+![](../static/dataset-info.png)
+:::
+
+The main schema of the dataset is as simple as follows:
+
+```python
+# From cfg/common.yaml
+data:
+  user_col: "user_id"        # <1>
+  item_col: "parent_asin"    # <2>
+  rating_col: "rating"       # <3>
+  timestamp_col: "timestamp" # <4>
+```
+1. Unique user identifier
+2. Product identifier (in our case, the ASIN—Amazon Standard Identification Number)
+3. User rating (1-5 scale)
+4. Interaction timestamp
+
+::: {.callout-note collapse="true"}
+## Configuration Management
+
+```python
+from src.cfg import ConfigLoader
+
+# Load configuration
+cfg = ConfigLoader("cfg/common.yaml")
+```
+
+Throughout the project, we will define a central place to store most of the configuration in `cfg/common.yaml` to have notebooks and scripts more easily access their inputs and outputs. Also, as running multiple experiments is a nature of working in ML, this design aims to make it easier to try different sets of configurations.
+:::
+
+
+The data flows through several key preprocessing steps:
+
+## Data Sampling and Filtering
+
+As ML is mostly about iterative development, the main rationale of sampling and filtering is to have a small but decent enough dataset to experiment different ideas **fast**. The more experiments we run, the more likely we would introduce improvements to our models.
+
+What does it mean for a decent RecSys dataset? One of the key criteria is **sparsity**—the ratio of observed interactions to all possible user-item pairs. 
+
+To understand why sparsity is problematic, consider the interaction matrix where each cell represents a potential user-item interaction:
+
+- **Matrix size**: `num_users × num_items` (total possible interactions)
+- **Actual interactions**: Much smaller number of observed ratings/clicks
+- **Sparsity**: `1 - (actual_interactions / (num_users × num_items))`
+
+The sparsity problem gets **quadratically worse** as datasets grow:
+
+```python
+# Small dataset example
+users = 1,000, items = 1,000 → possible interactions = 1M
+actual interactions = 50,000 → sparsity = 95%
+
+# Larger dataset 
+users = 10,000, items = 10,000 → possible interactions = 100M  
+actual interactions = 500,000 → sparsity = 99.5%
+```
+
+Each new user adds an entire **row** of mostly empty interactions, and each new item adds an entire **column** of mostly empty interactions. Since users typically interact with only a tiny fraction of available items, the interaction matrix becomes increasingly sparse as the catalog grows.
+
+In RecSys, the interaction distribution is typically long tail—a lot of noisy items or users have just a few interactions. So while randomly sampling may work just fine for many ML use cases, we need to apply it a bit more carefully here. Remember that ultimately we want to have a sample dataset where each user/item has at least X interactions.
+
+The tricky part is that a basic random sampling of users and items would create **sparsity cascade**—a domino effect that breaks your dataset.
+
+Here's what happens: You start with users and items that look fine on their own. User A has 10 interactions, Item X has 15 interactions. When you remove User B, you also lose all of User B's interactions with Item X. Suddenly Item X only has 8 interactions. Oops, now it's too sparse, so you remove it too. But removing Item X means User A loses some interactions and might become too sparse as well.
+
+It's like pulling threads from a sweater—everything starts unraveling.
+
+To deal with this problem, we can take an iterative approach where we gradually drop random users from the dataset while keeping an eye on the conditions and our sampling target. The trade-off is that we would no longer have an exact fixed number of users and items in the dataset as we would like, but rather defining minimum acceptable thresholds, like below:
+
+```python
+# From cfg/common.yaml
+sample:
+  sample_users: 10000
+  min_val_records: 5000         # <1>
+  min_user_interactions: 5
+  min_item_interactions: 10
+```
+1. We need to ensure sufficient validation data to evaluate our models.
+
+```python
+from src.sample import InteractionDataSampler
+
+data_sampler = InteractionDataSampler(
+    user_col=cfg.data.user_col,
+    item_col=cfg.data.item_col,
+    sample_users=cfg.sample.sample_users,
+    min_val_records=cfg.sample.min_val_records,
+    random_seed=cfg.run.random_seed,
+    min_item_interactions=cfg.sample.min_item_interactions,
+    min_user_interactions=cfg.sample.min_user_interactions,
+    perc_users_removed_each_round=0.1,
+    debug=False,
+)
+```
+
+```{.plaintext .code-overflow-wrap}
+...
+
+Randomly removing 2960 users - Round 18 started
+After randomly removing users - round 18: num_users=29,605
+Number of users 29,605 are still greater than expected, keep removing...
+
+Randomly removing 2413 users - Round 19 started
+After randomly removing users - round 19: num_users=24,137
+Number of users 24,137 are still greater than expected, keep removing...
+Number of val_df records 4,282 are falling below expected threshold, stop and use `sample_df` as final output...
+len(sample_users)=19,734 len(sample_items)=7,388
+```
+
+::: {.callout-note}
+## [InteractionDataSampler implementation](https://github.com/dvquy13/recsys-seq-model/blob/main/src/sample.py#L8)
+:::
+
+In the end, we would not have exact like 10000 users, but the numbers would be close to that. The distribution of the interaction is shown below:
+
+::: {.column-page}
+![](../static/sample-interaction-dist.png){.lightbox}
+:::
+
+## Train-test split
+We need to have a validation test dataset to evaluate our models, so that we can have an estimate of how well it performs on unseen data.
+
+There are two main types of train-test-split in RecSys:
+
+:::{.column-page}
+![](../static/train-test-split.png)
+:::
+
+AFAIK, the last-one-out is often used more in academic settings while **absolute timestamp** is more common in industry, as whatever model you have deployed on production would be tested against data in the next day.
+
+## ID Mapping: From Strings to Indices
+
+We discuss in the introduction chapter that we would formulate and model our problem in a neural network setting. Deep learning models work with numerical indices, not string IDs, so we have our [IDMapper](https://github.com/dvquy13/recsys-seq-model/blob/main/src/id_mapper.py) to provide deterministic mapping of user and item IDs to indice:
+
+```python
+from src.id_mapper import IDMapper
+
+user_ids = train_df[cfg.data.user_col].values
+item_ids = train_df[cfg.data.item_col].values
+unique_user_ids = list(set(user_ids))
+unique_item_ids = list(set(item_ids))
+idm = IDMapper()
+idm.fit(unique_user_ids, unique_item_ids)
+
+# Save for later use in model serving
+idm.save("data/idm.json")
+```
+
+## Sequence Generation
+
+At this point, you may wonder about all the sequences etc I mentioned earlier. How does user-item rating data have anything to do with sequences? 
+
+Traditional collaborative filtering approaches like Matrix Factorization only use the user-item rating matrix. But there is one important signal being left-out: the timestamps.
+
+The key insight is simple: when a user interacts with items over time, those interactions tell a story. We group each user's interactions chronologically to create sequences of items, with the assumption that items a user engages with have meaningful relationships to each other.
+
+Let's trace through an example to understand how sequence generation works:
+
+```python
+# User interactions over time:
+# Time 1: User buys "Python Programming" (item_indice: 42)
+# Time 2: User buys "Machine Learning" (item_indice: 73) 
+# Time 3: User buys "Deep Learning" (item_indice: 91)
+
+# Generated sequences:
+# Row 1: item_sequence = [-1, -1, ..., -1]           # No previous items
+# Row 2: item_sequence = [-1, -1, ..., 42]          # Previous: Python book
+# Row 3: item_sequence = [-1, -1, ..., 42, 73]      # Previous: Python, ML books
+```
+
+```python
+# Sample DataFrame
+data = {
+    "user_indices": [0, 0, 1, 1, 1],
+    "item_indices": [0, 1, 2, 3, 4],
+    "timestamp": [0, 1, 2, 3, 4],
+    "ratings": [1, 4, 5, 3, 2],
+}
+
+df = pd.DataFrame(data)
+
+# Generate the item sequences
+df_with_sequences = generate_item_sequences(
+    df,
+    user_col="user_indices",
+    item_col="item_indices",
+    timestamp_col="timestamp",
+    sequence_length=3,
+    padding=True,
+    padding_value=-1,
+)
+```
+
+![](./sequence-gen-test.png){.lightbox}
+
+As you can see, the above item_sequence column contains the sequence of items in chronological order which holds the context for the model to understand user preferences and make sequential predictions.
+
+In this project we choose to have user's last 10 items as the sequence length, but this parameter is very much configurable. It depends though on experimentation, but generally the tradeoff is that longer sequences provide more context but higher memory usage, while shorter sequences may not have access to full context but more focused on the recent items as well as faster processing.
+
+Note that we need to pad the sequence to the same length to be able to batch process them in our PyTorch model.
+
+```python
+# From cfg/common.yaml
+train:
+  sequence:
+    sequence_length: 10  # Keep last 10 items as context
+```
+
+## Recap
+
+In this chapter, we have:
+
+1. **Data Sampling and Filtering**: Discuss problems with basic random sampling with dyadic data and introduce our iterative sampling approach
+2. **ID Mapping**: Convert string IDs to numerical indices  
+3. **Sequence Generation**: Create item sequence features
+
+::: {.callout-note appearance="simple"}
+## Code
+All code for this chapter is available in the `notebooks/000-prep-data.ipynb` and `notebooks/001-features.ipynb` files in the [project repository](https://github.com/dvquy13/recsys-seq-model).
+:::
+
+## What's Next
+
+In [Chapter 3](../c3/index.qmd), we'll tackle the critical challenge of **negative sampling**. If the model only observes positive interactions (ratings), it would not be able to learn meaningful patterns to generalize. We need to generate negative examples as well so that model can learn to differentiate between positive and negative interactions.
+
+---
+
+<br>
+If you find this tutorial helpful, please cite this writeup as:
+
+> Quy, Dinh. (May 2025). {{< meta title >}}. {{< var website_url >}}. https://{{< var website_url >}}/projects/real-time-seq-recsys/c2/. 
