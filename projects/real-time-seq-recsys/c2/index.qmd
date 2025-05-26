@@ -1,7 +1,7 @@
 ---
 title: "Building Real-time RecSys Chapter 2 - Understanding the Data and Feature Engineering"
 subtitle: "Exploring Amazon product dataset and building features for sequence models"
-date: "2025-05-24"
+date: "2025-05-25"
 categories: [recsys, recsys-real-time-series]
 image: "../static/L2%20-%20Data%20signals.excalidraw.png"
 format:

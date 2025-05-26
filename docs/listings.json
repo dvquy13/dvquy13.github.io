@@ -3,8 +3,8 @@
     "listing": "/projects.html",
     "items": [
       "/projects/real-time-seq-recsys/c3/index.html",
-      "/projects/real-time-seq-recsys/c1/index.html",
       "/projects/real-time-seq-recsys/c2/index.html",
+      "/projects/real-time-seq-recsys/c1/index.html",
       "/projects/review-rec-bot/index.html",
       "/projects/reviews-parsing-mlsys/index.html"
     ]
@@ -13,8 +13,8 @@
     "listing": "/index.html",
     "items": [
       "/projects/real-time-seq-recsys/c3/index.html",
-      "/projects/real-time-seq-recsys/c1/index.html",
       "/projects/real-time-seq-recsys/c2/index.html",
+      "/projects/real-time-seq-recsys/c1/index.html",
       "/projects/review-rec-bot/index.html",
       "/projects/reviews-parsing-mlsys/index.html",
       "/posts/site-search-elasticsearch/index.html",
