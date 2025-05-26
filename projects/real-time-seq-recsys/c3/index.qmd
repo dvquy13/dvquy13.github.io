@@ -1,0 +1,228 @@
+---
+title: "Building Real-time RecSys Chapter 3 - Negative Sampling"
+subtitle: "Why your model needs to see what users don't want—and how to generate those examples"
+date: "2025-05-25"
+categories: [recsys, recsys-real-time-series]
+image: "../static/negative-sampling.png"
+format:
+  html:
+    code-fold: false
+    code-annotations: hover
+# draft: true
+---
+
+## Introduction
+
+In [Chapter 2](../c2/index.qmd), we took a deep dive into our Amazon dataset and built a robust feature engineering pipeline. But we're not quite yet ready to start training any personalization models—we still need to add the labels that will really empower our model to distinguish between what users liked and the rest.
+
+Since we already know which items users have purchased, one natural way to set up our recommendation challenge is as a sequence prediction problem. In short, we use a user’s past interactions to predict what they might try next—presenting the model with a sequence of actions and asking it to fill in the next likely item. Sounds familiar, doesn’t it?
+
+In natural language processing, researchers have long figured out how to turn big piles of text into smart models. Take Word2Vec, for example—a simple yet brilliant model that learns word relationships by studying which words tend to appear together. Essentially, Word2Vec breaks a sentence into multiple input–output pairs: the surrounding context words serve as the input and a hidden target word is masked for prediction.
+
+![Source: [A simple Word2Vec tutorial](https://medium.com/@zafaralibagh6/a-simple-word2vec-tutorial-61e64e38a6a1)](./skipgram.webp)
+
+At each step, we pick a target word along with its neighboring context to form a positive training example. How about the negatives? That's where negative sampling comes in. Rather than letting the model see only context words that belong together, we throw in some randomly selected words from outside the context. This mix challenges the model, teaching it to learn the patterns of words that appear in similar contexts.
+
+Now, let’s bring this idea to our book purchase dataset. When a user clicks, views, or buys an item, it sends a clear positive signal. But what about the millions of items they never interact with? Are these items unappealing, or might the user simply not have discovered them yet? Negative sampling bridges this gap, providing the model with examples of what a user isn’t likely to pick—balancing the training process by contrasting positives with smartly chosen negatives.
+
+I personally find this analogy helpful: Training a recommendation model without negative samples is like teaching someone to recognize cats by only showing them cat pictures—they might think everything is a cat.
+
+::: {.callout-note appearance="simple"}
+## Code
+All code for this chapter is available in the `notebooks/002-negative-sample.ipynb` file and the `src/negative_sampling.py` module in the [project repository](https://github.com/dvquy13/recsys-seq-model).
+:::
+
+## Negative Sampling Strategies
+
+### Random Sampling
+Let's start with the obvious approach: just pick random items the user hasn't touched.
+
+This is faily straightforward to code up. You grab all the items a user hasn't interacted with, throw them in a hat, and pull out however many negatives you need. It's fast, it's unbiased, and it works.
+
+One obvious but hard to mitigate downside is that some of those "random" negatives might actually be items the user would love if they discovered them. The other downside happens when the model may also be a little bit biased towards popular items, since they may see them appear in a lot of positive pairs.
+
+### Popularity-Based Sampling
+To deal with the above popularity biase, instead of picking negatives randomly, we sample them based on how popular they are in the dataset. This makes popular items get chosen as negatives more often.
+
+Why does this work better? Compared to a random item, a popular one has a higher chance of being liked by any given user. So when we use popular items as negatives, we're creating harder training examples. We're forcing the model to learn why this user didn't interact with this popular item, even though lots of other people did.
+
+This approach has a nice side effect: it helps the model learn beyond simple popularity bias. Instead of just recommending whatever's trending, it has to figure out what makes items relevant for specific users.
+
+The downside? It's more work to implement, and you need to keep track of popularity statistics. There is a catch that popular items aren't always bad choices for a user. Sometimes they're popular because they're actually good. So as in reality a user may actually be interested in a particular popular item (and there's a chance indeed if the item is a good one—hence popular), if we force a negative for the user-item pair in our training dataset, it can be a confusing example for the model.
+
+### Hard Negative Mining
+This is the fancy approach. You need a model that's already somewhat trained, and you use it to find items it thinks a user would like—but shouldn't. These become your negative samples.
+
+It's like having a sparring partner who knows your weaknesses. The model keeps getting challenged by examples that are specifically designed to trip it up. As the model gets better, the negatives get harder, creating a virtuous cycle of improvement.
+
+Looks like an idea, right? But to be honest it's not always worth the extra effort, especially from the start. You will need to train iteratively, which takes more time and compute. And there's always the risk that you're just teaching the model to overfit to its own biases.
+
+For this project, we implement **popularity-based negative sampling** as it strikes a good balance between effectiveness and simplicity.
+
+## Let's implement
+
+The full implementation is available [here](https://github.com/dvquy13/recsys-seq-model/blob/main/src/negative_sampling.py).
+
+Function signature:
+```{.python filename="src/negative_sampling.py"}
+
+def generate_negative_samples(
+    df,
+    user_col="user_indice",
+    item_col="item_indice", 
+    label_col="rating",
+    neg_label=0,
+    seed=None,
+) -> pd.DataFrame:
+    """
+    Generate negative samples for a user-item interaction DataFrame.
+    
+    The key insight: sample negative items proportional to their 
+    popularity to create more challenging training scenarios.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing user-item interactions.
+        user_col (str): Column name representing users.
+        item_col (str): Column name representing items.
+        label_col (str): Column name for the interaction label (e.g., rating).
+        neg_label (int): Label to assign to negative samples (default is 0).
+        seed (int, optional): Seed for random number generator to ensure reproducibility.
+
+    Returns:
+        pd.DataFrame: DataFrame containing generated negative samples.
+    """
+```
+
+### Step 1: Calculate Item Popularity
+
+```python
+# Calculate item popularity based on interaction frequency
+item_popularity = df[item_col].value_counts()
+
+# Convert to sampling probabilities to be used in the next step
+popularity = item_popularity.values.astype(np.float64)
+total_popularity = popularity.sum()
+sampling_probs = popularity / total_popularity
+```
+
+This creates a probability distribution where more popular items have higher chances of being selected as negatives.
+
+### Step 2: Identify Negative Candidates
+
+```python
+# Create user-item interaction mapping
+user_item_dict = df.groupby(user_col)[item_col].apply(set).to_dict()
+
+# For each user, find items they haven't interacted with
+for user, pos_items in user_item_dict.items():
+    negative_candidates = all_items_set - pos_items
+```
+
+We ensure we only sample from items the user hasn't already interacted with.
+
+### Step 3: Popularity-Weighted Sampling
+
+```python
+# Create a mapping from item to index to quickly access item-related data.
+items = item_popularity.index.values
+item_to_index = {item: idx for idx, item in enumerate(items)}
+
+# Sample negatives proportional to popularity
+candidate_indices = [item_to_index[item] for item in negative_candidates_list]
+candidate_probs = sampling_probs[candidate_indices]
+candidate_probs /= candidate_probs.sum()  # Normalize
+
+sampled_items = np.random.choice(
+    negative_candidates_list, 
+    size=num_neg, 
+    replace=False, 
+    p=candidate_probs
+)
+```
+
+This ensures popular items are more likely to be selected as negatives, creating harder training examples.
+
+You may find that in the implementation we choose to have the number of negative samples to be the same as the number of positive samples. This can be a starting point which helps us avoid dealing with imbalanced training data. However, feel free to experiment with different ratios (you need to update the implementation then).
+
+```python
+num_pos = len(pos_items)  # Number of positive interactions
+num_neg = min(num_pos, num_neg_candidates)  # Match positive count
+```
+
+As with other crucial components in our pipeline, let's test the implementation with some mock data to ensure it works as expected.
+
+::: {.column-page}
+![](./gen-negative-samples-test.png)
+:::
+
+## Adding Features to the generated negative samples
+
+As you can see from the above output, we only have the item indice and the label. We also need to populate the new negative observations with the same features as the positive ones, i.e. the sequence of previously interacted items.
+
+Since this negative samples are generated from the same user, we can use the same features as the positive ones and use the timestamp of the corresponding positive interaction.
+
+
+```python
+def add_features_to_neg_df(pos_df, neg_df, user_col, timestamp_col, feature_cols=[]):
+    """
+    Add features from positive samples to negative samples DataFrame.
+    
+    Key insight: Negative samples should have realistic timestamps
+    that align with when the user was actually active.
+    """
+    
+    # Create pseudo timestamps for negatives
+    # This timestamp pseudo column is used as join key to the positive samples, ensuring that each negative
+    # maps to one positive sample and get the positive's features.
+    neg_df = neg_df.assign(
+        timestamp_pseudo=lambda df: df.groupby(user_col).cumcount() + 1
+    )
+    
+    # Merge with corresponding positive interaction timestamps
+    neg_df = pd.merge(
+        neg_df,
+        pos_df.assign(
+            timestamp_pseudo=lambda df: df.groupby([user_col])[timestamp_col].rank(
+                method="first"
+            )
+        )[[user_col, timestamp_col, "timestamp_pseudo", *feature_cols]],
+        how="left",
+        on=[user_col, "timestamp_pseudo"],
+    ).drop(columns=["timestamp_pseudo"])
+    
+    return neg_df
+```
+
+## Concat and re-split train-test
+
+After adding the features to the negative samples, we can concatenate them with the positive samples and re-split the dataset based on the timestamp milestone we had earlier in our original train-test split.
+
+::: {.column-page}
+![](./concat-pos-neg.png)
+:::
+
+## Recap
+
+In this chapter, we tackled the tricky problem of implicit feedback in recommendation systems. Here's what we covered:
+
+- **Why we need negative samples**: Without them, our model would be like someone trying to recognize cats by only seeing cat pictures. We need examples of what users don't want to create a balanced learning experience.
+- **Three approaches to negative sampling**: We explored random sampling (simple but not very challenging), popularity-based sampling (our chosen approach that creates harder training scenarios), and hard negative mining (powerful but complex).
+- **Our popularity-based implementation**: We built a system that samples negative items proportional to their popularity, forcing our model to learn why a user didn't interact with popular items that others liked.
+- **Keeping things balanced**: We generate equal numbers of positive and negative samples for each user (1:1 ratio) to avoid bias in either direction.
+- **Adding realistic features**: We make sure our negative samples have proper timestamps and features that align with when users were actually active, maintaining temporal consistency for sequence modeling.
+
+::: {.callout-note appearance="simple"}
+## Code
+All code for this chapter is available in the `notebooks/002-negative-sample.ipynb` file and the `src/negative_sampling.py` module in the [project repository](https://github.com/dvquy13/recsys-seq-model).
+:::
+
+## What's Next?
+
+With our balanced dataset of positive and negative samples, we're ready to tackle model evaluation. In [Chapter 4]((../c4/index.qmd)), we'll set up our evaluation framework and experiment tracking with MLflow, establishing the foundation for systematic model development and comparison.
+
+---
+
+<br>
+If you find this tutorial helpful, please cite this writeup as:
+
+> Quy, Dinh. (May 2025). {{< meta title >}}. {{< var website_url >}}. https://{{< var website_url >}}/projects/real-time-seq-recsys/c3/. 

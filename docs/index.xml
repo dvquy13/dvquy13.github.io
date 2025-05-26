@@ -10,7 +10,444 @@
 <atom:link href="https://dvquys.com/index.xml" rel="self" type="application/rss+xml"/>
 <description>DvQ Personal Website</description>
 <generator>quarto-1.6.40</generator>
-<lastBuildDate>Fri, 23 May 2025 16:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 24 May 2025 16:00:00 GMT</lastBuildDate>
+<item>
+  <title>Building Real-time RecSys Chapter 3 - Negative Sampling</title>
+  <link>https://dvquys.com/projects/real-time-seq-recsys/c3/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In <a href="../../../projects/real-time-seq-recsys/c2/index.html">Chapter 2</a>, we took a deep dive into our Amazon dataset and built a robust feature engineering pipeline. But we’re not quite yet ready to start training any personalization models—we still need to add the labels that will really empower our model to distinguish between what users liked and the rest.</p>
+<p>Since we already know which items users have purchased, one natural way to set up our recommendation challenge is as a sequence prediction problem. In short, we use a user’s past interactions to predict what they might try next—presenting the model with a sequence of actions and asking it to fill in the next likely item. Sounds familiar, doesn’t it?</p>
+<p>In natural language processing, researchers have long figured out how to turn big piles of text into smart models. Take Word2Vec, for example—a simple yet brilliant model that learns word relationships by studying which words tend to appear together. Essentially, Word2Vec breaks a sentence into multiple input–output pairs: the surrounding context words serve as the input and a hidden target word is masked for prediction.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://dvquys.com/projects/real-time-seq-recsys/c3/skipgram.webp" class="img-fluid figure-img"></p>
+<figcaption>Source: <a href="https://medium.com/@zafaralibagh6/a-simple-word2vec-tutorial-61e64e38a6a1">A simple Word2Vec tutorial</a></figcaption>
+</figure>
+</div>
+<p>At each step, we pick a target word along with its neighboring context to form a positive training example. How about the negatives? That’s where negative sampling comes in. Rather than letting the model see only context words that belong together, we throw in some randomly selected words from outside the context. This mix challenges the model, teaching it to learn the patterns of words that appear in similar contexts.</p>
+<p>Now, let’s bring this idea to our book purchase dataset. When a user clicks, views, or buys an item, it sends a clear positive signal. But what about the millions of items they never interact with? Are these items unappealing, or might the user simply not have discovered them yet? Negative sampling bridges this gap, providing the model with examples of what a user isn’t likely to pick—balancing the training process by contrasting positives with smartly chosen negatives.</p>
+<p>I personally find this analogy helpful: Training a recommendation model without negative samples is like teaching someone to recognize cats by only showing them cat pictures—they might think everything is a cat.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Code
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>All code for this chapter is available in the <code>notebooks/002-negative-sample.ipynb</code> file and the <code>src/negative_sampling.py</code> module in the <a href="https://github.com/dvquy13/recsys-seq-model">project repository</a>.</p>
+</div>
+</div>
+</section>
+<section id="negative-sampling-strategies" class="level2">
+<h2 class="anchored" data-anchor-id="negative-sampling-strategies">Negative Sampling Strategies</h2>
+<section id="random-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="random-sampling">Random Sampling</h3>
+<p>Let’s start with the obvious approach: just pick random items the user hasn’t touched.</p>
+<p>This is faily straightforward to code up. You grab all the items a user hasn’t interacted with, throw them in a hat, and pull out however many negatives you need. It’s fast, it’s unbiased, and it works.</p>
+<p>One obvious but hard to mitigate downside is that some of those “random” negatives might actually be items the user would love if they discovered them. The other downside happens when the model may also be a little bit biased towards popular items, since they may see them appear in a lot of positive pairs.</p>
+</section>
+<section id="popularity-based-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="popularity-based-sampling">Popularity-Based Sampling</h3>
+<p>To deal with the above popularity biase, instead of picking negatives randomly, we sample them based on how popular they are in the dataset. This makes popular items get chosen as negatives more often.</p>
+<p>Why does this work better? Compared to a random item, a popular one has a higher chance of being liked by any given user. So when we use popular items as negatives, we’re creating harder training examples. We’re forcing the model to learn why this user didn’t interact with this popular item, even though lots of other people did.</p>
+<p>This approach has a nice side effect: it helps the model learn beyond simple popularity bias. Instead of just recommending whatever’s trending, it has to figure out what makes items relevant for specific users.</p>
+<p>The downside? It’s more work to implement, and you need to keep track of popularity statistics. There is a catch that popular items aren’t always bad choices for a user. Sometimes they’re popular because they’re actually good. So as in reality a user may actually be interested in a particular popular item (and there’s a chance indeed if the item is a good one—hence popular), if we force a negative for the user-item pair in our training dataset, it can be a confusing example for the model.</p>
+</section>
+<section id="hard-negative-mining" class="level3">
+<h3 class="anchored" data-anchor-id="hard-negative-mining">Hard Negative Mining</h3>
+<p>This is the fancy approach. You need a model that’s already somewhat trained, and you use it to find items it thinks a user would like—but shouldn’t. These become your negative samples.</p>
+<p>It’s like having a sparring partner who knows your weaknesses. The model keeps getting challenged by examples that are specifically designed to trip it up. As the model gets better, the negatives get harder, creating a virtuous cycle of improvement.</p>
+<p>Looks like an idea, right? But to be honest it’s not always worth the extra effort, especially from the start. You will need to train iteratively, which takes more time and compute. And there’s always the risk that you’re just teaching the model to overfit to its own biases.</p>
+<p>For this project, we implement <strong>popularity-based negative sampling</strong> as it strikes a good balance between effectiveness and simplicity.</p>
+</section>
+</section>
+<section id="lets-implement" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="lets-implement">Let’s implement</h2>
+<p>The full implementation is available <a href="https://github.com/dvquy13/recsys-seq-model/blob/main/src/negative_sampling.py">here</a>.</p>
+<p>Function signature:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/negative_sampling.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb1" data-filename="src/negative_sampling.py" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"></span>
+<span id="cb1-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> generate_negative_samples(</span>
+<span id="cb1-3">    df,</span>
+<span id="cb1-4">    user_col<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"user_indice"</span>,</span>
+<span id="cb1-5">    item_col<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"item_indice"</span>, </span>
+<span id="cb1-6">    label_col<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"rating"</span>,</span>
+<span id="cb1-7">    neg_label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,</span>
+<span id="cb1-8">    seed<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>,</span>
+<span id="cb1-9">) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> pd.DataFrame:</span>
+<span id="cb1-10">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb1-11"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Generate negative samples for a user-item interaction DataFrame.</span></span>
+<span id="cb1-12"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    </span></span>
+<span id="cb1-13"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    The key insight: sample negative items proportional to their </span></span>
+<span id="cb1-14"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    popularity to create more challenging training scenarios.</span></span>
+<span id="cb1-15"></span>
+<span id="cb1-16"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Args:</span></span>
+<span id="cb1-17"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        df (pd.DataFrame): DataFrame containing user-item interactions.</span></span>
+<span id="cb1-18"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        user_col (str): Column name representing users.</span></span>
+<span id="cb1-19"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        item_col (str): Column name representing items.</span></span>
+<span id="cb1-20"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        label_col (str): Column name for the interaction label (e.g., rating).</span></span>
+<span id="cb1-21"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        neg_label (int): Label to assign to negative samples (default is 0).</span></span>
+<span id="cb1-22"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        seed (int, optional): Seed for random number generator to ensure reproducibility.</span></span>
+<span id="cb1-23"></span>
+<span id="cb1-24"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Returns:</span></span>
+<span id="cb1-25"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        pd.DataFrame: DataFrame containing generated negative samples.</span></span>
+<span id="cb1-26"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    """</span></span></code></pre></div>
+</div>
+<section id="step-1-calculate-item-popularity" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-calculate-item-popularity">Step 1: Calculate Item Popularity</h3>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Calculate item popularity based on interaction frequency</span></span>
+<span id="cb2-2">item_popularity <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> df[item_col].value_counts()</span>
+<span id="cb2-3"></span>
+<span id="cb2-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Convert to sampling probabilities to be used in the next step</span></span>
+<span id="cb2-5">popularity <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> item_popularity.values.astype(np.float64)</span>
+<span id="cb2-6">total_popularity <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> popularity.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()</span>
+<span id="cb2-7">sampling_probs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> popularity <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> total_popularity</span></code></pre></div>
+<p>This creates a probability distribution where more popular items have higher chances of being selected as negatives.</p>
+</section>
+<section id="step-2-identify-negative-candidates" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-identify-negative-candidates">Step 2: Identify Negative Candidates</h3>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Create user-item interaction mapping</span></span>
+<span id="cb3-2">user_item_dict <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> df.groupby(user_col)[item_col].<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">apply</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>).to_dict()</span>
+<span id="cb3-3"></span>
+<span id="cb3-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># For each user, find items they haven't interacted with</span></span>
+<span id="cb3-5"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> user, pos_items <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> user_item_dict.items():</span>
+<span id="cb3-6">    negative_candidates <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> all_items_set <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> pos_items</span></code></pre></div>
+<p>We ensure we only sample from items the user hasn’t already interacted with.</p>
+</section>
+<section id="step-3-popularity-weighted-sampling" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="step-3-popularity-weighted-sampling">Step 3: Popularity-Weighted Sampling</h3>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Create a mapping from item to index to quickly access item-related data.</span></span>
+<span id="cb4-2">items <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> item_popularity.index.values</span>
+<span id="cb4-3">item_to_index <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {item: idx <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> idx, item <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(items)}</span>
+<span id="cb4-4"></span>
+<span id="cb4-5"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Sample negatives proportional to popularity</span></span>
+<span id="cb4-6">candidate_indices <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [item_to_index[item] <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> item <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> negative_candidates_list]</span>
+<span id="cb4-7">candidate_probs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> sampling_probs[candidate_indices]</span>
+<span id="cb4-8">candidate_probs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/=</span> candidate_probs.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Normalize</span></span>
+<span id="cb4-9"></span>
+<span id="cb4-10">sampled_items <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.choice(</span>
+<span id="cb4-11">    negative_candidates_list, </span>
+<span id="cb4-12">    size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>num_neg, </span>
+<span id="cb4-13">    replace<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>, </span>
+<span id="cb4-14">    p<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>candidate_probs</span>
+<span id="cb4-15">)</span></code></pre></div>
+<p>This ensures popular items are more likely to be selected as negatives, creating harder training examples.</p>
+<p>You may find that in the implementation we choose to have the number of negative samples to be the same as the number of positive samples. This can be a starting point which helps us avoid dealing with imbalanced training data. However, feel free to experiment with different ratios (you need to update the implementation then).</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">num_pos <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(pos_items)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Number of positive interactions</span></span>
+<span id="cb5-2">num_neg <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>(num_pos, num_neg_candidates)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Match positive count</span></span></code></pre></div>
+<p>As with other crucial components in our pipeline, let’s test the implementation with some mock data to ensure it works as expected.</p>
+<div class="column-page">
+<p><img src="https://dvquys.com/projects/real-time-seq-recsys/c3/gen-negative-samples-test.png" class="img-fluid"></p>
+</div>
+</section>
+</section>
+<section id="adding-features-to-the-generated-negative-samples" class="level2">
+<h2 class="anchored" data-anchor-id="adding-features-to-the-generated-negative-samples">Adding Features to the generated negative samples</h2>
+<p>As you can see from the above output, we only have the item indice and the label. We also need to populate the new negative observations with the same features as the positive ones, i.e.&nbsp;the sequence of previously interacted items.</p>
+<p>Since this negative samples are generated from the same user, we can use the same features as the positive ones and use the timestamp of the corresponding positive interaction.</p>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> add_features_to_neg_df(pos_df, neg_df, user_col, timestamp_col, feature_cols<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[]):</span>
+<span id="cb6-2">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb6-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Add features from positive samples to negative samples DataFrame.</span></span>
+<span id="cb6-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    </span></span>
+<span id="cb6-5"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Key insight: Negative samples should have realistic timestamps</span></span>
+<span id="cb6-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    that align with when the user was actually active.</span></span>
+<span id="cb6-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    """</span></span>
+<span id="cb6-8">    </span>
+<span id="cb6-9">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Create pseudo timestamps for negatives</span></span>
+<span id="cb6-10">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># This timestamp pseudo column is used as join key to the positive samples, ensuring that each negative</span></span>
+<span id="cb6-11">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># maps to one positive sample and get the positive's features.</span></span>
+<span id="cb6-12">    neg_df <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> neg_df.assign(</span>
+<span id="cb6-13">        timestamp_pseudo<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">lambda</span> df: df.groupby(user_col).cumcount() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span></span>
+<span id="cb6-14">    )</span>
+<span id="cb6-15">    </span>
+<span id="cb6-16">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Merge with corresponding positive interaction timestamps</span></span>
+<span id="cb6-17">    neg_df <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.merge(</span>
+<span id="cb6-18">        neg_df,</span>
+<span id="cb6-19">        pos_df.assign(</span>
+<span id="cb6-20">            timestamp_pseudo<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">lambda</span> df: df.groupby([user_col])[timestamp_col].rank(</span>
+<span id="cb6-21">                method<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"first"</span></span>
+<span id="cb6-22">            )</span>
+<span id="cb6-23">        )[[user_col, timestamp_col, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"timestamp_pseudo"</span>, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>feature_cols]],</span>
+<span id="cb6-24">        how<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"left"</span>,</span>
+<span id="cb6-25">        on<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[user_col, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"timestamp_pseudo"</span>],</span>
+<span id="cb6-26">    ).drop(columns<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"timestamp_pseudo"</span>])</span>
+<span id="cb6-27">    </span>
+<span id="cb6-28">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> neg_df</span></code></pre></div>
+</section>
+<section id="concat-and-re-split-train-test" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="concat-and-re-split-train-test">Concat and re-split train-test</h2>
+<p>After adding the features to the negative samples, we can concatenate them with the positive samples and re-split the dataset based on the timestamp milestone we had earlier in our original train-test split.</p>
+<div class="column-page">
+<p><img src="https://dvquys.com/projects/real-time-seq-recsys/c3/concat-pos-neg.png" class="img-fluid"></p>
+</div>
+</section>
+<section id="recap" class="level2">
+<h2 class="anchored" data-anchor-id="recap">Recap</h2>
+<p>In this chapter, we tackled the tricky problem of implicit feedback in recommendation systems. Here’s what we covered:</p>
+<ul>
+<li><strong>Why we need negative samples</strong>: Without them, our model would be like someone trying to recognize cats by only seeing cat pictures. We need examples of what users don’t want to create a balanced learning experience.</li>
+<li><strong>Three approaches to negative sampling</strong>: We explored random sampling (simple but not very challenging), popularity-based sampling (our chosen approach that creates harder training scenarios), and hard negative mining (powerful but complex).</li>
+<li><strong>Our popularity-based implementation</strong>: We built a system that samples negative items proportional to their popularity, forcing our model to learn why a user didn’t interact with popular items that others liked.</li>
+<li><strong>Keeping things balanced</strong>: We generate equal numbers of positive and negative samples for each user (1:1 ratio) to avoid bias in either direction.</li>
+<li><strong>Adding realistic features</strong>: We make sure our negative samples have proper timestamps and features that align with when users were actually active, maintaining temporal consistency for sequence modeling.</li>
+</ul>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Code
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>All code for this chapter is available in the <code>notebooks/002-negative-sample.ipynb</code> file and the <code>src/negative_sampling.py</code> module in the <a href="https://github.com/dvquy13/recsys-seq-model">project repository</a>.</p>
+</div>
+</div>
+</section>
+<section id="whats-next" class="level2">
+<h2 class="anchored" data-anchor-id="whats-next">What’s Next?</h2>
+<p>With our balanced dataset of positive and negative samples, we’re ready to tackle model evaluation. In <a href="(../c4/index.qmd)">Chapter 4</a>, we’ll set up our evaluation framework and experiment tracking with MLflow, establishing the foundation for systematic model development and comparison.</p>
+<hr>
+<p><br> If you find this tutorial helpful, please cite this writeup as:</p>
+<blockquote class="blockquote">
+<p>Quy, Dinh. (May 2025). Building Real-time RecSys Chapter 3 - Negative Sampling. dvquys.com. https://dvquys.com/projects/real-time-seq-recsys/c3/.</p>
+</blockquote>
+
+
+</section>
+
+ ]]></description>
+  <category>recsys</category>
+  <category>recsys-real-time-series</category>
+  <guid>https://dvquys.com/projects/real-time-seq-recsys/c3/</guid>
+  <pubDate>Sat, 24 May 2025 16:00:00 GMT</pubDate>
+  <media:content url="https://dvquys.com/projects/real-time-seq-recsys/static/negative-sampling.png" medium="image" type="image/png"/>
+</item>
 <item>
   <title>Building Real-time RecSys Chapter 1 - Introduction and Project Overview</title>
   <link>https://dvquys.com/projects/real-time-seq-recsys/c1/</link>
@@ -893,7 +1330,7 @@ Code
 </section>
 <section id="whats-next" class="level2">
 <h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
-<p>In <a href="../c3/index.qmd">Chapter 3</a>, we’ll tackle the critical challenge of <strong>negative sampling</strong>. If our model only sees positive interactions (ratings), it can’t learn meaningful patterns for generalization. We need to generate negative examples so the model can distill the patterns by learning to distinguish between positive and negative interactions.</p>
+<p>In <a href="../../../projects/real-time-seq-recsys/c3/index.html">Chapter 3</a>, we’ll tackle the critical challenge of <strong>negative sampling</strong>. If our model only sees positive interactions (ratings), it can’t learn meaningful patterns for generalization. We need to generate negative examples so the model can distill the patterns by learning to distinguish between positive and negative interactions.</p>
 <hr>
 <p><br> If you find this tutorial helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
