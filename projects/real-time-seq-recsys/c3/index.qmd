@@ -217,7 +217,7 @@ All code for this chapter is in `notebooks/002-negative-sample.ipynb` and `src/n
 
 ## What's Next?
 
-With our balanced dataset of positive and negative samples, we're ready to tackle model evaluation. In [Chapter 4]((../c4/index.qmd)), we'll set up our evaluation framework and experiment tracking with MLflow. This will give us the foundation for systematic model development and comparison.
+With our balanced dataset of positive and negative samples, we're ready to tackle model evaluation. In [Chapter 4]((../c4/index.qmd)), we'll set up our evaluation framework and experiment tracking with MLflow while implementing a baseline model along the way as an illustration. This will give us the foundation for systematic model development and comparison.
 
 ---
 

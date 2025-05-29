@@ -13,55 +13,49 @@ format:
 
 ## Introduction
 
-In [Chapter 3](../c3/index.qmd), we built a robust negative sampling pipeline to create balanced training data. Now we're ready to tackle one of the most critical aspects of any ML project: **evaluation**. Before we dive into complex sequence models, we need to establish a solid foundation for measuring success.
+In [Chapter 3](../c3/index.qmd), inspired by how Word2Vec cleverly samples out-of-context words to train its language model, we implemented our own popularity-based sampling strategy to generate negative samples for our training dataset. Now we're ready to tackle one of the most critical aspects of any ML project: **evaluation**.
 
-This chapter focuses on three essential components: building a comprehensive evaluation framework, setting up MLflow for experiment tracking, and implementing a popularity-based baseline model. Think of this as laying the groundwork for systematic model development—you'll use these tools throughout the rest of the series.
+We will discuss building a comprehensive evaluation framework, setting up MLflow for experiment tracking, and implementing a popularity-based baseline model to illustrate the end-to-end process. A solid measuring foundation provides the groundwork for systematic model development—you'll use these tools throughout your different attempts at improving the model performance.
 
 ::: {.callout-note appearance="simple"}
 ## Code
 All code for this chapter is available in the `notebooks/010-baseline-popular.ipynb` file and the `src/eval/` directory in the [project repository](https://github.com/dvquy13/recsys-seq-model).
 :::
 
-## Why Evaluation Matters in Recommendation Systems
+## The Challenges of Evaluation in Recommendation Systems
 
 Recommendation systems are notoriously tricky to evaluate. Unlike classification problems where accuracy is straightforward, recommendations involve ranking, relevance, and user satisfaction—all of which are nuanced concepts.
 
-Consider these challenges:
+RecSys present unique evaluation challenges that go far beyond traditional machine learning problems. The most fundamental issue is the **counterfactual problem**: we only observe user interactions with items they actually encountered, but we have no ground truth for the vast majority of items they never saw. If a user interacted with 10 items in their history, we can reasonably infer labels for those 10, but what about the remaining thousands or millions of items in our catalog? Did the user avoid them because they're irrelevant, or simply because they never discovered them? This missing data problem makes offline evaluation inherently problematic—we're essentially trying to measure recommendation quality using an incomplete and biased sample of user preferences.
 
-- **Implicit feedback**: Users don't explicitly rate most items they see
-- **Ranking quality**: The order of recommendations matters as much as the items themselves  
-- **Personalization**: A good recommendation for one user might be terrible for another
-- **Temporal dynamics**: User preferences change over time
+Beyond this counterfactual challenge, recommendation systems must also struggle with implicit feedback where users rarely provide explicit ratings, ranking quality where the order of recommendations matters as much as the items themselves, personalization where a perfect recommendation for one user might be terrible for another, and temporal dynamics where user preferences evolve over time. These complexities mean that unlike classification problems where accuracy is straightforward, recommendations involve nuanced concepts of relevance, satisfaction, and utility that resist simple measurement.
 
-To address these challenges, we need a comprehensive evaluation framework that can measure multiple aspects of recommendation quality.
+To address these challenges, we need a comprehensive evaluation framework that can measure multiple aspects of recommendation quality. For the scope of this tutorial, we would be focusing on measuring both the ranking quality and the classification quality of the recommendations, while leaving the problem of counterfactual evaluation for a future post perhaps[^1].
 
-## Online vs Offline Evaluation
+[^1]: You may take a look at this writing [Counterfactual Evaluation for Recommendation Systems](https://eugeneyan.com/writing/counterfactual-evaluation/) to learn more.
 
-Before diving into implementation, let's understand the two main evaluation paradigms:
+## Online vs Offline Evaluation: The Ultimate Goal vs The Development Tool
 
-### Online Evaluation
-- **What it is**: Testing recommendations with real users in production
-- **Metrics**: Click-through rates, conversion rates, user engagement
-- **Pros**: Measures real business impact and user satisfaction
-- **Cons**: Expensive, slow, requires significant traffic
+Before diving into the technical details, let me remind you of the what ultimately matters to the business: delivering relevant recommendations measured via business metrics like click-through rates and conversion rates.
 
-### Offline Evaluation  
-- **What it is**: Testing recommendations on historical data
-- **Metrics**: Precision@K, Recall@K, NDCG, coverage
-- **Pros**: Fast, cheap, reproducible, enables rapid iteration
-- **Cons**: May not capture real user behavior perfectly
+These metrics can only be evaluated at production environment with the help of online experiments. But they are typically expensive and slow. A/B testing and its alike require real users, real traffic, and real time to see if your changes work. So to iterate quickly on your backlog of a hundred different ideas, we often resort to offline evaluation as our development tool. The assumption is that improvements made over historical observational data can guide our decisions.
 
-For this tutorial series, we'll focus on **offline evaluation** to enable rapid experimentation. In production, you'd typically use offline evaluation for model development and online evaluation for final validation.
+Though more often than not, offline improvements don't always translate to online wins. You might build a model that crushes your offline metrics, deploy it to production, and watch your click-through rates stay flat or even drop. The gap between offline and online performance is one of the most challenging aspects of recommendation systems.
+
+Of course there have already been research efforts to address this, and googling around would actually lead us to some interesting ideas[^1]. IMHO though, the approaches are often too complicated so I normally refrain from fancy techniques in the early phases of the project. In principle we should nonetheless design our offline evaluation to match online results as closely as possible, while maintaining a mindset that offline evaluation is a guiding tool and a guardrail, not the definitive answer.
+
+I usually think like this: if your offline metrics show clear improvements, that's a good sign to move forward. If they show no change but you have strong reasons to believe your improvements are effective, don't let that stop you from running an online experiment. Sometimes the best ideas don't show up in offline metrics until they meet real users. Just make sure you can roll back quickly if you see significant drops in the early days.
+
+For this tutorial series, we'll focus on offline evaluation because it lets us iterate fast and learn the fundamentals. But important message worths repeating—the real test happens when your recommendations meet actual users.
 
 ## Evaluation Metrics for Recommendation Systems
 
-Our evaluation framework implements several key metrics:
+There are plenty of great posts diving into the details of these metrics so I would just briefly mention them here. Our evaluation framework implements several key metrics:
 
 ### Ranking Metrics
 - **Precision@K**: What fraction of top-K recommendations are relevant?
 - **Recall@K**: What fraction of relevant items appear in top-K recommendations?
 - **NDCG@K**: Normalized Discounted Cumulative Gain—rewards relevant items appearing higher in the ranking
-- **F-Beta@K**: Harmonic mean of precision and recall with configurable weighting
 
 ### Diversity Metrics
 - **Personalization**: Measures how different recommendations are across users (higher is better)
@@ -70,9 +64,27 @@ Our evaluation framework implements several key metrics:
 - **ROC-AUC**: Area under the ROC curve for binary relevance prediction
 - **Precision-Recall curves**: Trade-offs between precision and recall at different thresholds
 
-## The Evaluation Framework Architecture
+Why classification metrics? Isn't this a ranking problem? Well, the answer is yes and no. Essentially the choice of modeling approach is up to us, but there is one valid approach in which we would formulate the problem as predicting whether a user would interact with an item or not. As the output of this model would normally be a score between 0 and 1, we can then use the ROC-AUC to evaluate how well a model is able to rank the relevant items higher that the irrelevant ones, which is a form of ranking quality in and of itself. The other main benefit for using ROC-AUC is that it's also a built-in metric for almost all ML frameworks, which makes it easy to measure without the need to implement it from scratch (lazy person saying).
 
-Our evaluation framework is built around three core modules in `src/eval/`:
+If you wish to learn more, I suggest checking out [this post by Amit Chaudhary](https://amitness.com/posts/information-retrieval-evaluation) and the [Evidently documentation on Ranking metrics](https://docs.evidentlyai.com/metrics/all_metrics#ranking).
+
+## The baseline recommender system
+
+To demonstrate how we evaluate a model, let's first build a baseline one for easier illustration. This will serve as a sanity check for our evaluation framework and provide a performance benchmark for more complex models to beat.
+
+In the world of RecSys, the most popular base line is "popular" recommender (no pun intended). It's simple, fast, easy to implement, easy to understand for users, and sometimes quite effective, especialy compared to the effort required to put up.
+
+To get the most popular items, we only need a few lines of Pandas code to group by item and count the number of interactions:
+![](pop-impl-1.png)
+
+Then, for each of the user in our validation set, we can simply assign the most popular items to them:
+![](pop-impl-2.png)
+
+That's it. We now have recommendations provided for our users. Now we can move to the actual evaluation part.
+
+## How We Set Up Evaluation for our Project
+
+Our evaluation framework is built around four core modules in `src/eval/`:
 
 ```python
 from src.eval import (
@@ -123,13 +135,14 @@ def merge_recs_with_target(recs_df, label_df, k=10, user_col, item_col, rating_c
         )
         .assign(
             rating=lambda df: df[rating_col].fillna(0).astype(int),
+            # Fill the recall with ranking = top_k_retrieve + 1 so that the recall calculation is correct
             rec_ranking=lambda df: df["rec_ranking"].fillna(k + 1).astype(int),
         )
         .sort_values([user_col, "rec_ranking"])
     )
 ```
 
-This function aligns your model's recommendations with the ground truth, handling cases where recommended items don't appear in the validation set.
+This function aligns your model's recommendations with the ground truth and **handling cases where recommended items don't appear in the validation set**.
 
 ### Metric Logging with Evidently
 
@@ -171,13 +184,23 @@ def log_ranking_metrics(cfg: Config, eval_df):
     return report
 ```
 
-The beauty of this approach is that Evidently handles the complex metric calculations while our framework automatically logs everything to MLflow for tracking and comparison.
+There is also a `log_classification_metrics` function that follows the similar pattern, but for the task of evaluation classification accuracy.
 
-## MLflow Integration: Configuration-Driven Experiment Tracking
+The output is we have HTML report like this:
 
-One of the standout features of our framework is the seamless MLflow integration through the configuration system. Instead of manually managing MLflow runs, everything is handled through the `ConfigLoader`:
+::: {.column-page}
+![](./evidently-classification.png)
+:::
 
-### Configuration-Based Setup
+Do you notice that those report files are available in a nice web-based UI? If you are not familiar with MLflow, the next section will explain.
+
+## Experiment Tracking with MLflow
+
+Machine learning development is fundamentally an iterative process—the more ideas we systematically test, the better our chances of discovering meaningful improvements. This iterative nature means we're constantly cycling through hypotheses: trying new features, adjusting hyperparameters, experimenting with different architectures, and refining our approach based on results. To maximize this exploration while maintaining scientific rigor, we need more than just robust evaluation metrics; we need a convenient way to **track every experiment**, compare results across iterations, and easily revisit previous approaches. Comprehensive experiment logging creates a safety net that encourages bold experimentation—when you know you can reproduce any previous result or quickly understand what changed between runs, you're more willing to try ambitious ideas that might not work. This psychological safety accelerates the entire development cycle.
+
+There are often no restrictions on how you should track your experiments. Even manually keeping things in a spreadsheet works just fine. However, in our project and based on my own experience, I feel like [MLflow](https://mlflow.org/) is the most convenient way though, since this tool is mature and well-integrated with other ML frameworks. It also offers other fundamental capabilities like model registry which becomes very handy when we talk about model serving and deployment.
+
+As MLflow should be enabled in our every model training run, I put most of the MLflow integration implementation in our configuration code:
 
 ```python
 from src.cfg import ConfigLoader
@@ -192,6 +215,8 @@ cfg.init()  # This automatically sets up MLflow!
 The `cfg.init()` method handles all the MLflow setup:
 
 ```python
+from lightning.pytorch.loggers import MLFlowLogger
+
 def init(self):
     """Initialize MLflow experiment tracking automatically."""
     if self.run.log_to_mlflow:
@@ -199,7 +224,7 @@ def init(self):
         mlflow.set_experiment(self.run.experiment_name)
         mlflow.start_run(run_name=self.run.run_name)
         
-        self._mlf_logger = MLFlowLogger(
+        self._mlf_logger = MLFlowLogger(  # <1>
             experiment_name=self.run.experiment_name,
             run_id=mlflow.active_run().info.run_id,
             tracking_uri=mlflow_uri,
@@ -207,10 +232,9 @@ def init(self):
         )
     return self
 ```
+1. Note that MLFlowLogger here is a PyTorch Lightning logger, which we would use later when defining our PyTorch Lightning model for logging our model training progress.
 
-### Automatic Parameter Logging
-
-The configuration system automatically logs all parameters to MLflow:
+In the end of our run, we can call this method `cfg.log_config_to_mlflow()` to log all parameters to MLflow:
 
 ```python
 def log_config_to_mlflow(self):
@@ -220,260 +244,45 @@ def log_config_to_mlflow(self):
         mlflow.log_param(key, value)  # e.g., "train.learning_rate": 0.01
 ```
 
-This means every experiment automatically captures the complete configuration, making results fully reproducible.
+The result is we can access our experiment parameters like this:
 
-## Implementing the Popularity Baseline
+::: {.column-page}
+![](mlflow-overview.png)
+:::
 
-Now let's implement our first recommendation model: a popularity-based recommender. While simple, this baseline serves several important purposes:
+However, when we starts to develop our notebook, we may not want to log to MLflow. We can easily control this by setting the `log_to_mlflow` flag to `false` in our configuration file:
 
-1. **Sanity check**: Ensures our evaluation pipeline works correctly
-2. **Performance benchmark**: Provides a baseline for more complex models to beat
-3. **Production fallback**: Often used as a fallback when personalized models fail
-
-### Popularity Score Calculation
-
-The implementation is straightforward—we rank items by their interaction frequency in the training data:
-
-```python
-# Calculate popularity scores from training data
-popular_items_df = (
-    train_df.groupby(cfg.data.item_col, as_index=False)
-    .size()
-    .assign(
-        score=lambda df: df["size"] / df["size"].max(),  # Normalize to [0,1]
-        rec_ranking=lambda df: df["score"]
-        .rank(method="first", ascending=False)
-        .astype(int),
-    )
-    .sort_values(["rec_ranking"], ascending=[True])
-)
-
-# Get top-K popular items for evaluation
-top_popular_items_df = popular_items_df.head(cfg.eval.top_k_retrieve)
-```
-
-This creates a ranking where the most frequently interacted items get the highest scores.
-
-### Generating Recommendations for All Users
-
-For evaluation, we need to generate recommendations for every user in the validation set:
-
-```python
-# Create recommendations: same popular items for every user
-unique_users = val_df[cfg.data.user_col].unique()
-recommendations_df = pd.concat([
-    top_popular_items_df.assign(**{cfg.data.user_col: user})
-    for user in unique_users
-], ignore_index=True)
-```
-
-This gives every user the same set of popular items, which is exactly what a popularity-based recommender should do.
-
-## Complete Evaluation Workflow
-
-Here's how everything comes together in the `010-baseline-popular.ipynb` notebook:
-
-### 1. Setup and Configuration
-
-```python
-from src.cfg import ConfigLoader
-from src.eval import (
-    create_label_df, log_classification_metrics, 
-    log_ranking_metrics, merge_recs_with_target,
-)
-
-# Initialize configuration with MLflow
-cfg = ConfigLoader("../cfg/common.yaml")
-cfg.run.run_name = "001-baseline-popular"
-cfg.run.experiment_name = "Retrieve - Binary"
-cfg.init()  # Automatic MLflow setup
-```
-
-### 2. Data Preparation
-
-```python
-# Load preprocessed data with negative samples
-train_df = pd.read_parquet(cfg.data.train_features_neg_fp)
-val_df = pd.read_parquet(cfg.data.val_features_neg_fp)
-
-# Create ground truth labels for evaluation
-label_df = create_label_df(
-    val_df,
-    user_col=cfg.data.user_col,
-    item_col=cfg.data.item_col,
-    rating_col=cfg.data.rating_col,
-    timestamp_col=cfg.data.timestamp_col,
-)
-```
-
-### 3. Model Implementation and Evaluation
-
-```python
-# Calculate popularity scores and generate recommendations
-popular_items_df = (
-    train_df.groupby(cfg.data.item_col, as_index=False)
-    .size()
-    .assign(
-        score=lambda df: df["size"] / df["size"].max(),
-        rec_ranking=lambda df: df["score"].rank(method="first", ascending=False).astype(int),
-    )
-    .sort_values(["rec_ranking"], ascending=[True])
-)
-
-# Generate recommendations for all users
-unique_users = val_df[cfg.data.user_col].unique()
-recommendations_df = pd.concat([
-    popular_items_df.head(cfg.eval.top_k_retrieve).assign(**{cfg.data.user_col: user})
-    for user in unique_users
-], ignore_index=True)
-
-# Merge recommendations with ground truth
-eval_df = merge_recs_with_target(
-    recommendations_df, label_df,
-    k=cfg.eval.top_k_retrieve,
-    user_col=cfg.data.user_col,
-    item_col=cfg.data.item_col,
-    rating_col=cfg.data.rating_col,
-)
-
-# Log ranking metrics
-ranking_report = log_ranking_metrics(cfg, eval_df)
-```
-
-### 4. Classification Metrics
-
-We also evaluate the model's ability to predict binary relevance:
-
-```python
-# Prepare data for classification evaluation
-eval_classification_df = pd.merge(
-    val_df,
-    popular_items_df[[cfg.data.item_col, "score"]],
-    on=[cfg.data.item_col],
-    how="left",
-    validate="m:1",
-).assign(label=lambda df: df[cfg.data.rating_col].gt(0).astype(int))
-
-# Log classification metrics
-classification_report = log_classification_metrics(
-    cfg, eval_classification_df, 
-    target_col="label", 
-    prediction_col="score"
-)
-```
-
-### 5. Experiment Cleanup
-
-```python
-# Log all configuration parameters and end the MLflow run
-if cfg.run.log_to_mlflow:
-    cfg.log_config_to_mlflow()
-    mlflow.end_run()
-```
-
-## Understanding the Results
-
-After running the baseline, you'll see several types of outputs:
-
-### MLflow Experiment Tracking
-- **Parameters**: All configuration values automatically logged
-- **Metrics**: Ranking and classification metrics with step-wise tracking
-- **Artifacts**: Evidently HTML reports for detailed analysis
-
-### Evidently Reports
-The framework generates comprehensive HTML reports showing:
-- Precision@K and Recall@K curves
-- NDCG scores across different K values
-- Personalization metrics
-- ROC curves and precision-recall curves
-
-### Baseline Performance Expectations
-For a popularity-based recommender, expect:
-- **Low personalization scores**: Everyone gets the same recommendations
-- **Moderate precision@K**: Popular items have broad appeal
-- **Variable recall**: Depends on how well popular items match user preferences
-- **Decent ROC-AUC**: Popular items are often relevant
-
-## Why This Foundation Matters
-
-This evaluation framework and baseline implementation provide several critical benefits:
-
-### 1. **Reproducible Experiments**
-Every experiment is fully tracked with:
-- Complete configuration parameters
-- Evaluation metrics across multiple dimensions
-- Generated artifacts for detailed analysis
-
-### 2. **Systematic Model Development**
-The framework enables you to:
-- Compare models objectively using consistent metrics
-- Track improvements over time
-- Identify which changes actually help
-
-### 3. **Production Readiness**
-The evaluation patterns you establish here will:
-- Scale to more complex models
-- Integrate with production monitoring
-- Support A/B testing frameworks
-
-### 4. **Debugging and Validation**
-A working baseline helps you:
-- Validate that your evaluation pipeline works correctly
-- Identify data quality issues early
-- Establish reasonable performance expectations
-
-## Configuration Management Best Practices
-
-The configuration-driven approach offers several advantages:
-
-### Centralized Configuration
 ```yaml
 # cfg/common.yaml
-eval:
-  top_k_retrieve: 100
-  top_k_rerank: 10
-  min_roc_auc: 0.5
-
 run:
   log_to_mlflow: true
   experiment_name: "Retrieve - Binary"
 ```
 
-### Easy Experimentation
-```python
-# Try different evaluation settings
-cfg.eval.top_k_retrieve = 50
-cfg.eval.top_k_rerank = 5
+## Recap
 
-# Or different experiment tracking
-cfg.run.experiment_name = "Retrieve - Rating"
-cfg.train.label_format = "rating"
-```
+In this chapter, we established the critical evaluation infrastructure that will power your recommendation system development. Here's what we covered:
 
-### Automatic Documentation
-Every MLflow run captures the complete configuration, making it easy to reproduce results or understand what changed between experiments.
+- **The fundamental evaluation challenges**: We explored why recommendation systems are uniquely difficult to evaluate, from the counterfactual problem (we only see what users actually encountered) to the complexities of ranking, personalization, and temporal dynamics that make simple accuracy metrics inadequate.
+- **Online vs offline evaluation strategy**: We established the principle that while online metrics are the ultimate business goal, offline evaluation serves as our rapid iteration tool. The key insight: offline improvements don't always translate to online wins, but they provide essential guidance for systematic development.
+- **Comprehensive evaluation metrics**: We implemented a multi-dimensional framework using Evidently that captures ranking quality (Precision@K, Recall@K, NDCG@K), diversity (Personalization), and classification performance (ROC-AUC, Precision-Recall curves). We also justified why classification metrics make sense for recommendation systems when framed as binary relevance prediction.
+- **Popularity-based baseline implementation**: We built our first recommender system—a simple but effective popularity-based model that assigns the most frequently interacted items to all users. This baseline serves as our performance benchmark and validates that our evaluation pipeline works correctly.
+- **MLflow experiment tracking integration**: We created a configuration-driven system that automatically handles experiment setup, parameter logging, and artifact storage. This infrastructure encourages bold experimentation by providing the safety net of full reproducibility.
+
+::: {.callout-note appearance="simple"}
+## Code
+All code for this chapter is available in the `notebooks/010-baseline-popular.ipynb` file and the `src/eval/` directory in the [project repository](https://github.com/dvquy13/recsys-seq-model).
+:::
 
 ## What's Next
 
-With your evaluation framework and baseline model in place, you have:
+In [Chapter 5](../c5/index.qmd), we'll build on this foundation to implement sequence-based recommendation models that can capture temporal patterns in user behavior. The evaluation framework you've built here will be essential for measuring whether these more complex models actually improve upon our simple baseline. When it does, the results would be hard to miss:
 
-- **A robust evaluation pipeline** that can assess recommendation quality across multiple dimensions
-- **MLflow integration** for systematic experiment tracking and comparison
-- **A working baseline model** that establishes performance expectations
-- **The foundation** for building and evaluating more sophisticated models
+::: {.column-page}
+![](../static/model-compare.png)
+:::
 
-In [Chapter 5](../c5/index.qmd), we'll build on this foundation to implement sequence-based recommendation models that can capture temporal patterns in user behavior. The evaluation framework you've built here will be essential for measuring whether these more complex models actually improve upon our simple baseline.
-
-## Recap
-
-This chapter established the critical evaluation infrastructure for your recommendation system:
-
-- **Comprehensive metrics**: Ranking, classification, and diversity metrics using Evidently
-- **Seamless MLflow integration**: Configuration-driven experiment tracking
-- **Baseline implementation**: Popularity-based recommender as a performance benchmark
-- **Complete workflow**: From data preparation to metric logging and experiment cleanup
-
-The evaluation framework you've built is production-ready and will scale with you as you develop more sophisticated models. Most importantly, you now have a systematic way to measure progress and make data-driven decisions about model improvements.
+As you can see, MLflow can help compare model iterations easily 😉.
 
 ---
 
