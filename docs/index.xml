@@ -12,8 +12,8 @@
 <generator>quarto-1.6.40</generator>
 <lastBuildDate>Mon, 26 May 2025 16:00:00 GMT</lastBuildDate>
 <item>
-  <title>Building Real-time RecSys Chapter 4 - Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation</title>
-  <link>https://dvquys.com/projects/real-time-seq-recsys/c4/</link>
+  <title>Implement a RecSys Chapter 4 - Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation</title>
+  <link>https://dvquys.com/projects/implement-recsys/c4/</link>
   <description><![CDATA[ 
 
 
@@ -22,8 +22,8 @@
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>In <a href="../../../projects/real-time-seq-recsys/c3/index.html">Chapter 3</a>, inspired by how Word2Vec cleverly samples out-of-context words to train its language model, we implemented our own popularity-based sampling strategy to generate negative samples for our training dataset. Now we’re ready to tackle one of the most critical aspects of any ML project: <strong>evaluation</strong>.</p>
-<p>We will discuss building a comprehensive evaluation framework, setting up MLflow for experiment tracking, and implementing a popularity-based baseline model to illustrate the end-to-end process. A solid measuring foundation provides the groundwork for systematic model development—you’ll use these tools throughout your different attempts at improving the model performance.</p>
+<p>In <a href="../../../projects/implement-recsys/c3/index.html">Chapter 3</a>, inspired by how Word2Vec cleverly samples out-of-context words to train its language model, we implemented our own popularity-based sampling strategy to generate negative samples for our training dataset. Now we’re ready to tackle one of the most critical aspects of any ML project: <strong>evaluation</strong>.</p>
+<p>We will discuss building our evaluation framework, setting up MLflow for experiment tracking, and implementing a popularity-based baseline model to illustrate the end-to-end process. A solid measuring foundation provides the groundwork for systematic model development—you’ll use these tools throughout all your different attempts at improving the model performance.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -85,8 +85,8 @@ Code
 <h2 class="anchored" data-anchor-id="the-baseline-recommender-system">The baseline recommender system</h2>
 <p>To demonstrate how we evaluate a model, let’s first build a baseline one for easier illustration. This will serve as a sanity check for our evaluation framework and provide a performance benchmark for more complex models to beat.</p>
 <p>In the world of RecSys, the most popular base line is “popular” recommender (no pun intended). It’s simple, fast, easy to implement, easy to understand for users, and sometimes quite effective, especialy compared to the effort required to put up.</p>
-<p>To get the most popular items, we only need a few lines of Pandas code to group by item and count the number of interactions: <img src="https://dvquys.com/projects/real-time-seq-recsys/c4/pop-impl-1.png" class="img-fluid"></p>
-<p>Then, for each of the user in our validation set, we can simply assign the most popular items to them: <img src="https://dvquys.com/projects/real-time-seq-recsys/c4/pop-impl-2.png" class="img-fluid"></p>
+<p>To get the most popular items, we only need a few lines of Pandas code to group by item and count the number of interactions: <img src="https://dvquys.com/projects/implement-recsys/c4/pop-impl-1.png" class="img-fluid"></p>
+<p>Then, for each of the user in our validation set, we can simply assign the most popular items to them: <img src="https://dvquys.com/projects/implement-recsys/c4/pop-impl-2.png" class="img-fluid"></p>
 <p>That’s it. We now have recommendations provided for our users. Now we can move to the actual evaluation part.</p>
 </section>
 <section id="how-we-set-up-evaluation-for-our-project" class="level2 page-columns page-full">
@@ -369,7 +369,7 @@ font-style: inherit;">return</span> report</span></code></pre></div>
 <p>There is also a <code>log_classification_metrics</code> function that follows the similar pattern, but for the task of evaluation classification accuracy.</p>
 <p>The output is we have HTML report like this:</p>
 <div class="column-page">
-<p><img src="https://dvquys.com/projects/real-time-seq-recsys/c4/evidently-classification.png" class="img-fluid"></p>
+<p><img src="https://dvquys.com/projects/implement-recsys/c4/evidently-classification.png" class="img-fluid"></p>
 </div>
 <p>Do you notice that those report files are available in a nice web-based UI? If you are not familiar with MLflow, the next section will explain.</p>
 </section>
@@ -513,7 +513,7 @@ background-color: null;
 font-style: inherit;"># e.g., "train.learning_rate": 0.01</span></span></code></pre></div>
 <p>The result is we can access our experiment parameters like this:</p>
 <div class="column-page">
-<p><img src="https://dvquys.com/projects/real-time-seq-recsys/c4/mlflow-overview.png" class="img-fluid"></p>
+<p><img src="https://dvquys.com/projects/implement-recsys/c4/mlflow-overview.png" class="img-fluid"></p>
 </div>
 <p>However, when we starts to develop our notebook, we may not want to log to MLflow. We can easily control this by setting the <code>log_to_mlflow</code> flag to <code>false</code> in our configuration file:</p>
 <div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb7-1"><span class="co" style="color: #5E5E5E;
@@ -578,13 +578,13 @@ Code
 <h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
 <p>In <a href="../c5/index.qmd">Chapter 5</a>, we’ll build on this foundation to implement sequence-based recommendation models that can capture temporal patterns in user behavior. The evaluation framework you’ve built here will be essential for measuring whether these more complex models actually improve upon our simple baseline. When it does, the results would be hard to miss:</p>
 <div class="column-page">
-<p><img src="https://dvquys.com/projects/real-time-seq-recsys/static/model-compare.png" class="img-fluid"></p>
+<p><img src="https://dvquys.com/projects/implement-recsys/static/model-compare.png" class="img-fluid"></p>
 </div>
 <p>As you can see, MLflow can help compare model iterations easily 😉.</p>
 <hr>
 <p><br> If you find this tutorial helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
-<p>Quy, Dinh. (May 2025). Building Real-time RecSys Chapter 4 - Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation. dvquys.com. https://dvquys.com/projects/real-time-seq-recsys/c4/.</p>
+<p>Quy, Dinh. (May 2025). Implement a RecSys Chapter 4 - Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation. dvquys.com. https://dvquys.com/projects/implement-recsys/c4/.</p>
 </blockquote>
 
 
@@ -599,14 +599,14 @@ Code
 </ol>
 </section></div> ]]></description>
   <category>recsys</category>
-  <category>recsys-real-time-series</category>
-  <guid>https://dvquys.com/projects/real-time-seq-recsys/c4/</guid>
+  <category>implement-recsys-series</category>
+  <guid>https://dvquys.com/projects/implement-recsys/c4/</guid>
   <pubDate>Mon, 26 May 2025 16:00:00 GMT</pubDate>
-  <media:content url="https://dvquys.com/projects/real-time-seq-recsys/static/evaluation-framework.png" medium="image" type="image/png"/>
+  <media:content url="https://dvquys.com/projects/implement-recsys/static/evaluation-framework.png" medium="image" type="image/png"/>
 </item>
 <item>
-  <title>Building Real-time RecSys Chapter 3 - Negative Sampling</title>
-  <link>https://dvquys.com/projects/real-time-seq-recsys/c3/</link>
+  <title>Implement a RecSys Chapter 3 - Negative Sampling</title>
+  <link>https://dvquys.com/projects/implement-recsys/c3/</link>
   <description><![CDATA[ 
 
 
@@ -615,12 +615,12 @@ Code
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>In <a href="../../../projects/real-time-seq-recsys/c2/index.html">Chapter 2</a>, we dug into our Amazon dataset and built a solid feature preprocessing pipeline. But we’re not ready to train any models yet. We’re missing something crucial: the labels that will teach our model the difference between what users want and what they don’t.</p>
+<p>In <a href="../../../projects/implement-recsys/c2/index.html">Chapter 2</a>, we dug into our Amazon dataset and built a solid feature preprocessing pipeline. But we’re not ready to train any models yet. We’re missing something crucial: the labels that will teach our model the difference between what users want and what they don’t.</p>
 <p>We already know which items users bought. So here’s a natural idea: let’s turn this into a sequence prediction problem. Show the model a user’s past actions, then ask it to predict what comes next.</p>
 <p>If this idea of predicting next thing based on a sequence of things sounds familiar, then it’s expected. This is exactly what researchers in natural language processing figured out years ago. Take Word2Vec. It’s a simple but brilliant model that learns word relationships by studying which words hang out together. Word2Vec breaks a sentence into input-output pairs where the surrounding words are the input and the hidden target word is what you’re trying to predict.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://dvquys.com/projects/real-time-seq-recsys/c3/skipgram.webp" class="img-fluid figure-img"></p>
+<p><img src="https://dvquys.com/projects/implement-recsys/c3/skipgram.webp" class="img-fluid figure-img"></p>
 <figcaption>Source: <a href="https://medium.com/@zafaralibagh6/a-simple-word2vec-tutorial-61e64e38a6a1">A simple Word2Vec tutorial</a></figcaption>
 </figure>
 </div>
@@ -888,7 +888,7 @@ background-color: null;
 font-style: inherit;"># Match positive count</span></span></code></pre></div>
 <p>Like other crucial parts of our pipeline, let’s test this with some mock data to make sure it works.</p>
 <div class="column-page">
-<p><img src="https://dvquys.com/projects/real-time-seq-recsys/c3/gen-negative-samples-test.png" class="img-fluid"></p>
+<p><img src="https://dvquys.com/projects/implement-recsys/c3/gen-negative-samples-test.png" class="img-fluid"></p>
 </div>
 </section>
 </section>
@@ -995,7 +995,7 @@ font-style: inherit;">return</span> neg_df</span></code></pre></div>
 <h2 class="anchored" data-anchor-id="concat-and-re-split-train-test">Concat and re-split train-test</h2>
 <p>After adding features to the negative samples, we can combine them with the positive samples. Then we re-split the dataset based on the timestamp milestone we used in our original train-test split.</p>
 <div class="column-page">
-<p><img src="https://dvquys.com/projects/real-time-seq-recsys/c3/concat-pos-neg.png" class="img-fluid"></p>
+<p><img src="https://dvquys.com/projects/implement-recsys/c3/concat-pos-neg.png" class="img-fluid"></p>
 </div>
 </section>
 <section id="recap" class="level2">
@@ -1028,7 +1028,7 @@ Code
 <hr>
 <p><br> If you find this tutorial helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
-<p>Quy, Dinh. (May 2025). Building Real-time RecSys Chapter 3 - Negative Sampling. dvquys.com. https://dvquys.com/projects/real-time-seq-recsys/c3/.</p>
+<p>Quy, Dinh. (May 2025). Implement a RecSys Chapter 3 - Negative Sampling. dvquys.com. https://dvquys.com/projects/implement-recsys/c3/.</p>
 </blockquote>
 
 
@@ -1036,14 +1036,14 @@ Code
 
  ]]></description>
   <category>recsys</category>
-  <category>recsys-real-time-series</category>
-  <guid>https://dvquys.com/projects/real-time-seq-recsys/c3/</guid>
+  <category>implement-recsys-series</category>
+  <guid>https://dvquys.com/projects/implement-recsys/c3/</guid>
   <pubDate>Sun, 25 May 2025 16:00:00 GMT</pubDate>
-  <media:content url="https://dvquys.com/projects/real-time-seq-recsys/static/negative-sampling.png" medium="image" type="image/png"/>
+  <media:content url="https://dvquys.com/projects/implement-recsys/static/negative-sampling.png" medium="image" type="image/png"/>
 </item>
 <item>
-  <title>Building Real-time RecSys Chapter 2 - Understanding the Data and Feature Engineering</title>
-  <link>https://dvquys.com/projects/real-time-seq-recsys/c2/</link>
+  <title>Implement a RecSys Chapter 2 - Understanding the Data and Feature Engineering</title>
+  <link>https://dvquys.com/projects/implement-recsys/c2/</link>
   <description><![CDATA[ 
 
 
@@ -1052,7 +1052,7 @@ Code
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>In <a href="../../../projects/real-time-seq-recsys/c1/index.html">Chapter 1</a>, we set up our development environment and explored the project architecture. Now it’s time to dive into the heart of any recommendation system: <strong>data</strong>. The quality of our recommendations depends entirely on how well we understand, process, and engineer features from our data.</p>
+<p>In <a href="../../../projects/implement-recsys/c1/index.html">Chapter 1</a>, we set up our development environment and explored the project architecture. Now it’s time to dive into the heart of any recommendation system: <strong>data</strong>. The quality of our recommendations depends entirely on how well we understand, process, and engineer features from our data.</p>
 <p>This chapter focuses on the data pipeline from raw data to model-ready features. We’ll explore the Amazon product dataset, understand user-item interaction sequences, and build the feature engineering pipeline that will power our session-based recommender.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -1078,10 +1078,10 @@ Code
 </ol>
 <p>Among the well-known public datasets, I chose the <a href="https://amazon-reviews-2023.github.io/">Amazon Reviews 2023</a> dataset from the McAuley Lab, specifically the “Books” category. Beyond the characteristics above, this dataset has other useful features—like reviews for both users and items—with plenty of observations to work with.</p>
 <div class="column-page">
-<p><img src="https://dvquys.com/projects/real-time-seq-recsys/static/dataset.png" class="img-fluid"></p>
+<p><img src="https://dvquys.com/projects/implement-recsys/static/dataset.png" class="img-fluid"></p>
 </div>
 <div class="column-page">
-<p><img src="https://dvquys.com/projects/real-time-seq-recsys/static/dataset-info.png" class="img-fluid"></p>
+<p><img src="https://dvquys.com/projects/implement-recsys/static/dataset-info.png" class="img-fluid"></p>
 </div>
 <p>The main schema of the dataset is as simple as follows:</p>
 <div class="sourceCode" id="annotated-cell-1" style="background: #f1f3f5;"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-1-1"><span class="co" style="color: #5E5E5E;
@@ -1326,7 +1326,7 @@ len(sample_users)=19,734 len(sample_items)=7,388</code></pre>
 </div>
 <p>In the end, we won’t have exactly 10,000 users, but the numbers will be close. The distribution of interactions is shown below:</p>
 <div class="column-page">
-<p><a href="../static/sample-interaction-dist.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://dvquys.com/projects/real-time-seq-recsys/static/sample-interaction-dist.png" class="img-fluid"></a></p>
+<p><a href="../static/sample-interaction-dist.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://dvquys.com/projects/implement-recsys/static/sample-interaction-dist.png" class="img-fluid"></a></p>
 </div>
 </section>
 <section id="train-test-split" class="level2 page-columns page-full">
@@ -1334,7 +1334,7 @@ len(sample_users)=19,734 len(sample_items)=7,388</code></pre>
 <p>After sampling our data, we need to split it into a train and validation dataset to evaluate our models. The validation dataset plays a critical role in providing an estimate of how well the model performs on unseen data.</p>
 <p>There are two main types of train-test-split in RecSys:</p>
 <div class="column-page">
-<p><img src="https://dvquys.com/projects/real-time-seq-recsys/static/train-test-split.png" class="img-fluid"></p>
+<p><img src="https://dvquys.com/projects/implement-recsys/static/train-test-split.png" class="img-fluid"></p>
 </div>
 <p>From what I’ve seen, last-one-out is used more in academic settings, while <strong>absolute timestamp</strong> is more common in industry. This makes sense from the perspective that any model deployed in production gets tested against future data.</p>
 </section>
@@ -1570,7 +1570,7 @@ font-style: inherit;">1</span>,</span>
 <span id="cb8-20">)</span>
 <span id="cb8-21"></span>
 <span id="cb8-22">display(df_with_sequences)</span></code></pre></div>
-<p><a href="./sequence-gen-test.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="https://dvquys.com/projects/real-time-seq-recsys/c2/sequence-gen-test.png" class="img-fluid"></a></p>
+<p><a href="./sequence-gen-test.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="https://dvquys.com/projects/implement-recsys/c2/sequence-gen-test.png" class="img-fluid"></a></p>
 <p>As you can see, the above item_sequence column contains the sequence of items in chronological order which holds the context for the model to understand user preferences and make sequential predictions.</p>
 <p>In this project, we use the user’s last 10 items as the sequence length, but this is configurable. The choice depends on experimentation, but generally there’s a trade-off: longer sequences provide more context but use more memory, while shorter sequences focus on recent items and process faster.</p>
 <p>Do take note that we need to pad sequences to the same length so we can batch process them in our PyTorch model.</p>
@@ -1610,11 +1610,11 @@ Code
 </section>
 <section id="whats-next" class="level2">
 <h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
-<p>In <a href="../../../projects/real-time-seq-recsys/c3/index.html">Chapter 3</a>, we’ll tackle the critical challenge of <strong>negative sampling</strong>. If our model only sees positive interactions (ratings), it can’t learn meaningful patterns for generalization. We need to generate negative examples so the model can distill the patterns by learning to distinguish between positive and negative interactions.</p>
+<p>In <a href="../../../projects/implement-recsys/c3/index.html">Chapter 3</a>, we’ll tackle the critical challenge of <strong>negative sampling</strong>. If our model only sees positive interactions (ratings), it can’t learn meaningful patterns for generalization. We need to generate negative examples so the model can distill the patterns by learning to distinguish between positive and negative interactions.</p>
 <hr>
 <p><br> If you find this tutorial helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
-<p>Quy, Dinh. (May 2025). Building Real-time RecSys Chapter 2 - Understanding the Data and Feature Engineering. dvquys.com. https://dvquys.com/projects/real-time-seq-recsys/c2/.</p>
+<p>Quy, Dinh. (May 2025). Implement a RecSys Chapter 2 - Understanding the Data and Feature Engineering. dvquys.com. https://dvquys.com/projects/implement-recsys/c2/.</p>
 </blockquote>
 
 
@@ -1622,14 +1622,14 @@ Code
 
  ]]></description>
   <category>recsys</category>
-  <category>recsys-real-time-series</category>
-  <guid>https://dvquys.com/projects/real-time-seq-recsys/c2/</guid>
+  <category>implement-recsys-series</category>
+  <guid>https://dvquys.com/projects/implement-recsys/c2/</guid>
   <pubDate>Sat, 24 May 2025 16:00:00 GMT</pubDate>
-  <media:content url="https://dvquys.com/projects/real-time-seq-recsys/static/L2%20-%20Data%20signals.excalidraw.png" medium="image" type="image/png"/>
+  <media:content url="https://dvquys.com/projects/implement-recsys/static/L2%20-%20Data%20signals.excalidraw.png" medium="image" type="image/png"/>
 </item>
 <item>
-  <title>Building Real-time RecSys Chapter 1 - Introduction and Project Overview</title>
-  <link>https://dvquys.com/projects/real-time-seq-recsys/c1/</link>
+  <title>Implement a RecSys Chapter 1 - Introduction and Project Overview</title>
+  <link>https://dvquys.com/projects/implement-recsys/c1/</link>
   <description><![CDATA[ 
 
 
@@ -1638,9 +1638,9 @@ Code
 
 <section id="introduction" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Imagine you’re building an e-commerce site and your CEO asks: <em>“Why don’t we show personalized recommendations that update in real-time as users browse?”</em> You think to yourself—sounds simple enough, but then reality hits: How do you capture user intent from their session behavior? How do you serve recommendations fast enough to feel real-time? How do you handle the complexity of sequence modeling at scale?</p>
-<p>If this sounds familiar, this tutorial series is for you.</p>
-<p>Over the next several chapters, I’ll walk you through building a complete <strong>real-time recommendation system</strong> that learns from user behavior sequences. We’ll go from raw data to a complete recommender system that personalizes recommendations as users interact with your platform.</p>
+<p>Imagine you’re browsing an e-commerce site and notice something remarkable: the recommendations update almost instantly as you click through products. You view a pair of headphones, and suddenly complementary items appear. You check out a laptop, and the “you might also like” section refreshes with relevant accessories. You think to yourself—<em>“Wow, how do they do that?”</em> Then curiosity kicks in: How do they capture your evolving intent so quickly? How do they serve personalized suggestions fast enough to feel real-time? How do they handle the complexity of understanding your browsing patterns on the fly?</p>
+<p>If you’ve ever have those questions, this tutorial series is for you.</p>
+<p>Over the next several chapters, I’ll walk you through building an end-to-end <strong>recommendation system</strong> that reacts in real-time based on user behavior sequences. We’ll go from raw data to a complete recommender system that personalizes recommendations as users interact with your platform.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1656,12 +1656,13 @@ Enough Talking, Show Me the Code!
 </div>
 <p>For those who aren’t well aware of what a recommender system is, here is a quick recap. Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.</p>
 <div class="column-page">
-<p><a href="../static/recommender system.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://dvquys.com/projects/real-time-seq-recsys/static/recommender system.png" class="img-fluid"></a></p>
+<p><a href="../static/recommender system.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://dvquys.com/projects/implement-recsys/static/recommender system.png" class="img-fluid"></a></p>
 </div>
-<p>From a business standpoint, the primary goals of a recommender system are to create a sense of “we understand you” for each user and to drive revenue through personalized cross-selling opportunities. By tailoring recommendations to each user, companies can boost engagement and average order value. From the user’s perspective, these systems help uncover content or products they might never have discovered on their own and save time by surfacing the most relevant options up front.</p>
+<p>From the user’s perspective, these systems help uncover content or products they might never have discovered on their own and save time by surfacing the most relevant options up front.</p>
+<p>From a business standpoint, the primary goals of a recommender system are to create a sense of “we understand you” for each user and to drive revenue through personalized cross-selling opportunities. By tailoring recommendations to each user, companies can boost engagement and average order value.</p>
 <p>In practice, recommender systems power some of the world’s largest digital platforms. For example, Amazon’s “Frequently Bought Together” suggestions guide shoppers toward complementary products, Facebook uses recommendation algorithms to prioritize posts and ads in users’ feeds, and Netflix’s home screen is largely driven by personalized movie and show recommendations.</p>
 <div class="column-page">
-<p><img src="https://dvquys.com/projects/real-time-seq-recsys/static/recsys-biz-value.gif" class="img-fluid"></p>
+<p><img src="https://dvquys.com/projects/implement-recsys/static/recsys-biz-value.gif" class="img-fluid"></p>
 </div>
 <p>The impact of these systems is profound: According to <a href="https://www.mckinsey.com/industries/retail/our-insights/how-retailers-can-keep-up-with-consumers">this report from McKinsey</a>, roughly 75 percent of Netflix viewing hours come from recommended titles, 35 percent of Amazon’s purchases are influenced by its recommendations, and Netflix alone <a href="https://dl.acm.org/doi/pdf/10.1145/2843948">saves around $1 billion per year</a> through improved user retention and engagement. These metrics underscore why recommender systems have become a critical component of modern digital businesses.</p>
 </section>
@@ -1678,7 +1679,7 @@ Enough Talking, Show Me the Code!
 <div class="page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
-<p class="page-columns page-full"><a href="../static/session-based retriever - demo v2.gif" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-2" title="The Demo"><img src="https://dvquys.com/projects/real-time-seq-recsys/static/session-based retriever - demo v2.gif" class="img-fluid figure-img column-page" alt="The Demo"></a></p>
+<p class="page-columns page-full"><a href="../static/session-based retriever - demo v2.gif" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-2" title="The Demo"><img src="https://dvquys.com/projects/implement-recsys/static/session-based retriever - demo v2.gif" class="img-fluid figure-img column-page" alt="The Demo"></a></p>
 <figcaption>The Demo</figcaption>
 </figure>
 </div>
@@ -1689,11 +1690,11 @@ Enough Talking, Show Me the Code!
 <p>This tutorial series is designed for:</p>
 <ul>
 <li><strong>Data Scientists</strong> looking beyond training models and into ML services</li>
-<li><strong>ML Engineers</strong> building scalable recommendation systems<br>
-</li>
+<li><strong>ML Engineers</strong> building scalable recommendation systems</li>
 <li><strong>Backend Developers</strong> interested in ML/RecSys architecture</li>
 <li><strong>Anyone</strong> curious about a modern and real-time end-to-end RecSys project</li>
 </ul>
+<p>All in all, it’s good to have some basic knowledge of Machine Learning and Python to follow along.</p>
 </section>
 <section id="session-based-vs-traditional-recommendations" class="level2">
 <h2 class="anchored" data-anchor-id="session-based-vs-traditional-recommendations">Session-Based vs Traditional Recommendations</h2>
@@ -1717,8 +1718,8 @@ Enough Talking, Show Me the Code!
 </ul>
 </section>
 </section>
-<section id="why-sequence-modeling-matters" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="why-sequence-modeling-matters">Why Sequence Modeling Matters</h2>
+<section id="why-session-based-recommendations-matters" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="why-session-based-recommendations-matters">Why Session-based Recommendations Matters</h2>
 <p>User behavior is inherently sequential. Consider an e-commerce browsing session:</p>
 <ol type="1">
 <li>User searches for “wireless headphones”</li>
@@ -1730,14 +1731,14 @@ Enough Talking, Show Me the Code!
 <div class="page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
-<p class="page-columns page-full"><a href="../static/L2 - Data signals.excalidraw.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-3" title="Data signals"><img src="https://dvquys.com/projects/real-time-seq-recsys/static/L2 - Data signals.excalidraw.png" class="img-fluid figure-img column-page" alt="Data signals"></a></p>
+<p class="page-columns page-full"><a href="../static/L2 - Data signals.excalidraw.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-3" title="Data signals"><img src="https://dvquys.com/projects/implement-recsys/static/L2 - Data signals.excalidraw.png" class="img-fluid figure-img column-page" alt="Data signals"></a></p>
 <figcaption>Data signals</figcaption>
 </figure>
 </div>
 </div>
 </section>
-<section id="real-time-architecture-a-simplified-payload-approach" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="real-time-architecture-a-simplified-payload-approach">Real-Time Architecture: A Simplified Payload Approach</h2>
+<section id="how-to-react-in-real-time-a-simplified-payload-approach" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="how-to-react-in-real-time-a-simplified-payload-approach">How to react in real-time: A Simplified Payload Approach</h2>
 <p>In production, real-time recommendation systems typically leverage <strong>streaming architectures</strong> with event pipelines (Kafka, Kinesis, etc.) that process user interactions. The streaming system is normally built in a centralized manner by a platform team with the aim to provide real-time data processing capabilities to multiple downstream usages. This approach also ensures scalability and reliability.</p>
 <p>However, for the purpose of this tutorial, we’ll use the <strong>simplified request-payload approach</strong> to focus on the ML aspects rather than streaming infrastructure complexity.</p>
 <p>Basically we would include the real-time events in the payload of the requests coming in to RecSys APIs. In real-world, implementation can be done by frontend capturing user interactions locally (clicks, views, etc.) and includes recent session history in each API request.</p>
@@ -1746,7 +1747,7 @@ Enough Talking, Show Me the Code!
 <div class="page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
-<p class="page-columns page-full"><a href="../static/api-payload.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-4" title="Example request payload"><img src="https://dvquys.com/projects/real-time-seq-recsys/static/api-payload.png" class="img-fluid figure-img column-page" alt="Example request payload"></a></p>
+<p class="page-columns page-full"><a href="../static/api-payload.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-4" title="Example request payload"><img src="https://dvquys.com/projects/implement-recsys/static/api-payload.png" class="img-fluid figure-img column-page" alt="Example request payload"></a></p>
 <figcaption>Example request payload</figcaption>
 </figure>
 </div>
@@ -1917,11 +1918,11 @@ font-style: inherit;"># Start the frontend demo</span></span></code></pre></div>
 </section>
 <section id="whats-next" class="level2">
 <h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
-<p>In <a href="../../../projects/real-time-seq-recsys/c2/index.html">Chapter 2</a>, we’ll get our hands dirty while setting up the input data in a format that’s designed for sequence modeling.</p>
+<p>In <a href="../../../projects/implement-recsys/c2/index.html">Chapter 2</a>, we’ll get our hands dirty while setting up the input data in a format that’s designed for sequence modeling.</p>
 <hr>
 <p><br> If you find this tutorial helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
-<p>Quy, Dinh. (May 2025). Building Real-time RecSys Chapter 1 - Introduction and Project Overview. dvquys.com. https://dvquys.com/projects/real-time-seq-recsys/c1/.</p>
+<p>Quy, Dinh. (May 2025). Implement a RecSys Chapter 1 - Introduction and Project Overview. dvquys.com. https://dvquys.com/projects/implement-recsys/c1/.</p>
 </blockquote>
 
 
@@ -1935,10 +1936,10 @@ font-style: inherit;"># Start the frontend demo</span></span></code></pre></div>
 </ol>
 </section></div> ]]></description>
   <category>recsys</category>
-  <category>recsys-real-time-series</category>
-  <guid>https://dvquys.com/projects/real-time-seq-recsys/c1/</guid>
+  <category>implement-recsys-series</category>
+  <guid>https://dvquys.com/projects/implement-recsys/c1/</guid>
   <pubDate>Fri, 23 May 2025 16:00:00 GMT</pubDate>
-  <media:content url="https://dvquys.com/projects/real-time-seq-recsys/static/recommender%20system.png" medium="image" type="image/png"/>
+  <media:content url="https://dvquys.com/projects/implement-recsys/static/recommender%20system.png" medium="image" type="image/png"/>
 </item>
 <item>
   <title>Building a Conversational Assistant for Restaurant Discovery and Booking</title>

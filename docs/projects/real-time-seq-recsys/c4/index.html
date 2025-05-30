@@ -245,20 +245,55 @@ cookieconsent.run({
   <li><a href="#diversity-metrics" id="toc-diversity-metrics" class="nav-link" data-scroll-target="#diversity-metrics">Diversity Metrics</a></li>
   <li><a href="#classification-metrics" id="toc-classification-metrics" class="nav-link" data-scroll-target="#classification-metrics">Classification Metrics</a></li>
   </ul></li>
-  <li><a href="#the-baseline-recommender-system" id="toc-the-baseline-recommender-system" class="nav-link" data-scroll-target="#the-baseline-recommender-system">The baseline recommender system</a></li>
   <li><a href="#how-we-set-up-evaluation-for-our-project" id="toc-how-we-set-up-evaluation-for-our-project" class="nav-link" data-scroll-target="#how-we-set-up-evaluation-for-our-project">How We Set Up Evaluation for our Project</a>
   <ul class="collapse">
   <li><a href="#core-evaluation-utilities" id="toc-core-evaluation-utilities" class="nav-link" data-scroll-target="#core-evaluation-utilities">Core Evaluation Utilities</a></li>
   <li><a href="#metric-logging-with-evidently" id="toc-metric-logging-with-evidently" class="nav-link" data-scroll-target="#metric-logging-with-evidently">Metric Logging with Evidently</a></li>
   </ul></li>
-  <li><a href="#experiment-tracking-with-mlflow" id="toc-experiment-tracking-with-mlflow" class="nav-link" data-scroll-target="#experiment-tracking-with-mlflow">Experiment Tracking with MLflow</a></li>
-  <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap">Recap</a></li>
+  <li><a href="#mlflow-integration-configuration-driven-experiment-tracking" id="toc-mlflow-integration-configuration-driven-experiment-tracking" class="nav-link" data-scroll-target="#mlflow-integration-configuration-driven-experiment-tracking">MLflow Integration: Configuration-Driven Experiment Tracking</a>
+  <ul class="collapse">
+  <li><a href="#configuration-based-setup" id="toc-configuration-based-setup" class="nav-link" data-scroll-target="#configuration-based-setup">Configuration-Based Setup</a></li>
+  <li><a href="#automatic-parameter-logging" id="toc-automatic-parameter-logging" class="nav-link" data-scroll-target="#automatic-parameter-logging">Automatic Parameter Logging</a></li>
+  </ul></li>
+  <li><a href="#implementing-the-popularity-baseline" id="toc-implementing-the-popularity-baseline" class="nav-link" data-scroll-target="#implementing-the-popularity-baseline">Implementing the Popularity Baseline</a>
+  <ul class="collapse">
+  <li><a href="#popularity-score-calculation" id="toc-popularity-score-calculation" class="nav-link" data-scroll-target="#popularity-score-calculation">Popularity Score Calculation</a></li>
+  <li><a href="#generating-recommendations-for-all-users" id="toc-generating-recommendations-for-all-users" class="nav-link" data-scroll-target="#generating-recommendations-for-all-users">Generating Recommendations for All Users</a></li>
+  </ul></li>
+  <li><a href="#complete-evaluation-workflow" id="toc-complete-evaluation-workflow" class="nav-link" data-scroll-target="#complete-evaluation-workflow">Complete Evaluation Workflow</a>
+  <ul class="collapse">
+  <li><a href="#setup-and-configuration" id="toc-setup-and-configuration" class="nav-link" data-scroll-target="#setup-and-configuration">1. Setup and Configuration</a></li>
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation">2. Data Preparation</a></li>
+  <li><a href="#model-implementation-and-evaluation" id="toc-model-implementation-and-evaluation" class="nav-link" data-scroll-target="#model-implementation-and-evaluation">3. Model Implementation and Evaluation</a></li>
+  <li><a href="#classification-metrics-1" id="toc-classification-metrics-1" class="nav-link" data-scroll-target="#classification-metrics-1">4. Classification Metrics</a></li>
+  <li><a href="#experiment-cleanup" id="toc-experiment-cleanup" class="nav-link" data-scroll-target="#experiment-cleanup">5. Experiment Cleanup</a></li>
+  </ul></li>
+  <li><a href="#understanding-the-results" id="toc-understanding-the-results" class="nav-link" data-scroll-target="#understanding-the-results">Understanding the Results</a>
+  <ul class="collapse">
+  <li><a href="#mlflow-experiment-tracking" id="toc-mlflow-experiment-tracking" class="nav-link" data-scroll-target="#mlflow-experiment-tracking">MLflow Experiment Tracking</a></li>
+  <li><a href="#evidently-reports" id="toc-evidently-reports" class="nav-link" data-scroll-target="#evidently-reports">Evidently Reports</a></li>
+  <li><a href="#baseline-performance-expectations" id="toc-baseline-performance-expectations" class="nav-link" data-scroll-target="#baseline-performance-expectations">Baseline Performance Expectations</a></li>
+  </ul></li>
+  <li><a href="#why-this-foundation-matters" id="toc-why-this-foundation-matters" class="nav-link" data-scroll-target="#why-this-foundation-matters">Why This Foundation Matters</a>
+  <ul class="collapse">
+  <li><a href="#reproducible-experiments" id="toc-reproducible-experiments" class="nav-link" data-scroll-target="#reproducible-experiments">1. <strong>Reproducible Experiments</strong></a></li>
+  <li><a href="#systematic-model-development" id="toc-systematic-model-development" class="nav-link" data-scroll-target="#systematic-model-development">2. <strong>Systematic Model Development</strong></a></li>
+  <li><a href="#production-readiness" id="toc-production-readiness" class="nav-link" data-scroll-target="#production-readiness">3. <strong>Production Readiness</strong></a></li>
+  <li><a href="#debugging-and-validation" id="toc-debugging-and-validation" class="nav-link" data-scroll-target="#debugging-and-validation">4. <strong>Debugging and Validation</strong></a></li>
+  </ul></li>
+  <li><a href="#configuration-management-best-practices" id="toc-configuration-management-best-practices" class="nav-link" data-scroll-target="#configuration-management-best-practices">Configuration Management Best Practices</a>
+  <ul class="collapse">
+  <li><a href="#centralized-configuration" id="toc-centralized-configuration" class="nav-link" data-scroll-target="#centralized-configuration">Centralized Configuration</a></li>
+  <li><a href="#easy-experimentation" id="toc-easy-experimentation" class="nav-link" data-scroll-target="#easy-experimentation">Easy Experimentation</a></li>
+  <li><a href="#automatic-documentation" id="toc-automatic-documentation" class="nav-link" data-scroll-target="#automatic-documentation">Automatic Documentation</a></li>
+  </ul></li>
   <li><a href="#whats-next" id="toc-whats-next" class="nav-link" data-scroll-target="#whats-next">What’s Next</a></li>
+  <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap">Recap</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content">
+<main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
@@ -321,21 +356,12 @@ Code
 <li><strong>ROC-AUC</strong>: Area under the ROC curve for binary relevance prediction</li>
 <li><strong>Precision-Recall curves</strong>: Trade-offs between precision and recall at different thresholds</li>
 </ul>
-<p>Why classification metrics? Isn’t this a ranking problem? Well, the answer is yes and no. Essentially the choice of modeling approach is up to us, but there is one valid approach in which we would formulate the problem as predicting whether a user would interact with an item or not. As the output of this model would normally be a score between 0 and 1, we can then use the ROC-AUC to evaluate how well a model is able to rank the relevant items higher that the irrelevant ones, which is a form of ranking quality in and of itself. The other main benefit for using ROC-AUC is that it’s also a built-in metric for almost all ML frameworks, which makes it easy to measure without the need to implement it from scratch (lazy person saying).</p>
 <p>If you wish to learn more, I suggest checking out <a href="https://amitness.com/posts/information-retrieval-evaluation">this post by Amit Chaudhary</a> and the <a href="https://docs.evidentlyai.com/metrics/all_metrics#ranking">Evidently documentation on Ranking metrics</a>.</p>
 </section>
 </section>
-<section id="the-baseline-recommender-system" class="level2">
-<h2 class="anchored" data-anchor-id="the-baseline-recommender-system">The baseline recommender system</h2>
-<p>To demonstrate how we evaluate a model, let’s first build a baseline one for easier illustration. This will serve as a sanity check for our evaluation framework and provide a performance benchmark for more complex models to beat.</p>
-<p>In the world of RecSys, the most popular base line is “popular” recommender (no pun intended). It’s simple, fast, easy to implement, easy to understand for users, and sometimes quite effective, especialy compared to the effort required to put up.</p>
-<p>To get the most popular items, we only need a few lines of Pandas code to group by item and count the number of interactions: <img src="pop-impl-1.png" class="img-fluid"></p>
-<p>Then, for each of the user in our validation set, we can simply assign the most popular items to them: <img src="pop-impl-2.png" class="img-fluid"></p>
-<p>That’s it. We now have recommendations provided for our users. Now we can move to the actual evaluation part.</p>
-</section>
-<section id="how-we-set-up-evaluation-for-our-project" class="level2 page-columns page-full">
+<section id="how-we-set-up-evaluation-for-our-project" class="level2">
 <h2 class="anchored" data-anchor-id="how-we-set-up-evaluation-for-our-project">How We Set Up Evaluation for our Project</h2>
-<p>Our evaluation framework is built around four core modules in <code>src/eval/</code>:</p>
+<p>Our evaluation framework is built around three core modules in <code>src/eval/</code>:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.<span class="bu">eval</span> <span class="im">import</span> (</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    create_label_df,           <span class="co"># Create ground truth labels</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    merge_recs_with_target,    <span class="co"># Merge recommendations with labels  </span></span>
@@ -376,14 +402,13 @@ Code
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        .assign(</span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            rating<span class="op">=</span><span class="kw">lambda</span> df: df[rating_col].fillna(<span class="dv">0</span>).astype(<span class="bu">int</span>),</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Fill the recall with ranking = top_k_retrieve + 1 so that the recall calculation is correct</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>            rec_ranking<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"rec_ranking"</span>].fillna(k <span class="op">+</span> <span class="dv">1</span>).astype(<span class="bu">int</span>),</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        .sort_values([user_col, <span class="st">"rec_ranking"</span>])</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This function aligns your model’s recommendations with the ground truth and <strong>handling cases where recommended items don’t appear in the validation set</strong>.</p>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            rec_ranking<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"rec_ranking"</span>].fillna(k <span class="op">+</span> <span class="dv">1</span>).astype(<span class="bu">int</span>),</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        .sort_values([user_col, <span class="st">"rec_ranking"</span>])</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This function aligns your model’s recommendations with the ground truth, handling cases where recommended items don’t appear in the validation set.</p>
 </section>
-<section id="metric-logging-with-evidently" class="level3 page-columns page-full">
+<section id="metric-logging-with-evidently" class="level3">
 <h3 class="anchored" data-anchor-id="metric-logging-with-evidently">Metric Logging with Evidently</h3>
 <p>The <code>src/eval/log_metrics.py</code> module uses the <a href="https://www.evidentlyai.com/">Evidently</a> library to compute and log comprehensive metrics:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_ranking_metrics(cfg: Config, eval_df):</span>
@@ -419,19 +444,14 @@ Code
 <span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>            <span class="co"># ... metric logging logic</span></span>
 <span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> report</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>There is also a <code>log_classification_metrics</code> function that follows the similar pattern, but for the task of evaluation classification accuracy.</p>
-<p>The output is we have HTML report like this:</p>
-<div class="column-page">
-<p><img src="./evidently-classification.png" class="img-fluid"></p>
-</div>
-<p>Do you notice that those report files are available in a nice web-based UI? If you are not familiar with MLflow, the next section will explain.</p>
+<p>The beauty of this approach is that Evidently handles the complex metric calculations while our framework automatically logs everything to MLflow for tracking and comparison.</p>
 </section>
 </section>
-<section id="experiment-tracking-with-mlflow" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="experiment-tracking-with-mlflow">Experiment Tracking with MLflow</h2>
-<p>Machine learning development is fundamentally an iterative process—the more ideas we systematically test, the better our chances of discovering meaningful improvements. This iterative nature means we’re constantly cycling through hypotheses: trying new features, adjusting hyperparameters, experimenting with different architectures, and refining our approach based on results. To maximize this exploration while maintaining scientific rigor, we need more than just robust evaluation metrics; we need a convenient way to <strong>track every experiment</strong>, compare results across iterations, and easily revisit previous approaches. Comprehensive experiment logging creates a safety net that encourages bold experimentation—when you know you can reproduce any previous result or quickly understand what changed between runs, you’re more willing to try ambitious ideas that might not work. This psychological safety accelerates the entire development cycle.</p>
-<p>There are often no restrictions on how you should track your experiments. Even manually keeping things in a spreadsheet works just fine. However, in our project and based on my own experience, I feel like <a href="https://mlflow.org/">MLflow</a> is the most convenient way though, since this tool is mature and well-integrated with other ML frameworks. It also offers other fundamental capabilities like model registry which becomes very handy when we talk about model serving and deployment.</p>
-<p>As MLflow should be enabled in our every model training run, I put most of the MLflow integration implementation in our configuration code:</p>
+<section id="mlflow-integration-configuration-driven-experiment-tracking" class="level2">
+<h2 class="anchored" data-anchor-id="mlflow-integration-configuration-driven-experiment-tracking">MLflow Integration: Configuration-Driven Experiment Tracking</h2>
+<p>One of the standout features of our framework is the seamless MLflow integration through the configuration system. Instead of manually managing MLflow runs, everything is handled through the <code>ConfigLoader</code>:</p>
+<section id="configuration-based-setup" class="level3">
+<h3 class="anchored" data-anchor-id="configuration-based-setup">Configuration-Based Setup</h3>
 <div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.cfg <span class="im">import</span> ConfigLoader</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load configuration and initialize MLflow</span></span>
@@ -440,75 +460,254 @@ Code
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>cfg.run.experiment_name <span class="op">=</span> <span class="st">"Retrieve - Binary"</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>cfg.init()  <span class="co"># This automatically sets up MLflow!</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The <code>cfg.init()</code> method handles all the MLflow setup:</p>
-<div class="sourceCode" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lightning.pytorch.loggers <span class="im">import</span> MLFlowLogger</span>
-<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> init(<span class="va">self</span>):</span>
-<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Initialize MLflow experiment tracking automatically."""</span></span>
-<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="va">self</span>.run.log_to_mlflow:</span>
-<span id="annotated-cell-6-6"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>        logger.info(<span class="ss">f"Setting up MLflow experiment </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>run<span class="sc">.</span>experiment_name<span class="sc">}</span><span class="ss">..."</span>)</span>
-<span id="annotated-cell-6-7"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a>        mlflow.set_experiment(<span class="va">self</span>.run.experiment_name)</span>
-<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>        mlflow.start_run(run_name<span class="op">=</span><span class="va">self</span>.run.run_name)</span>
-<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a>        </span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1">1</button><span id="annotated-cell-6-10" class="code-annotation-target"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._mlf_logger <span class="op">=</span> MLFlowLogger(</span>
-<span id="annotated-cell-6-11"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a>            experiment_name<span class="op">=</span><span class="va">self</span>.run.experiment_name,</span>
-<span id="annotated-cell-6-12"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a>            run_id<span class="op">=</span>mlflow.active_run().info.run_id,</span>
-<span id="annotated-cell-6-13"><a href="#annotated-cell-6-13" aria-hidden="true" tabindex="-1"></a>            tracking_uri<span class="op">=</span>mlflow_uri,</span>
-<span id="annotated-cell-6-14"><a href="#annotated-cell-6-14" aria-hidden="true" tabindex="-1"></a>            log_model<span class="op">=</span><span class="va">True</span>,</span>
-<span id="annotated-cell-6-15"><a href="#annotated-cell-6-15" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="annotated-cell-6-16"><a href="#annotated-cell-6-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">self</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
-<dd>
-<span data-code-cell="annotated-cell-6" data-code-lines="10" data-code-annotation="1">Note that MLFlowLogger here is a PyTorch Lightning logger, which we would use later when defining our PyTorch Lightning model for logging our model training progress.</span>
-</dd>
-</dl>
-<p>In the end of our run, we can call this method <code>cfg.log_config_to_mlflow()</code> to log all parameters to MLflow:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_config_to_mlflow(<span class="va">self</span>):</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Log all configuration parameters to MLflow with dot notation."""</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    flat_config <span class="op">=</span> flatten_dict(<span class="va">self</span>.config.model_dump())</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key, value <span class="kw">in</span> flat_config.items():</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        mlflow.log_param(key, value)  <span class="co"># e.g., "train.learning_rate": 0.01</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The result is we can access our experiment parameters like this:</p>
-<div class="column-page">
-<p><img src="mlflow-overview.png" class="img-fluid"></p>
-</div>
-<p>However, when we starts to develop our notebook, we may not want to log to MLflow. We can easily control this by setting the <code>log_to_mlflow</code> flag to <code>false</code> in our configuration file:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># cfg/common.yaml</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">run</span><span class="kw">:</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">log_to_mlflow</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">experiment_name</span><span class="kw">:</span><span class="at"> </span><span class="st">"Retrieve - Binary"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> init(<span class="va">self</span>):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Initialize MLflow experiment tracking automatically."""</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="va">self</span>.run.log_to_mlflow:</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        logger.info(<span class="ss">f"Setting up MLflow experiment </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>run<span class="sc">.</span>experiment_name<span class="sc">}</span><span class="ss">..."</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        mlflow.set_experiment(<span class="va">self</span>.run.experiment_name)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        mlflow.start_run(run_name<span class="op">=</span><span class="va">self</span>.run.run_name)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._mlf_logger <span class="op">=</span> MLFlowLogger(</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>            experiment_name<span class="op">=</span><span class="va">self</span>.run.experiment_name,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            run_id<span class="op">=</span>mlflow.active_run().info.run_id,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            tracking_uri<span class="op">=</span>mlflow_uri,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>            log_model<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">self</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="automatic-parameter-logging" class="level3">
+<h3 class="anchored" data-anchor-id="automatic-parameter-logging">Automatic Parameter Logging</h3>
+<p>The configuration system automatically logs all parameters to MLflow:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_config_to_mlflow(<span class="va">self</span>):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Log all configuration parameters to MLflow with dot notation."""</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    flat_config <span class="op">=</span> flatten_dict(<span class="va">self</span>.config.model_dump())</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key, value <span class="kw">in</span> flat_config.items():</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        mlflow.log_param(key, value)  <span class="co"># e.g., "train.learning_rate": 0.01</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This means every experiment automatically captures the complete configuration, making results fully reproducible.</p>
+</section>
+</section>
+<section id="implementing-the-popularity-baseline" class="level2">
+<h2 class="anchored" data-anchor-id="implementing-the-popularity-baseline">Implementing the Popularity Baseline</h2>
+<p>Now let’s implement our first recommendation model: a popularity-based recommender. While simple, this baseline serves several important purposes:</p>
+<ol type="1">
+<li><strong>Sanity check</strong>: Ensures our evaluation pipeline works correctly</li>
+<li><strong>Performance benchmark</strong>: Provides a baseline for more complex models to beat</li>
+<li><strong>Production fallback</strong>: Often used as a fallback when personalized models fail</li>
+</ol>
+<section id="popularity-score-calculation" class="level3">
+<h3 class="anchored" data-anchor-id="popularity-score-calculation">Popularity Score Calculation</h3>
+<p>The implementation is straightforward—we rank items by their interaction frequency in the training data:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate popularity scores from training data</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>popular_items_df <span class="op">=</span> (</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    train_df.groupby(cfg.data.item_col, as_index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    .size()</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    .assign(</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        score<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"size"</span>] <span class="op">/</span> df[<span class="st">"size"</span>].<span class="bu">max</span>(),  <span class="co"># Normalize to [0,1]</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        rec_ranking<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"score"</span>]</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        .rank(method<span class="op">=</span><span class="st">"first"</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        .astype(<span class="bu">int</span>),</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    .sort_values([<span class="st">"rec_ranking"</span>], ascending<span class="op">=</span>[<span class="va">True</span>])</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Get top-K popular items for evaluation</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>top_popular_items_df <span class="op">=</span> popular_items_df.head(cfg.<span class="bu">eval</span>.top_k_retrieve)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This creates a ranking where the most frequently interacted items get the highest scores.</p>
+</section>
+<section id="generating-recommendations-for-all-users" class="level3">
+<h3 class="anchored" data-anchor-id="generating-recommendations-for-all-users">Generating Recommendations for All Users</h3>
+<p>For evaluation, we need to generate recommendations for every user in the validation set:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create recommendations: same popular items for every user</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>unique_users <span class="op">=</span> val_df[cfg.data.user_col].unique()</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>recommendations_df <span class="op">=</span> pd.concat([</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    top_popular_items_df.assign(<span class="op">**</span>{cfg.data.user_col: user})</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> user <span class="kw">in</span> unique_users</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>], ignore_index<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This gives every user the same set of popular items, which is exactly what a popularity-based recommender should do.</p>
+</section>
+</section>
+<section id="complete-evaluation-workflow" class="level2">
+<h2 class="anchored" data-anchor-id="complete-evaluation-workflow">Complete Evaluation Workflow</h2>
+<p>Here’s how everything comes together in the <code>010-baseline-popular.ipynb</code> notebook:</p>
+<section id="setup-and-configuration" class="level3">
+<h3 class="anchored" data-anchor-id="setup-and-configuration">1. Setup and Configuration</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.cfg <span class="im">import</span> ConfigLoader</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.<span class="bu">eval</span> <span class="im">import</span> (</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    create_label_df, log_classification_metrics, </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    log_ranking_metrics, merge_recs_with_target,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize configuration with MLflow</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>cfg <span class="op">=</span> ConfigLoader(<span class="st">"../cfg/common.yaml"</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>cfg.run.run_name <span class="op">=</span> <span class="st">"001-baseline-popular"</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>cfg.run.experiment_name <span class="op">=</span> <span class="st">"Retrieve - Binary"</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>cfg.init()  <span class="co"># Automatic MLflow setup</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="data-preparation" class="level3">
+<h3 class="anchored" data-anchor-id="data-preparation">2. Data Preparation</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load preprocessed data with negative samples</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>train_df <span class="op">=</span> pd.read_parquet(cfg.data.train_features_neg_fp)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>val_df <span class="op">=</span> pd.read_parquet(cfg.data.val_features_neg_fp)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Create ground truth labels for evaluation</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>label_df <span class="op">=</span> create_label_df(</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    val_df,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    user_col<span class="op">=</span>cfg.data.user_col,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    item_col<span class="op">=</span>cfg.data.item_col,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    rating_col<span class="op">=</span>cfg.data.rating_col,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    timestamp_col<span class="op">=</span>cfg.data.timestamp_col,</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="model-implementation-and-evaluation" class="level3">
+<h3 class="anchored" data-anchor-id="model-implementation-and-evaluation">3. Model Implementation and Evaluation</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate popularity scores and generate recommendations</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>popular_items_df <span class="op">=</span> (</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    train_df.groupby(cfg.data.item_col, as_index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    .size()</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    .assign(</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        score<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"size"</span>] <span class="op">/</span> df[<span class="st">"size"</span>].<span class="bu">max</span>(),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        rec_ranking<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"score"</span>].rank(method<span class="op">=</span><span class="st">"first"</span>, ascending<span class="op">=</span><span class="va">False</span>).astype(<span class="bu">int</span>),</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    .sort_values([<span class="st">"rec_ranking"</span>], ascending<span class="op">=</span>[<span class="va">True</span>])</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate recommendations for all users</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>unique_users <span class="op">=</span> val_df[cfg.data.user_col].unique()</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>recommendations_df <span class="op">=</span> pd.concat([</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    popular_items_df.head(cfg.<span class="bu">eval</span>.top_k_retrieve).assign(<span class="op">**</span>{cfg.data.user_col: user})</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> user <span class="kw">in</span> unique_users</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>], ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge recommendations with ground truth</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>eval_df <span class="op">=</span> merge_recs_with_target(</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    recommendations_df, label_df,</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    k<span class="op">=</span>cfg.<span class="bu">eval</span>.top_k_retrieve,</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    user_col<span class="op">=</span>cfg.data.user_col,</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    item_col<span class="op">=</span>cfg.data.item_col,</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    rating_col<span class="op">=</span>cfg.data.rating_col,</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Log ranking metrics</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>ranking_report <span class="op">=</span> log_ranking_metrics(cfg, eval_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="classification-metrics-1" class="level3">
+<h3 class="anchored" data-anchor-id="classification-metrics-1">4. Classification Metrics</h3>
+<p>We also evaluate the model’s ability to predict binary relevance:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare data for classification evaluation</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>eval_classification_df <span class="op">=</span> pd.merge(</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    val_df,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    popular_items_df[[cfg.data.item_col, <span class="st">"score"</span>]],</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    on<span class="op">=</span>[cfg.data.item_col],</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    how<span class="op">=</span><span class="st">"left"</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    validate<span class="op">=</span><span class="st">"m:1"</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>).assign(label<span class="op">=</span><span class="kw">lambda</span> df: df[cfg.data.rating_col].gt(<span class="dv">0</span>).astype(<span class="bu">int</span>))</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Log classification metrics</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>classification_report <span class="op">=</span> log_classification_metrics(</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    cfg, eval_classification_df, </span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    target_col<span class="op">=</span><span class="st">"label"</span>, </span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    prediction_col<span class="op">=</span><span class="st">"score"</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="experiment-cleanup" class="level3">
+<h3 class="anchored" data-anchor-id="experiment-cleanup">5. Experiment Cleanup</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Log all configuration parameters and end the MLflow run</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> cfg.run.log_to_mlflow:</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    cfg.log_config_to_mlflow()</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    mlflow.end_run()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="understanding-the-results" class="level2">
+<h2 class="anchored" data-anchor-id="understanding-the-results">Understanding the Results</h2>
+<p>After running the baseline, you’ll see several types of outputs:</p>
+<section id="mlflow-experiment-tracking" class="level3">
+<h3 class="anchored" data-anchor-id="mlflow-experiment-tracking">MLflow Experiment Tracking</h3>
+<ul>
+<li><strong>Parameters</strong>: All configuration values automatically logged</li>
+<li><strong>Metrics</strong>: Ranking and classification metrics with step-wise tracking</li>
+<li><strong>Artifacts</strong>: Evidently HTML reports for detailed analysis</li>
+</ul>
+</section>
+<section id="evidently-reports" class="level3">
+<h3 class="anchored" data-anchor-id="evidently-reports">Evidently Reports</h3>
+<p>The framework generates comprehensive HTML reports showing: - Precision@K and Recall@K curves - NDCG scores across different K values - Personalization metrics - ROC curves and precision-recall curves</p>
+</section>
+<section id="baseline-performance-expectations" class="level3">
+<h3 class="anchored" data-anchor-id="baseline-performance-expectations">Baseline Performance Expectations</h3>
+<p>For a popularity-based recommender, expect: - <strong>Low personalization scores</strong>: Everyone gets the same recommendations - <strong>Moderate precision@K</strong>: Popular items have broad appeal - <strong>Variable recall</strong>: Depends on how well popular items match user preferences - <strong>Decent ROC-AUC</strong>: Popular items are often relevant</p>
+</section>
+</section>
+<section id="why-this-foundation-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-foundation-matters">Why This Foundation Matters</h2>
+<p>This evaluation framework and baseline implementation provide several critical benefits:</p>
+<section id="reproducible-experiments" class="level3">
+<h3 class="anchored" data-anchor-id="reproducible-experiments">1. <strong>Reproducible Experiments</strong></h3>
+<p>Every experiment is fully tracked with: - Complete configuration parameters - Evaluation metrics across multiple dimensions - Generated artifacts for detailed analysis</p>
+</section>
+<section id="systematic-model-development" class="level3">
+<h3 class="anchored" data-anchor-id="systematic-model-development">2. <strong>Systematic Model Development</strong></h3>
+<p>The framework enables you to: - Compare models objectively using consistent metrics - Track improvements over time - Identify which changes actually help</p>
+</section>
+<section id="production-readiness" class="level3">
+<h3 class="anchored" data-anchor-id="production-readiness">3. <strong>Production Readiness</strong></h3>
+<p>The evaluation patterns you establish here will: - Scale to more complex models - Integrate with production monitoring - Support A/B testing frameworks</p>
+</section>
+<section id="debugging-and-validation" class="level3">
+<h3 class="anchored" data-anchor-id="debugging-and-validation">4. <strong>Debugging and Validation</strong></h3>
+<p>A working baseline helps you: - Validate that your evaluation pipeline works correctly - Identify data quality issues early - Establish reasonable performance expectations</p>
+</section>
+</section>
+<section id="configuration-management-best-practices" class="level2">
+<h2 class="anchored" data-anchor-id="configuration-management-best-practices">Configuration Management Best Practices</h2>
+<p>The configuration-driven approach offers several advantages:</p>
+<section id="centralized-configuration" class="level3">
+<h3 class="anchored" data-anchor-id="centralized-configuration">Centralized Configuration</h3>
+<div class="sourceCode" id="cb15"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># cfg/common.yaml</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">eval</span><span class="kw">:</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">top_k_retrieve</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">top_k_rerank</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">min_roc_auc</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.5</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">run</span><span class="kw">:</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">log_to_mlflow</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">experiment_name</span><span class="kw">:</span><span class="at"> </span><span class="st">"Retrieve - Binary"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="easy-experimentation" class="level3">
+<h3 class="anchored" data-anchor-id="easy-experimentation">Easy Experimentation</h3>
+<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Try different evaluation settings</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>cfg.<span class="bu">eval</span>.top_k_retrieve <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>cfg.<span class="bu">eval</span>.top_k_rerank <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Or different experiment tracking</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>cfg.run.experiment_name <span class="op">=</span> <span class="st">"Retrieve - Rating"</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>cfg.train.label_format <span class="op">=</span> <span class="st">"rating"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="automatic-documentation" class="level3">
+<h3 class="anchored" data-anchor-id="automatic-documentation">Automatic Documentation</h3>
+<p>Every MLflow run captures the complete configuration, making it easy to reproduce results or understand what changed between experiments.</p>
+</section>
+</section>
+<section id="whats-next" class="level2">
+<h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
+<p>With your evaluation framework and baseline model in place, you have:</p>
+<ul>
+<li><strong>A robust evaluation pipeline</strong> that can assess recommendation quality across multiple dimensions</li>
+<li><strong>MLflow integration</strong> for systematic experiment tracking and comparison</li>
+<li><strong>A working baseline model</strong> that establishes performance expectations</li>
+<li><strong>The foundation</strong> for building and evaluating more sophisticated models</li>
+</ul>
+<p>In <a href="../c5/index.qmd">Chapter 5</a>, we’ll build on this foundation to implement sequence-based recommendation models that can capture temporal patterns in user behavior. The evaluation framework you’ve built here will be essential for measuring whether these more complex models actually improve upon our simple baseline.</p>
 </section>
 <section id="recap" class="level2">
 <h2 class="anchored" data-anchor-id="recap">Recap</h2>
-<p>In this chapter, we established the critical evaluation infrastructure that will power your recommendation system development. Here’s what we covered:</p>
+<p>This chapter established the critical evaluation infrastructure for your recommendation system:</p>
 <ul>
-<li><strong>The fundamental evaluation challenges</strong>: We explored why recommendation systems are uniquely difficult to evaluate, from the counterfactual problem (we only see what users actually encountered) to the complexities of ranking, personalization, and temporal dynamics that make simple accuracy metrics inadequate.</li>
-<li><strong>Online vs offline evaluation strategy</strong>: We established the principle that while online metrics are the ultimate business goal, offline evaluation serves as our rapid iteration tool. The key insight: offline improvements don’t always translate to online wins, but they provide essential guidance for systematic development.</li>
-<li><strong>Comprehensive evaluation metrics</strong>: We implemented a multi-dimensional framework using Evidently that captures ranking quality (Precision@K, Recall@K, NDCG@K), diversity (Personalization), and classification performance (ROC-AUC, Precision-Recall curves). We also justified why classification metrics make sense for recommendation systems when framed as binary relevance prediction.</li>
-<li><strong>Popularity-based baseline implementation</strong>: We built our first recommender system—a simple but effective popularity-based model that assigns the most frequently interacted items to all users. This baseline serves as our performance benchmark and validates that our evaluation pipeline works correctly.</li>
-<li><strong>MLflow experiment tracking integration</strong>: We created a configuration-driven system that automatically handles experiment setup, parameter logging, and artifact storage. This infrastructure encourages bold experimentation by providing the safety net of full reproducibility.</li>
+<li><strong>Comprehensive metrics</strong>: Ranking, classification, and diversity metrics using Evidently</li>
+<li><strong>Seamless MLflow integration</strong>: Configuration-driven experiment tracking</li>
+<li><strong>Baseline implementation</strong>: Popularity-based recommender as a performance benchmark</li>
+<li><strong>Complete workflow</strong>: From data preparation to metric logging and experiment cleanup</li>
 </ul>
-<div class="callout callout-style-simple callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Code
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>All code for this chapter is available in the <code>notebooks/010-baseline-popular.ipynb</code> file and the <code>src/eval/</code> directory in the <a href="https://github.com/dvquy13/recsys-seq-model">project repository</a>.</p>
-</div>
-</div>
-</section>
-<section id="whats-next" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
-<p>In <a href="../c5/index.qmd">Chapter 5</a>, we’ll build on this foundation to implement sequence-based recommendation models that can capture temporal patterns in user behavior. The evaluation framework you’ve built here will be essential for measuring whether these more complex models actually improve upon our simple baseline. When it does, the results would be hard to miss:</p>
-<div class="column-page">
-<p><img src="../static/model-compare.png" class="img-fluid"></p>
-</div>
-<p>As you can see, MLflow can help compare model iterations easily 😉.</p>
+<p>The evaluation framework you’ve built is production-ready and will scale with you as you develop more sophisticated models. Most importantly, you now have a systematic way to measure progress and make data-driven decisions about model improvements.</p>
 <hr>
 <p><br> If you find this tutorial helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
