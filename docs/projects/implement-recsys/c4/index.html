@@ -238,7 +238,6 @@ cookieconsent.run({
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
   <li><a href="#the-challenges-of-evaluation-in-recommendation-systems" id="toc-the-challenges-of-evaluation-in-recommendation-systems" class="nav-link" data-scroll-target="#the-challenges-of-evaluation-in-recommendation-systems">The Challenges of Evaluation in Recommendation Systems</a></li>
-  <li><a href="#online-vs-offline-evaluation-the-ultimate-goal-vs-the-development-tool" id="toc-online-vs-offline-evaluation-the-ultimate-goal-vs-the-development-tool" class="nav-link" data-scroll-target="#online-vs-offline-evaluation-the-ultimate-goal-vs-the-development-tool">Online vs Offline Evaluation: The Ultimate Goal vs The Development Tool</a></li>
   <li><a href="#evaluation-metrics-for-recommendation-systems" id="toc-evaluation-metrics-for-recommendation-systems" class="nav-link" data-scroll-target="#evaluation-metrics-for-recommendation-systems">Evaluation Metrics for Recommendation Systems</a>
   <ul class="collapse">
   <li><a href="#ranking-metrics" id="toc-ranking-metrics" class="nav-link" data-scroll-target="#ranking-metrics">Ranking Metrics</a></li>
@@ -248,7 +247,6 @@ cookieconsent.run({
   <li><a href="#the-baseline-recommender-system" id="toc-the-baseline-recommender-system" class="nav-link" data-scroll-target="#the-baseline-recommender-system">The baseline recommender system</a></li>
   <li><a href="#how-we-set-up-evaluation-for-our-project" id="toc-how-we-set-up-evaluation-for-our-project" class="nav-link" data-scroll-target="#how-we-set-up-evaluation-for-our-project">How We Set Up Evaluation for our Project</a>
   <ul class="collapse">
-  <li><a href="#core-evaluation-utilities" id="toc-core-evaluation-utilities" class="nav-link" data-scroll-target="#core-evaluation-utilities">Core Evaluation Utilities</a></li>
   <li><a href="#metric-logging-with-evidently" id="toc-metric-logging-with-evidently" class="nav-link" data-scroll-target="#metric-logging-with-evidently">Metric Logging with Evidently</a></li>
   </ul></li>
   <li><a href="#experiment-tracking-with-mlflow" id="toc-experiment-tracking-with-mlflow" class="nav-link" data-scroll-target="#experiment-tracking-with-mlflow">Experiment Tracking with MLflow</a></li>
@@ -284,19 +282,12 @@ Code
 </section>
 <section id="the-challenges-of-evaluation-in-recommendation-systems" class="level2">
 <h2 class="anchored" data-anchor-id="the-challenges-of-evaluation-in-recommendation-systems">The Challenges of Evaluation in Recommendation Systems</h2>
-<p>Recommendation systems are notoriously tricky to evaluate. Unlike classification problems where accuracy is straightforward, recommendations involve ranking, relevance, and user satisfaction—all of which are nuanced concepts.</p>
-<p>RecSys present unique evaluation challenges that go far beyond traditional machine learning problems. The most fundamental issue is the <strong>counterfactual problem</strong>: we only observe user interactions with items they actually encountered, but we have no ground truth for the vast majority of items they never saw. If a user interacted with 10 items in their history, we can reasonably infer labels for those 10, but what about the remaining thousands or millions of items in our catalog? Did the user avoid them because they’re irrelevant, or simply because they never discovered them? This missing data problem makes offline evaluation inherently problematic—we’re essentially trying to measure recommendation quality using an incomplete and biased sample of user preferences.</p>
-<p>Beyond this counterfactual challenge, recommendation systems must also struggle with implicit feedback where users rarely provide explicit ratings, ranking quality where the order of recommendations matters as much as the items themselves, personalization where a perfect recommendation for one user might be terrible for another, and temporal dynamics where user preferences evolve over time. These complexities mean that unlike classification problems where accuracy is straightforward, recommendations involve nuanced concepts of relevance, satisfaction, and utility that resist simple measurement.</p>
+<p>Recommendation systems are notoriously tricky to evaluate. Unlike classification problems where accuracy is straightforward, the most significant challenge originates from the fact that RecSys has its root from information retrieval—where we essentially try to rank items. The issue comes when your new model produces a new ranking, but we don’t really know how users would react to this alternative ranking unless we deploy it in production. This makes offline evaluation feel quite limited for gauging real-world performance.</p>
+<p>You may ask: Why don’t just run online experiment for any idea we have? Because they are typically expensive and slow. Methods like A/B tests in general require real users, real traffic, and real time to see if your changes work. So to iterate quickly on your backlog of a hundred different ideas, we don’t really have any other choices rather than resorting to offline evaluation as our development tool. That assumes, of course, that getting scores on old data actually points you towards better real-world models.</p>
+<p>If you ask me how I navigate through all these sorts of uncertainties, here’s my take: if your offline metrics show clear improvements, that’s a good sign to move forward. If they show no change but you have strong reasons to believe your improvements are effective, don’t let that stop you from running an online experiment. Sometimes the best ideas don’t show up in offline metrics until they meet real users. Just make sure you can roll back quickly if you see significant drops in the early days.</p>
+<p>Beyond this counterfactual challenge, recommendation systems must also struggle with implicit feedback where users rarely provide explicit ratings, ranking quality where the order of recommendations matters as much as the items themselves, personalization where a perfect recommendation for one user might be terrible for another, and temporal dynamics where user preferences evolve over time. In short, recommendations involve nuanced concepts of relevance, satisfaction, and utility that resist simple measurement.</p>
 <p>To address these challenges, we need a comprehensive evaluation framework that can measure multiple aspects of recommendation quality. For the scope of this tutorial, we would be focusing on measuring both the ranking quality and the classification quality of the recommendations, while leaving the problem of counterfactual evaluation for a future post perhaps<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
-</section>
-<section id="online-vs-offline-evaluation-the-ultimate-goal-vs-the-development-tool" class="level2">
-<h2 class="anchored" data-anchor-id="online-vs-offline-evaluation-the-ultimate-goal-vs-the-development-tool">Online vs Offline Evaluation: The Ultimate Goal vs The Development Tool</h2>
-<p>Before diving into the technical details, let me remind you of the what ultimately matters to the business: delivering relevant recommendations measured via business metrics like click-through rates and conversion rates.</p>
-<p>These metrics can only be evaluated at production environment with the help of online experiments. But they are typically expensive and slow. A/B testing and its alike require real users, real traffic, and real time to see if your changes work. So to iterate quickly on your backlog of a hundred different ideas, we often resort to offline evaluation as our development tool. The assumption is that improvements made over historical observational data can guide our decisions.</p>
-<p>Though more often than not, offline improvements don’t always translate to online wins. You might build a model that crushes your offline metrics, deploy it to production, and watch your click-through rates stay flat or even drop. The gap between offline and online performance is one of the most challenging aspects of recommendation systems.</p>
-<p>Of course there have already been research efforts to address this, and googling around would actually lead us to some interesting ideas<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. IMHO though, the approaches are often too complicated so I normally refrain from fancy techniques in the early phases of the project. In principle we should nonetheless design our offline evaluation to match online results as closely as possible, while maintaining a mindset that offline evaluation is a guiding tool and a guardrail, not the definitive answer.</p>
-<p>I usually think like this: if your offline metrics show clear improvements, that’s a good sign to move forward. If they show no change but you have strong reasons to believe your improvements are effective, don’t let that stop you from running an online experiment. Sometimes the best ideas don’t show up in offline metrics until they meet real users. Just make sure you can roll back quickly if you see significant drops in the early days.</p>
-<p>For this tutorial series, we’ll focus on offline evaluation because it lets us iterate fast and learn the fundamentals. But important message worths repeating—the real test happens when your recommendations meet actual users.</p>
+<p>All in all, we’ll focus on offline evaluation because it lets us iterate fast and learn the fundamentals. But important message worths repeating—the real test happens when your recommendations meet actual users.</p>
 </section>
 <section id="evaluation-metrics-for-recommendation-systems" class="level2">
 <h2 class="anchored" data-anchor-id="evaluation-metrics-for-recommendation-systems">Evaluation Metrics for Recommendation Systems</h2>
@@ -328,97 +319,100 @@ Code
 <section id="the-baseline-recommender-system" class="level2">
 <h2 class="anchored" data-anchor-id="the-baseline-recommender-system">The baseline recommender system</h2>
 <p>To demonstrate how we evaluate a model, let’s first build a baseline one for easier illustration. This will serve as a sanity check for our evaluation framework and provide a performance benchmark for more complex models to beat.</p>
-<p>In the world of RecSys, the most popular base line is “popular” recommender (no pun intended). It’s simple, fast, easy to implement, easy to understand for users, and sometimes quite effective, especialy compared to the effort required to put up.</p>
+<p>In the world of RecSys, the most popular base line is “popular” recommender (pun intended). It’s simple, fast, easy to implement, easy to understand for users, and sometimes quite effective, especially compared to the effort required to put up.</p>
 <p>To get the most popular items, we only need a few lines of Pandas code to group by item and count the number of interactions: <img src="pop-impl-1.png" class="img-fluid"></p>
 <p>Then, for each of the user in our validation set, we can simply assign the most popular items to them: <img src="pop-impl-2.png" class="img-fluid"></p>
 <p>That’s it. We now have recommendations provided for our users. Now we can move to the actual evaluation part.</p>
 </section>
 <section id="how-we-set-up-evaluation-for-our-project" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="how-we-set-up-evaluation-for-our-project">How We Set Up Evaluation for our Project</h2>
-<p>Our evaluation framework is built around four core modules in <code>src/eval/</code>:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.<span class="bu">eval</span> <span class="im">import</span> (</span>
+<p>We need to align the recommendations with the ground truth labels. The <code>src/eval/utils.py</code> module provides two functions for this purpose:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/eval/utils.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb1" data-filename="src/eval/utils.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.<span class="bu">eval</span> <span class="im">import</span> (</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    create_label_df,           <span class="co"># Create ground truth labels</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    merge_recs_with_target,    <span class="co"># Merge recommendations with labels  </span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    log_ranking_metrics,       <span class="co"># Log ranking-based metrics</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    log_classification_metrics <span class="co"># Log classification-based metrics</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<section id="core-evaluation-utilities" class="level3">
-<h3 class="anchored" data-anchor-id="core-evaluation-utilities">Core Evaluation Utilities</h3>
-<p>The <code>src/eval/utils.py</code> module provides essential functions for evaluation setup:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_label_df(df, user_col, item_col, rating_col, timestamp_col):</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Create ground truth labels from validation data.</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Ranks items by rating and timestamp for each user.</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    label_cols <span class="op">=</span> [user_col, item_col, rating_col, <span class="st">"rating_rank"</span>]</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    label_df <span class="op">=</span> (</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        df.sort_values([timestamp_col], ascending<span class="op">=</span>[<span class="va">False</span>])</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        .assign(</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>            rating_rank<span class="op">=</span><span class="kw">lambda</span> df: df.groupby(user_col)[rating_col].rank(</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                method<span class="op">=</span><span class="st">"first"</span>, ascending<span class="op">=</span><span class="va">False</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        .sort_values([<span class="st">"rating_rank"</span>], ascending<span class="op">=</span>[<span class="va">True</span>])[label_cols]</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> label_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This function creates a ranking of items for each user based on their ratings and interaction timestamps, providing the ground truth for evaluation.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> merge_recs_with_target(recs_df, label_df, k<span class="op">=</span><span class="dv">10</span>, user_col, item_col, rating_col):</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Merge recommendation rankings with ground truth labels.</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Essential for computing ranking metrics.</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        recs_df.pipe(</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            <span class="kw">lambda</span> df: pd.merge(</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                df, label_df[[user_col, item_col, rating_col, <span class="st">"rating_rank"</span>]],</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                on<span class="op">=</span>[user_col, item_col], how<span class="op">=</span><span class="st">"outer"</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        .assign(</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            rating<span class="op">=</span><span class="kw">lambda</span> df: df[rating_col].fillna(<span class="dv">0</span>).astype(<span class="bu">int</span>),</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Fill the recall with ranking = top_k_retrieve + 1 so that the recall calculation is correct</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>            rec_ranking<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"rec_ranking"</span>].fillna(k <span class="op">+</span> <span class="dv">1</span>).astype(<span class="bu">int</span>),</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        .sort_values([user_col, <span class="st">"rec_ranking"</span>])</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This function aligns your model’s recommendations with the ground truth and <strong>handling cases where recommended items don’t appear in the validation set</strong>.</p>
-</section>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_label_df(df, user_col, item_col, rating_col, timestamp_col):</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">    Creates a ranking of items for each user based on their ratings and interaction timestamps, providing the ground truth for evaluation.</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    label_cols <span class="op">=</span> [user_col, item_col, rating_col, <span class="st">"rating_rank"</span>]</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    label_df <span class="op">=</span> (</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        df.sort_values([timestamp_col], ascending<span class="op">=</span>[<span class="va">False</span>])</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        .assign(</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>            rating_rank<span class="op">=</span><span class="kw">lambda</span> df: df.groupby(user_col)[rating_col].rank(</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>                method<span class="op">=</span><span class="st">"first"</span>, ascending<span class="op">=</span><span class="va">False</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        .sort_values([<span class="st">"rating_rank"</span>], ascending<span class="op">=</span>[<span class="va">True</span>])[label_cols]</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> label_df</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> merge_recs_with_target(recs_df, label_df, user_col, item_col, rating_col, k<span class="op">=</span><span class="dv">10</span>):</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co">    Align your model's recommendations with the ground truth and handling cases where recommended items don't appear in the validation set.</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        recs_df.pipe(</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>            <span class="kw">lambda</span> df: pd.merge(</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>                df, label_df[[user_col, item_col, rating_col, <span class="st">"rating_rank"</span>]],</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>                on<span class="op">=</span>[user_col, item_col], how<span class="op">=</span><span class="st">"outer"</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        .assign(</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>            rating<span class="op">=</span><span class="kw">lambda</span> df: df[rating_col].fillna(<span class="dv">0</span>).astype(<span class="bu">int</span>),</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Fill the recall with ranking = top_k_retrieve + 1 so that the recall calculation is correct</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>            rec_ranking<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"rec_ranking"</span>].fillna(k <span class="op">+</span> <span class="dv">1</span>).astype(<span class="bu">int</span>),</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        .sort_values([user_col, <span class="st">"rec_ranking"</span>])</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <section id="metric-logging-with-evidently" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="metric-logging-with-evidently">Metric Logging with Evidently</h3>
 <p>The <code>src/eval/log_metrics.py</code> module uses the <a href="https://www.evidentlyai.com/">Evidently</a> library to compute and log comprehensive metrics:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_ranking_metrics(cfg: Config, eval_df):</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Compute and log ranking metrics using Evidently.</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Automatically integrates with MLflow for experiment tracking.</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    column_mapping <span class="op">=</span> ColumnMapping(</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        recommendations_type<span class="op">=</span><span class="st">"rank"</span>,</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        target<span class="op">=</span>cfg.data.rating_col,</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        prediction<span class="op">=</span><span class="st">"rec_ranking"</span>, </span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        item_id<span class="op">=</span>cfg.data.item_col,</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        user_id<span class="op">=</span>cfg.data.user_col,</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    report <span class="op">=</span> Report(</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        metrics<span class="op">=</span>[</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>            NDCGKMetric(k<span class="op">=</span>cfg.<span class="bu">eval</span>.top_k_rerank),</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>            RecallTopKMetric(k<span class="op">=</span>cfg.<span class="bu">eval</span>.top_k_retrieve),</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>            PrecisionTopKMetric(k<span class="op">=</span>cfg.<span class="bu">eval</span>.top_k_rerank),</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>            FBetaTopKMetric(k<span class="op">=</span>cfg.<span class="bu">eval</span>.top_k_rerank),</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>            PersonalizationMetric(k<span class="op">=</span>cfg.<span class="bu">eval</span>.top_k_rerank),</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        ]</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    report.run(reference_data<span class="op">=</span><span class="va">None</span>, current_data<span class="op">=</span>eval_df, column_mapping<span class="op">=</span>column_mapping)</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Automatically log to MLflow if configured</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cfg.run.log_to_mlflow:</span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        mlflow.log_artifact(evidently_report_fp)</span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Log individual metrics for easy comparison</span></span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> metric_result <span class="kw">in</span> report.as_dict()[<span class="st">"metrics"</span>]:</span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>            <span class="co"># ... metric logging logic</span></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> report</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/eval/log_metrics.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" data-filename="src/eval/log_metrics.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_ranking_metrics(cfg: Config, eval_df):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Compute and log ranking metrics using Evidently.</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Automatically integrates with MLflow for experiment tracking.</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    column_mapping <span class="op">=</span> ColumnMapping(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        recommendations_type<span class="op">=</span><span class="st">"rank"</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        target<span class="op">=</span>cfg.data.rating_col,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        prediction<span class="op">=</span><span class="st">"rec_ranking"</span>, </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        item_id<span class="op">=</span>cfg.data.item_col,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        user_id<span class="op">=</span>cfg.data.user_col,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    report <span class="op">=</span> Report(</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        metrics<span class="op">=</span>[</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>            NDCGKMetric(k<span class="op">=</span>cfg.<span class="bu">eval</span>.top_k_rerank),</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>            RecallTopKMetric(k<span class="op">=</span>cfg.<span class="bu">eval</span>.top_k_retrieve),</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>            PrecisionTopKMetric(k<span class="op">=</span>cfg.<span class="bu">eval</span>.top_k_rerank),</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>            FBetaTopKMetric(k<span class="op">=</span>cfg.<span class="bu">eval</span>.top_k_rerank),</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>            PersonalizationMetric(k<span class="op">=</span>cfg.<span class="bu">eval</span>.top_k_rerank),</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    report.run(reference_data<span class="op">=</span><span class="va">None</span>, current_data<span class="op">=</span>eval_df, column_mapping<span class="op">=</span>column_mapping)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Automatically log to MLflow if configured</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cfg.run.log_to_mlflow:</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        mlflow.log_artifact(evidently_report_fp)</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Log individual metrics for easy comparison</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> metric_result <span class="kw">in</span> report.as_dict()[<span class="st">"metrics"</span>]:</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>            <span class="co"># ... metric logging logic</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> report</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>There is also a <code>log_classification_metrics</code> function that follows the similar pattern, but for the task of evaluation classification accuracy.</p>
 <p>The output is we have HTML report like this:</p>
 <div class="column-page">
@@ -429,60 +423,65 @@ Code
 </section>
 <section id="experiment-tracking-with-mlflow" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="experiment-tracking-with-mlflow">Experiment Tracking with MLflow</h2>
-<p>Machine learning development is fundamentally an iterative process—the more ideas we systematically test, the better our chances of discovering meaningful improvements. This iterative nature means we’re constantly cycling through hypotheses: trying new features, adjusting hyperparameters, experimenting with different architectures, and refining our approach based on results. To maximize this exploration while maintaining scientific rigor, we need more than just robust evaluation metrics; we need a convenient way to <strong>track every experiment</strong>, compare results across iterations, and easily revisit previous approaches. Comprehensive experiment logging creates a safety net that encourages bold experimentation—when you know you can reproduce any previous result or quickly understand what changed between runs, you’re more willing to try ambitious ideas that might not work. This psychological safety accelerates the entire development cycle.</p>
-<p>There are often no restrictions on how you should track your experiments. Even manually keeping things in a spreadsheet works just fine. However, in our project and based on my own experience, I feel like <a href="https://mlflow.org/">MLflow</a> is the most convenient way though, since this tool is mature and well-integrated with other ML frameworks. It also offers other fundamental capabilities like model registry which becomes very handy when we talk about model serving and deployment.</p>
+<p>Machine learning development is fundamentally an iterative process—the more ideas we systematically test, the better our chances of discovering meaningful improvements. This iterative nature means we’re constantly cycling through hypotheses: trying new features, adjusting hyperparameters, experimenting with different architectures, and refining our approach based on results.</p>
+<p>To maximize this exploration while maintaining scientific rigor, we need more than just robust evaluation metrics; we need a convenient way to <strong>track every experiment</strong>, compare results across iterations, and easily revisit previous approaches. Comprehensive experiment logging creates a safety net that encourages bold experimentation—when you know you can reproduce any previous result or quickly understand what changed between runs, you’re more willing to try ambitious ideas that might not work. This psychological safety accelerates the entire development cycle.</p>
+<p>There are often no restrictions on how you should track your experiments. Even manually keeping things in a spreadsheet works just fine. Based on my own experience, I feel like <a href="https://mlflow.org/">MLflow</a> is the most convenient way though, since this tool is mature and well-integrated with other ML frameworks. It also offers other fundamental capabilities like model registry which becomes very handy when we talk about model serving and deployment.</p>
 <p>As MLflow should be enabled in our every model training run, I put most of the MLflow integration implementation in our configuration code:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.cfg <span class="im">import</span> ConfigLoader</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load configuration and initialize MLflow</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>cfg <span class="op">=</span> ConfigLoader(<span class="st">"../cfg/common.yaml"</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>cfg.run.run_name <span class="op">=</span> <span class="st">"001-baseline-popular"</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>cfg.run.experiment_name <span class="op">=</span> <span class="st">"Retrieve - Binary"</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>cfg.init()  <span class="co"># This automatically sets up MLflow!</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.cfg <span class="im">import</span> ConfigLoader</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load configuration and initialize MLflow</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>cfg <span class="op">=</span> ConfigLoader(<span class="st">"../cfg/common.yaml"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>cfg.run.run_name <span class="op">=</span> <span class="st">"001-baseline-popular"</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>cfg.run.experiment_name <span class="op">=</span> <span class="st">"Retrieve - Binary"</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>cfg.init()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The <code>cfg.init()</code> method handles all the MLflow setup:</p>
-<div class="sourceCode" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lightning.pytorch.loggers <span class="im">import</span> MLFlowLogger</span>
-<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> init(<span class="va">self</span>):</span>
-<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Initialize MLflow experiment tracking automatically."""</span></span>
-<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="va">self</span>.run.log_to_mlflow:</span>
-<span id="annotated-cell-6-6"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>        logger.info(<span class="ss">f"Setting up MLflow experiment </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>run<span class="sc">.</span>experiment_name<span class="sc">}</span><span class="ss">..."</span>)</span>
-<span id="annotated-cell-6-7"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a>        mlflow.set_experiment(<span class="va">self</span>.run.experiment_name)</span>
-<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>        mlflow.start_run(run_name<span class="op">=</span><span class="va">self</span>.run.run_name)</span>
-<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a>        </span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1">1</button><span id="annotated-cell-6-10" class="code-annotation-target"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._mlf_logger <span class="op">=</span> MLFlowLogger(</span>
-<span id="annotated-cell-6-11"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a>            experiment_name<span class="op">=</span><span class="va">self</span>.run.experiment_name,</span>
-<span id="annotated-cell-6-12"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a>            run_id<span class="op">=</span>mlflow.active_run().info.run_id,</span>
-<span id="annotated-cell-6-13"><a href="#annotated-cell-6-13" aria-hidden="true" tabindex="-1"></a>            tracking_uri<span class="op">=</span>mlflow_uri,</span>
-<span id="annotated-cell-6-14"><a href="#annotated-cell-6-14" aria-hidden="true" tabindex="-1"></a>            log_model<span class="op">=</span><span class="va">True</span>,</span>
-<span id="annotated-cell-6-15"><a href="#annotated-cell-6-15" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="annotated-cell-6-16"><a href="#annotated-cell-6-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">self</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="annotated-cell-4"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lightning.pytorch.loggers <span class="im">import</span> MLFlowLogger</span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ConfigLoader:</span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> init(<span class="va">self</span>):</span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Initialize MLflow experiment tracking automatically."""</span></span>
+<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.run.log_to_mlflow:</span>
+<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a>            logger.info(<span class="ss">f"Setting up MLflow experiment </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>run<span class="sc">.</span>experiment_name<span class="sc">}</span><span class="ss">..."</span>)</span>
+<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10" aria-hidden="true" tabindex="-1"></a>            mlflow.set_experiment(<span class="va">self</span>.run.experiment_name)</span>
+<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11" aria-hidden="true" tabindex="-1"></a>            mlflow.start_run(run_name<span class="op">=</span><span class="va">self</span>.run.run_name)</span>
+<span id="annotated-cell-4-12"><a href="#annotated-cell-4-12" aria-hidden="true" tabindex="-1"></a>            </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1">1</button><span id="annotated-cell-4-13" class="code-annotation-target"><a href="#annotated-cell-4-13" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._mlf_logger <span class="op">=</span> MLFlowLogger(</span>
+<span id="annotated-cell-4-14"><a href="#annotated-cell-4-14" aria-hidden="true" tabindex="-1"></a>                experiment_name<span class="op">=</span><span class="va">self</span>.run.experiment_name,</span>
+<span id="annotated-cell-4-15"><a href="#annotated-cell-4-15" aria-hidden="true" tabindex="-1"></a>                run_id<span class="op">=</span>mlflow.active_run().info.run_id,</span>
+<span id="annotated-cell-4-16"><a href="#annotated-cell-4-16" aria-hidden="true" tabindex="-1"></a>                tracking_uri<span class="op">=</span>mlflow_uri,</span>
+<span id="annotated-cell-4-17"><a href="#annotated-cell-4-17" aria-hidden="true" tabindex="-1"></a>                log_model<span class="op">=</span><span class="va">True</span>,</span>
+<span id="annotated-cell-4-18"><a href="#annotated-cell-4-18" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-4-19"><a href="#annotated-cell-4-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-6" data-code-lines="10" data-code-annotation="1">Note that MLFlowLogger here is a PyTorch Lightning logger, which we would use later when defining our PyTorch Lightning model for logging our model training progress.</span>
+<span data-code-cell="annotated-cell-4" data-code-lines="13" data-code-annotation="1">Note that MLFlowLogger here is a PyTorch Lightning logger, which we would use later when defining our PyTorch Lightning model for logging our model training progress.</span>
 </dd>
 </dl>
 <p>In the end of our run, we can call this method <code>cfg.log_config_to_mlflow()</code> to log all parameters to MLflow:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_config_to_mlflow(<span class="va">self</span>):</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Log all configuration parameters to MLflow with dot notation."""</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    flat_config <span class="op">=</span> flatten_dict(<span class="va">self</span>.config.model_dump())</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key, value <span class="kw">in</span> flat_config.items():</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        mlflow.log_param(key, value)  <span class="co"># e.g., "train.learning_rate": 0.01</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_config_to_mlflow(<span class="va">self</span>):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Log all configuration parameters to MLflow with dot notation."""</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    flat_config <span class="op">=</span> flatten_dict(<span class="va">self</span>.config.model_dump())</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key, value <span class="kw">in</span> flat_config.items():</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        mlflow.log_param(key, value)  <span class="co"># e.g., "train.learning_rate": 0.01</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The result is we can access our experiment parameters like this:</p>
 <div class="column-page">
 <p><img src="mlflow-overview.png" class="img-fluid"></p>
 </div>
-<p>However, when we starts to develop our notebook, we may not want to log to MLflow. We can easily control this by setting the <code>log_to_mlflow</code> flag to <code>false</code> in our configuration file:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># cfg/common.yaml</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">run</span><span class="kw">:</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">log_to_mlflow</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">experiment_name</span><span class="kw">:</span><span class="at"> </span><span class="st">"Retrieve - Binary"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If for some reasons we don’t want to log your run to MLflow e.g.&nbsp;when we starts to develop our notebook, we can easily control this behavior by setting the <code>log_to_mlflow</code> flag to <code>false</code> in our configuration file:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># cfg/common.yaml</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">run</span><span class="kw">:</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">log_to_mlflow</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">experiment_name</span><span class="kw">:</span><span class="at"> </span><span class="st">"Retrieve - Binary"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>At this point, you’ve got a working popularity-based recommender, a full offline evaluation pipeline, and MLflow tracking wired into your runs. With those pieces in place, you can safely try out new ideas, compare experiments side by side, and roll back if something goes sideways.</p>
 </section>
 <section id="recap" class="level2">
 <h2 class="anchored" data-anchor-id="recap">Recap</h2>
 <p>In this chapter, we established the critical evaluation infrastructure that will power your recommendation system development. Here’s what we covered:</p>
 <ul>
-<li><strong>The fundamental evaluation challenges</strong>: We explored why recommendation systems are uniquely difficult to evaluate, from the counterfactual problem (we only see what users actually encountered) to the complexities of ranking, personalization, and temporal dynamics that make simple accuracy metrics inadequate.</li>
+<li><strong>The fundamental evaluation challenges</strong>: We explored why recommendation systems are uniquely difficult to evaluate, mostly from the angle of counterfactual problem (we only see what users actually encountered) which makes simple accuracy metrics inadequate.</li>
 <li><strong>Online vs offline evaluation strategy</strong>: We established the principle that while online metrics are the ultimate business goal, offline evaluation serves as our rapid iteration tool. The key insight: offline improvements don’t always translate to online wins, but they provide essential guidance for systematic development.</li>
 <li><strong>Comprehensive evaluation metrics</strong>: We implemented a multi-dimensional framework using Evidently that captures ranking quality (Precision@K, Recall@K, NDCG@K), diversity (Personalization), and classification performance (ROC-AUC, Precision-Recall curves). We also justified why classification metrics make sense for recommendation systems when framed as binary relevance prediction.</li>
 <li><strong>Popularity-based baseline implementation</strong>: We built our first recommender system—a simple but effective popularity-based model that assigns the most frequently interacted items to all users. This baseline serves as our performance benchmark and validates that our evaluation pipeline works correctly.</li>
@@ -504,11 +503,11 @@ Code
 </section>
 <section id="whats-next" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
-<p>In <a href="../c5/index.qmd">Chapter 5</a>, we’ll build on this foundation to implement sequence-based recommendation models that can capture temporal patterns in user behavior. The evaluation framework you’ve built here will be essential for measuring whether these more complex models actually improve upon our simple baseline. When it does, the results would be hard to miss:</p>
+<p>In <a href="../c5/index.qmd">Chapter 5</a>, we’ll build on this foundation to implement sequence-based recommendation models that can capture temporal patterns in user behavior. The evaluation framework you’ve built here will be essential for measuring whether these more complex models actually improve upon our simple baseline. And if the our evaluation setup does a good job, the results would be hard to miss:</p>
 <div class="column-page">
 <p><img src="../static/model-compare.png" class="img-fluid"></p>
 </div>
-<p>As you can see, MLflow can help compare model iterations easily 😉.</p>
+<p>As you can see, MLflow helps comparing model iterations easily 😉.</p>
 <hr>
 <p><br> If you find this tutorial helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
@@ -523,7 +522,6 @@ Code
 
 <ol>
 <li id="fn1"><p>You may take a look at this writing <a href="https://eugeneyan.com/writing/counterfactual-evaluation/">Counterfactual Evaluation for Recommendation Systems</a> to learn more.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>You may take a look at this writing <a href="https://eugeneyan.com/writing/counterfactual-evaluation/">Counterfactual Evaluation for Recommendation Systems</a> to learn more.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
