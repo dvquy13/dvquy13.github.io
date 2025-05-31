@@ -62,6 +62,14 @@ If you wish to learn more, I suggest checking out [this post by Amit Chaudhary](
 
 To demonstrate how we evaluate a model, let's first build a baseline one for easier illustration. This will serve as a sanity check for our evaluation framework and provide a performance benchmark for more complex models to beat.
 
+::: {.callout-note appearance="simple"}
+## Start MLflow
+If you have followed the README instructions (see [Chapter 1](../c1/index.qmd)), you should have already started MLflow. If not, you can start it by running the following command:
+```bash
+make ml-platform-up && make ml-platform-logs
+```
+:::
+
 In the world of RecSys, the most popular base line is "popular" recommender (pun intended). It's simple, fast, easy to implement, easy to understand for users, and sometimes quite effective, especially compared to the effort required to put up.
 
 To get the most popular items, we only need a few lines of Pandas code to group by item and count the number of interactions:

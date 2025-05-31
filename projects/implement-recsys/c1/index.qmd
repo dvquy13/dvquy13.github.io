@@ -7,6 +7,7 @@ image: "../static/recommender%20system.png"
 format:
   html:
     code-fold: false
+    code-annotations: hover
 # draft: true
 ---
 
@@ -180,14 +181,15 @@ Each notebook represents a complete milestone, allowing you to pause and resume 
 You may found the below commands useful, as I have myself running them regularly when developing the projects. Treating them as shortcuts, I have put them in the Makefile:
 
 ```bash
-# Environment Management
-make ml-platform-up      # Start MLflow, Qdrant, Redis
-make ml-platform-down    # Stop all services
-make ml-platform-logs    # View service logs
-
-# Development
+# Environment setup
 uv sync --all-groups     # Install/update dependencies
 make requirements-txt    # Export requirements for Docker
+
+# Development session
+make lab                 # Start Jupyter Lab  # <1>
+make ml-platform-up      # Start MLflow, Qdrant, Redis  # <2>
+make ml-platform-down    # Stop all services
+make ml-platform-logs    # View service logs
 
 # API Operations (covered in later chapters)
 make api-up             # Start the FastAPI service
@@ -196,6 +198,8 @@ make api-test           # Run API tests
 # UI Demo (optional)
 make ui-up              # Start the frontend demo
 ```
+1. This is a shortcut to start Jupyter Lab, you will need to run this in every chapter.
+2. The tools that we will use to support our model development and serving are grouped into this ml-platform umbrella.
 
 ## Recap
 
