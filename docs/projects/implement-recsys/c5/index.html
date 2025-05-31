@@ -247,7 +247,11 @@ cookieconsent.run({
   <li><a href="#training-setup" id="toc-training-setup" class="nav-link" data-scroll-target="#training-setup">Training Setup</a></li>
   <li><a href="#serving-architecture" id="toc-serving-architecture" class="nav-link" data-scroll-target="#serving-architecture">Serving Architecture</a></li>
   </ul></li>
-  <li><a href="#model-implementation" id="toc-model-implementation" class="nav-link" data-scroll-target="#model-implementation">Model Implementation</a></li>
+  <li><a href="#model-implementation" id="toc-model-implementation" class="nav-link" data-scroll-target="#model-implementation">Model Implementation</a>
+  <ul class="collapse">
+  <li><a href="#the-case-for-session-only-models" id="toc-the-case-for-session-only-models" class="nav-link" data-scroll-target="#the-case-for-session-only-models">The Case for Session-Only Models</a></li>
+  <li><a href="#core-architecture" id="toc-core-architecture" class="nav-link" data-scroll-target="#core-architecture">Core Architecture</a></li>
+  </ul></li>
   <li><a href="#model-training" id="toc-model-training" class="nav-link" data-scroll-target="#model-training">Model Training</a>
   <ul class="collapse">
   <li><a href="#mask-pooling" id="toc-mask-pooling" class="nav-link" data-scroll-target="#mask-pooling">Mask Pooling</a></li>
@@ -255,6 +259,12 @@ cookieconsent.run({
   <li><a href="#preparing-pytorch-datasets" id="toc-preparing-pytorch-datasets" class="nav-link" data-scroll-target="#preparing-pytorch-datasets">Preparing PyTorch Datasets</a></li>
   </ul></li>
   <li><a href="#integration-with-mlflow-for-experiment-tracking" id="toc-integration-with-mlflow-for-experiment-tracking" class="nav-link" data-scroll-target="#integration-with-mlflow-for-experiment-tracking">Integration with MLflow for Experiment Tracking</a></li>
+  <li><a href="#model-comparison" id="toc-model-comparison" class="nav-link" data-scroll-target="#model-comparison">Model Comparison</a>
+  <ul class="collapse">
+  <li><a href="#recall-the-heart-of-retrieval-performance" id="toc-recall-the-heart-of-retrieval-performance" class="nav-link" data-scroll-target="#recall-the-heart-of-retrieval-performance">Recall: The Heart of Retrieval Performance</a></li>
+  <li><a href="#ranking-quality-validation" id="toc-ranking-quality-validation" class="nav-link" data-scroll-target="#ranking-quality-validation">Ranking Quality Validation</a></li>
+  <li><a href="#what-this-means-for-users" id="toc-what-this-means-for-users" class="nav-link" data-scroll-target="#what-this-means-for-users">What This Means for Users</a></li>
+  </ul></li>
   <li><a href="#model-registry-and-versioning" id="toc-model-registry-and-versioning" class="nav-link" data-scroll-target="#model-registry-and-versioning">Model Registry and Versioning</a></li>
   </ul>
 </nav>
@@ -397,7 +407,17 @@ User B: Book5 → Book1 → Book4 → Book2 → Book3</code></pre>
 </section>
 <section id="model-implementation" class="level2">
 <h2 class="anchored" data-anchor-id="model-implementation">Model Implementation</h2>
-<p>Let’s examine our model implementation. You can see that its core is quite simple and straightforward. The candidate item is converted into embedding via an Embedding lookup operation. The query tower consists of a fully connected layer to add some learning capability on top of the input embedding, followed by normalization techniques to help with overfitting. Do note that at first we usually keep the model away from those techniques to make it easier to debug. Only after being certain the core architecture is working through experiments we will add them in if they help with the model performance on validation data.</p>
+<p>Now let’s translate the two-tower architecture into concrete code. But first, let me explain a key design decision that shapes our implementation.</p>
+<section id="the-case-for-session-only-models" class="level3">
+<h3 class="anchored" data-anchor-id="the-case-for-session-only-models">The Case for Session-Only Models</h3>
+<p>Traditional two-tower retrievers include both user embeddings and sequence representations in the query tower. But I’ve chosen to build what I call a “SoleSequenceRetriever”—a model that relies entirely on the sequence of interactions, without any user-specific embeddings.</p>
+<p>This isn’t just a technical choice; it’s a strategic one<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> that fundamentally changes how the model behaves. By removing user embeddings, we’re making a bet that the sequence itself contains enough signal to make good recommendations. A user browsing “Python Programming → Machine Learning → Data Analysis” tells us more about their immediate intent than knowing they’re “User #47832” with some historical preference profile.</p>
+<p>This approach solves several practical problems. New users get meaningful recommendations from their very first interaction—no cold start period where they see generic popular items. The model becomes more adaptive to changing interests since it’s not anchored to historical user preferences. And operationally, serving becomes simpler since we don’t need to manage user embedding lookups or worry about user ID mapping issues.</p>
+<p>The trade-off, of course, is that we lose the ability to capture stable, long-term user preferences that might not be evident in a short session. But for the purpose of this project and the fact that we can always extend the model later, this trade-off is worth it.</p>
+</section>
+<section id="core-architecture" class="level3">
+<h3 class="anchored" data-anchor-id="core-architecture">Core Architecture</h3>
+<p>With that context, let’s look at our implementation. The core is simple and straightforward.</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>src/sequence/model.py</strong></pre>
@@ -441,11 +461,13 @@ User B: Book5 → Book1 → Book4 → Book2 → Book3</code></pre>
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="22" data-code-annotation="1">In case we are using a pre-trained item embedding, we can pass it in as an argument to the model.</span>
+<span data-code-cell="annotated-cell-2" data-code-lines="22" data-code-annotation="1">We support pre-trained item embeddings, which can be useful if you have embeddings from other models or external sources.</span>
 </dd>
 </dl>
-<p>Note that the SoleSequenceRetriever is a variant of the TwoTowerSequenceRetriever, where I remove the <code>user_id</code> embedding from the query tower for the model to rely solely on the sequence of interactions, which can make serving new users much easier.</p>
-<p>Our base class supports both mean pooling and GRU-based pooling for sequence aggregation, making this configurable at training time. This flexibility allows us to experiment with different approaches to combining sequence information.</p>
+<p>The architecture reflects our key principles. The item embedding layer converts raw item IDs into dense vectors that can capture semantic relationships. The configurable pooling method (mean or GRU) aggregates the sequence into a single representation. The query fully connected layer adds learning capacity while batch normalization and dropout help with generalization.</p>
+<p>Notice what’s <em>not</em> here: any mention of user IDs. The model’s query tower depends entirely on the sequence of items, making it truly session-based.</p>
+<p>Our base class supports both mean pooling and GRU-based pooling for sequence aggregation, making this configurable at training time. This flexibility allows us to experiment with different approaches to combining sequence information without changing the core architecture.</p>
+</section>
 </section>
 <section id="model-training" class="level2">
 <h2 class="anchored" data-anchor-id="model-training">Model Training</h2>
@@ -516,7 +538,7 @@ User B: Book5 → Book1 → Book4 → Book2 → Book3</code></pre>
 </section>
 <section id="training-loop" class="level3">
 <h3 class="anchored" data-anchor-id="training-loop">Training Loop</h3>
-<p>The training function uses binary cross-entropy loss against our positive/negative samples. We use PyTorch Lightning to leverage its built-in training loop, logging capabilities and integration with MLflow instead of implementing ourselves<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+<p>The training function uses binary cross-entropy loss against our positive/negative samples. We use PyTorch Lightning to leverage its built-in training loop, logging capabilities and integration with MLflow instead of implementing ourselves<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>src/sequence/trainer.py</strong></pre>
@@ -588,11 +610,38 @@ User B: Book5 → Book1 → Book4 → Book2 → Book3</code></pre>
 <div class="column-page">
 <p><img src="./mlflow-training.png" class="img-fluid"></p>
 </div>
-<p>After training, we can compare the performance of our model with the popularity baseline on the same set of evaluation metrics:</p>
+</section>
+<section id="model-comparison" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="model-comparison">Model Comparison</h2>
+<p>After training, we can compare the performance of our model with the popularity baseline:</p>
 <div class="column-page">
 <p><img src="../static/model-compare.png" class="img-fluid"></p>
 </div>
-<p>As you can see, our personalized model is able to outperform the popularity baseline on all aspects by quite a large margin.</p>
+<p>The results validate our sequence-based approach with substantial improvements across all aspects. Let’s break down what these numbers tell us about our retrieval system’s effectiveness.</p>
+<section id="recall-the-heart-of-retrieval-performance" class="level3">
+<h3 class="anchored" data-anchor-id="recall-the-heart-of-retrieval-performance">Recall: The Heart of Retrieval Performance</h3>
+<p>Since we’re building a retrieval system, <strong>recall is chosen to be our north-star metric</strong>. Recall measures what fraction of relevant items we successfully include in our candidate set. In the two-stage retrieval-ranking framework, if our retrieval system misses a relevant item, no amount of sophisticated ranking can fix that—the item is gone forever from the user’s recommendations.</p>
+<p>Our sequence-based model achieves substantial improvements in recall across evaluation points:</p>
+<ul>
+<li><strong>Recall@100</strong>: 0.186 vs 0.062 (197% improvement)</li>
+<li><strong>Recall@10</strong>: 0.038 vs 0.01 for the popularity baseline (280% improvement)</li>
+</ul>
+<p>These numbers tell two important stories. The recall@100 improvement shows we’re nearly doubling our ability to capture relevant items in a typical retrieval candidate set. This is crucial for the downstream ranking stage—we’re giving it much better raw material to work with.</p>
+<p>The recall@10 improvement is equally significant but for a different reason. When we deploy this retrieval system as a standalone recommender (without a ranking stage), users see these top-10 results directly. A 280% improvement means users are nearly three times more likely to find something relevant in their immediate recommendations.</p>
+</section>
+<section id="ranking-quality-validation" class="level3">
+<h3 class="anchored" data-anchor-id="ranking-quality-validation">Ranking Quality Validation</h3>
+<p>The significant improvements in NDCG ranking metrics provide additional validation: <strong>NDCG@10</strong>: 0.018 vs 0.005 (360% improvement). NDCG measures whether we’re putting the most relevant items at the top of our candidate list. This improvement suggests our retrieval system isn’t just finding relevant items—it’s finding them and scoring them appropriately.</p>
+<p>This ranking quality matters regardless of whether we add a downstream ranking stage. If we deploy the retrieval system directly, users get better-ordered recommendations. If we add ranking later, we’re providing the ranking model with better-scored candidates to work with.</p>
+</section>
+<section id="what-this-means-for-users" class="level3">
+<h3 class="anchored" data-anchor-id="what-this-means-for-users">What This Means for Users</h3>
+<p>These metric improvements translate to concrete user experience benefits:</p>
+<p><strong>Immediate Impact</strong>: Users are 3x more likely to find relevant items in their top recommendations, dramatically reducing the time spent browsing through irrelevant suggestions.</p>
+<p><strong>Better Cold Start</strong>: New users get personalized recommendations from their very first interaction, eliminating the typical cold start period of generic popular items.</p>
+<p><strong>System Flexibility</strong>: The improved candidate quality gives us options—we can deploy this as a complete recommendation system now, or use it as a strong foundation for a more sophisticated ranking stage later.</p>
+<p>The results demonstrate that sequence modeling captures meaningful patterns in user behavior that static approaches miss entirely.</p>
+</section>
 </section>
 <section id="model-registry-and-versioning" class="level2">
 <h2 class="anchored" data-anchor-id="model-registry-and-versioning">Model Registry and Versioning</h2>
@@ -623,7 +672,8 @@ User B: Book5 → Book1 → Book4 → Book2 → Book3</code></pre>
 <ol>
 <li id="fn1"><p>The beauty of neural network-based approaches is that they offer flexibility to design an architecture that combines and best captures from multiple sources of signals.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>If you don’t recall anything about king and queen… Well, yeah, cause I didn’t say anything about that (LOL). But I would assume if you read any random article about Word2Vec, you would run into this famous analogy.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>I still remember how frustrating it was trying to implement DDP (Distributed Data Parallel) training loop with pure PyTorch. After figuring out that Lightning does not only handle that elegently but also has a lot of other features that I would have to implement myself, I never looked back.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>On the other hand, it’s not entirely wrong if you think I’m just a lazy guy who doesn’t want to deal with the missing of user embedding for new users.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>I still remember how frustrating it was trying to implement DDP (Distributed Data Parallel) training loop with pure PyTorch. After figuring out that Lightning does not only handle that elegently but also has a lot of other features that I would have to implement myself, I never looked back.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

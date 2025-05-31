@@ -136,7 +136,23 @@ Again, the beauty of this approach is that it's both a complete recommendation s
 
 ## Model Implementation
 
-Let's examine our model implementation. You can see that its core is quite simple and straightforward. The candidate item is converted into embedding via an Embedding lookup operation. The query tower consists of a fully connected layer to add some learning capability on top of the input embedding, followed by normalization techniques to help with overfitting. Do note that at first we usually keep the model away from those techniques to make it easier to debug. Only after being certain the core architecture is working through experiments we will add them in if they help with the model performance on validation data.
+Now let's translate the two-tower architecture into concrete code. But first, let me explain a key design decision that shapes our implementation.
+
+### The Case for Session-Only Models
+
+Traditional two-tower retrievers include both user embeddings and sequence representations in the query tower. But I've chosen to build what I call a "SoleSequenceRetriever"—a model that relies entirely on the sequence of interactions, without any user-specific embeddings.
+
+This isn't just a technical choice; it's a strategic one[^4] that fundamentally changes how the model behaves. By removing user embeddings, we're making a bet that the sequence itself contains enough signal to make good recommendations. A user browsing "Python Programming → Machine Learning → Data Analysis" tells us more about their immediate intent than knowing they're "User #47832" with some historical preference profile.
+
+[^4]: On the other hand, it's not entirely wrong if you think I'm just a lazy guy who doesn't want to deal with the missing of user embedding for new users.
+
+This approach solves several practical problems. New users get meaningful recommendations from their very first interaction—no cold start period where they see generic popular items. The model becomes more adaptive to changing interests since it's not anchored to historical user preferences. And operationally, serving becomes simpler since we don't need to manage user embedding lookups or worry about user ID mapping issues.
+
+The trade-off, of course, is that we lose the ability to capture stable, long-term user preferences that might not be evident in a short session. But for the purpose of this project and the fact that we can always extend the model later, this trade-off is worth it.
+
+### Core Architecture
+
+With that context, let's look at our implementation. The core is simple and straightforward.
 
 ```{.python filename="src/sequence/model.py"}
 class SoleSequenceRetriever(BaseSequenceRetriever):
@@ -175,11 +191,13 @@ class SoleSequenceRetriever(BaseSequenceRetriever):
             nn.Dropout(dropout),
         )
 ```
-1. In case we are using a pre-trained item embedding, we can pass it in as an argument to the model.
+1. We support pre-trained item embeddings, which can be useful if you have embeddings from other models or external sources.
 
-Note that the SoleSequenceRetriever is a variant of the TwoTowerSequenceRetriever, where I remove the `user_id` embedding from the query tower for the model to rely solely on the sequence of interactions, which can make serving new users much easier.
+The architecture reflects our key principles. The item embedding layer converts raw item IDs into dense vectors that can capture semantic relationships. The configurable pooling method (mean or GRU) aggregates the sequence into a single representation. The query fully connected layer adds learning capacity while batch normalization and dropout help with generalization.
 
-Our base class supports both mean pooling and GRU-based pooling for sequence aggregation, making this configurable at training time. This flexibility allows us to experiment with different approaches to combining sequence information.
+Notice what's *not* here: any mention of user IDs. The model's query tower depends entirely on the sequence of items, making it truly session-based.
+
+Our base class supports both mean pooling and GRU-based pooling for sequence aggregation, making this configurable at training time. This flexibility allows us to experiment with different approaches to combining sequence information without changing the core architecture.
 
 ## Model Training
 
@@ -324,13 +342,46 @@ While the model is training, we can observe how it converges and how it performs
 ![](./mlflow-training.png)
 :::
 
-After training, we can compare the performance of our model with the popularity baseline on the same set of evaluation metrics:
+## Model Comparison
+
+After training, we can compare the performance of our model with the popularity baseline:
 
 :::{.column-page}
 ![](../static/model-compare.png)
 :::
 
-As you can see, our personalized model is able to outperform the popularity baseline on all aspects by quite a large margin.
+The results validate our sequence-based approach with substantial improvements across all metrics. Let's break down what these numbers tell us about our retrieval system's effectiveness.
+
+### Recall: The Heart of Retrieval Performance
+
+Since we're building a retrieval system, **recall is chosen to be our north-star metric**. Recall measures what fraction of relevant items we successfully include in our candidate set. In the two-stage retrieval-ranking framework, if our retrieval system misses a relevant item, no amount of sophisticated ranking can fix that—the item is gone forever from the user's recommendations.
+
+Our sequence-based model achieves substantial improvements in recall across evaluation points:
+
+- **Recall@100**: 0.186 vs 0.062 (197% improvement)
+- **Recall@10**: 0.038 vs 0.01 for the popularity baseline (280% improvement)
+
+These numbers tell two important stories. The recall@100 improvement shows we're nearly doubling our ability to capture relevant items in a typical retrieval candidate set. This is crucial for the downstream ranking stage—we're giving it much better raw material to work with.
+
+The recall@10 improvement is equally significant but for a different reason. When we deploy this retrieval system as a standalone recommender (without a ranking stage), users see these top-10 results directly. A 280% improvement means users are nearly three times more likely to find something relevant in their immediate recommendations.
+
+### Ranking Quality Validation
+
+The significant improvements in NDCG ranking metrics provide additional validation: **NDCG@10**: 0.018 vs 0.005 (360% improvement). NDCG measures whether we're putting the most relevant items at the top of our candidate list. This improvement suggests our retrieval system isn't just finding relevant items—it's finding them and scoring them appropriately.
+
+This ranking quality matters regardless of whether we add a downstream ranking stage. If we deploy the retrieval system directly, users get better-ordered recommendations. If we add ranking later, we're providing the ranking model with better-scored candidates to work with.
+
+### What This Means for Users
+
+These metric improvements translate to concrete user experience benefits:
+
+**Immediate Impact**: Users are 3x more likely to find relevant items in their top recommendations, dramatically reducing the time spent browsing through irrelevant suggestions.
+
+**Better Cold Start**: New users get personalized recommendations from their very first interaction, eliminating the typical cold start period of generic popular items.
+
+**System Flexibility**: The improved candidate quality gives us options—we can deploy this as a complete recommendation system now, or use it as a strong foundation for a more sophisticated ranking stage later.
+
+The results demonstrate that sequence modeling captures meaningful patterns in user behavior that static approaches miss entirely.
 
 ## Model Registry and Versioning
 
