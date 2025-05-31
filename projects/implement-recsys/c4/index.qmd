@@ -5,7 +5,7 @@ title: |
 subtitle: "Establishing the evaluation foundation and implementing your baseline"
 date: "2025-05-30"
 categories: [recsys, implement-recsys-series]
-image: "../static/evaluation-framework.png"
+image: "./evidently-classification.png"
 format:
   html:
     code-fold: false

@@ -5,7 +5,7 @@ title: |
 subtitle: "Why your model needs to see what users don't want—and how to generate those examples"
 date: "2025-05-26"
 categories: [recsys, implement-recsys-series]
-image: "../static/negative-sampling.png"
+image: "./skipgram.webp"
 format:
   html:
     code-fold: false

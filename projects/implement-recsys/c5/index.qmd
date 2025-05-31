@@ -5,7 +5,7 @@ title: |
 subtitle: "Design and build sequence models that capture temporal patterns in user behavior"
 date: "2025-05-31"
 categories: [recsys, implement-recsys-series]
-image: "../static/sequence-modeling.png"
+image: "../static/two-tower-architecture.png"
 format:
   html:
     code-fold: false
@@ -15,7 +15,7 @@ format:
 
 This is the **fifth chapter** of the tutorial series: Implement a RecSys.
 {{< include ../_series-index.qmd >}}
-
+  
 ## Introduction
 
 In [Chapter 4](../c4/index.qmd), we established our evaluation framework, implemented MLflow experiment tracking, and built a popularity-based baseline model. Since our baseline is simple, it treats all users the same way—everyone gets the same popular items regardless of their personal browsing history or preferences.
@@ -53,7 +53,7 @@ Think about what happens in a static recommendation systems when a new user sign
 
 Our sequence model flips this on its head. The moment a new user clicks on their first book, the model springs into action. They browse "Python Programming," then click on "Machine Learning Basics"—the model immediately understands they're on a learning journey. No waiting. No generic recommendations. The system starts personalizing from interaction number one.
 
-This happens because our model doesn't need to know who you are. It mostly needs to know what you're doing. Traditional collaborative filtering methods like Matrix Factorization, while also leaning on user interaction data, normally provides user embedding that captures stable preferences over time. The sequence representation captures what's happening right now. This is largely debateable, but in a lot of the settings "right now" is often more important than "over time" for making the next recommendation[^1].
+This happens because our model doesn't need to know who you are. It mostly needs to know what you're doing. Traditional collaborative filtering methods like Matrix Factorization, while also leaning on user interaction data, normally provides user embedding that captures stable preferences over time. The sequence representation captures what's happening right now. This is largely debateable, but in some settings "right now" carries more weight than "over time" for making the next recommendation[^1].
 
 [^1]: The beauty of neural network-based approaches is that they offer flexibility to design an architecture that combines and best captures from multiple sources of signals.
 
@@ -61,6 +61,7 @@ And the model keeps learning as users interact. When someone adds a third book t
 
 This real-time adaptation solves one of the biggest problems in recommendation systems: how do you stay relevant when user interests change quickly? Traditional collaborative filtering models need to be retrained to pick up new patterns. Our sequence model adapts immediately. If thriller readers suddenly start buying romance novels (maybe it's Valentine's Day), the model notices the shift in the very next recommendation request.
 
+Now that we understand why sequence modeling is crucial, let's explore how to actually design it.
 
 ## Sequence Modeling Approaches
 
@@ -86,9 +87,11 @@ To fix this memory issue, researchers developed Long Short-Term Memory (LSTM) an
 
 More recently, Transformer models have taken the field by storm. Instead of processing sequences step by step, they use self-attention mechanisms to look at all parts of the sequence simultaneously. It's like being able to read an entire book at once and instantly connect themes from chapter 1 to chapter 20. Transformers are incredibly powerful for capturing long-range dependencies, but there's a catch—they can be computationally expensive, especially when you have thousands or millions of items in your catalog.
 
-## Retrieval vs Ranking
+Now that we've explored different sequence modeling approaches—from simple averaging to sophisticated Transformers—let's not forget that all architecture decisions should consider the following question: how do we deploy these models in production systems that need to handle millions of items in real-time?
 
-When discussing recommendation system modeling approaches, it's unrealistic if we don't talk about retrieval and ranking, as most real-world systems are designed according to this two-phase approach.
+This is where the retrieval vs ranking paradigm becomes essential.
+
+## Retrieval vs Ranking
 
 While the main task is still to rank the most relevant and likely-to-be-interacted items on top, in reality it's not uncommon that we need to deal with ranking for millions of items. Training a scoring model that takes into account each instance of `<user, context, item>` and uses it from the start is not feasible because of latency constraints. Calling that model to give fine-grained scores to all millions of items would take forever, and neither our users have that kind of patience nor do we as engineers find that idea sane.
 
@@ -405,3 +408,56 @@ if val_roc_auc > cfg.eval.min_roc_auc:
             latest_version
         )
 ```
+
+## Recap
+
+In this chapter, we achieved a major milestone in our recommendation system journey—transitioning from simple heuristic-based approaches to personalized machine learning models that capture temporal patterns in user behavior. Here's what we accomplished:
+
+**From Theory to Practice:**
+
+- **Why sequence modeling matters**: We established that traditional collaborative filtering misses the crucial story hidden in the order and timing of user interactions. By modeling sequences, we can distinguish between users who follow structured learning paths versus those who jump between topics randomly.
+- **Real-time adaptation and cold start solutions**: We demonstrated how sequence-based models solve two critical RecSys challenges. New users get personalized recommendations from their very first interaction, and the model adapts immediately to changing user interests without requiring retraining.
+
+**Architectural Decisions:**
+
+- **Two-tower retrieval architecture**: We chose a retrieval-focused approach over end-to-end ranking, enabling fast candidate selection from millions of items while maintaining millisecond-level response times.
+- **Session-only modeling**: By building a "SoleSequenceRetriever" that relies entirely on interaction sequences without user embeddings, we prioritized adaptability and simplified serving infrastructure while solving cold start problems elegantly.
+
+**Technical Implementation:**
+
+- **Masked pooling for variable sequences**: We addressed the practical challenge of variable-length user sessions by implementing masked pooling that ignores padding tokens during sequence aggregation.
+- **Cosine similarity alignment**: Our training objective uses the same cosine similarity computation as production serving, ensuring consistency between offline training and online inference.
+- **PyTorch Lightning integration**: We leveraged Lightning's capabilities for training loops, distributed training, and automatic MLflow integration, avoiding the complexity of custom implementations.
+
+**Validation and Results:**
+
+- **Substantial performance improvements**: Our sequence-based retriever achieved 197% improvement in Recall@100 and 280% improvement in Recall@10 compared to the popularity baseline, demonstrating that temporal patterns contain meaningful signals for recommendations.
+- **MLflow model registry**: We established automated model versioning with quality gates, ensuring only models exceeding minimum performance thresholds get registered for potential deployment.
+
+This sequence-based retriever represents a complete, deployable recommendation system that can serve personalized suggestions in real-time. More importantly, it provides a solid foundation for future enhancements—whether adding a downstream ranking layer or incorporating additional features like item content or user demographics.
+
+::: {.callout-note appearance="simple"}
+## Code
+All code for this chapter is available in the `notebooks/011-sequence-modeling.ipynb` file and the `src/sequence/` directory in the [project repository](https://github.com/dvquy13/recsys-seq-model).
+:::
+
+## What's Next?
+
+With our sequence-based retrieval model performing strongly, we have several exciting directions for future development:
+
+**Short-term enhancements** could include experimenting with Transformer-based pooling for better long-range dependency modeling, incorporating item content features to improve cold-start item recommendations, or implementing more sophisticated negative sampling strategies like hard negative mining.
+
+**Medium-term evolution** might involve building the ranking layer on top of our retrieval system, implementing online learning capabilities for real-time model adaptation, or adding multi-armed bandit strategies for exploration-exploitation balance.
+
+**Production deployment** considerations include setting up the vector database infrastructure for candidate indexing, implementing real-time serving APIs, and establishing A/B testing frameworks for online evaluation.
+
+In [Chapter 6](../c6/index.qmd), we will continue our journey to build an end-to-end recommendation system by preparing the offline computation and online serving infrastructure, e.g. MLflow, Redis, Qdrant. The focus would shift a bit towards platform/infrastructure, but we only touch upon how we set them up locally so hopefully it should not be too much of a stretch.
+
+Continue to the [next chapter](../c6/index.qmd).
+
+---
+
+<br>
+If you find this tutorial helpful, please cite this writeup as:
+
+> Quy, Dinh. (May 2025). {{< meta title >}}. {{< var website_url >}}. https://{{< var website_url >}}/projects/implement-recsys/c5/.
