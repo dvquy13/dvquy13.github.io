@@ -1,5 +1,7 @@
 ---
-title: "Implement a RecSys Chapter 2 - Understanding the Data and Feature Engineering"
+title: |
+    Implement a RecSys, Chapter 2:<br>
+    Understanding the Data and Feature Engineering
 subtitle: "Exploring Amazon product dataset and building features for sequence models"
 date: "2025-05-25"
 categories: [recsys, implement-recsys-series]
@@ -10,6 +12,9 @@ format:
     code-annotations: hover
 # draft: true
 ---
+
+This is the **second chapter** of the tutorial series: Implement a RecSys.
+{{< include ../series-index.qmd >}}
 
 ## Introduction
 
@@ -276,6 +281,8 @@ All code for this chapter is available in the `notebooks/000-prep-data.ipynb` an
 ## What's Next
 
 In [Chapter 3](../c3/index.qmd), we'll tackle the critical challenge of **negative sampling**. If our model only sees positive interactions (ratings), it can't learn meaningful patterns for generalization. We need to generate negative examples so the model can distill the patterns by learning to distinguish between positive and negative interactions.
+
+Continue to the [next chapter](../c3/index.qmd).
 
 ---
 

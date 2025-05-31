@@ -1,5 +1,7 @@
 ---
-title: "Implement a RecSys Chapter 1 - Introduction and Project Overview"
+title: |
+    Implement a RecSys, Chapter 1:<br>
+    Introduction and Project Overview
 subtitle: "Understanding session-based recommendations and setting up your development environment"
 date: "2025-05-24"
 categories: [recsys, implement-recsys-series]
@@ -10,6 +12,9 @@ format:
     code-annotations: hover
 # draft: true
 ---
+
+This is the **first chapter** of the tutorial series: Implement a RecSys.
+{{< include ../series-index.qmd >}}
 
 ## Introduction
 
@@ -215,6 +220,8 @@ After that you should have:
 ## What's Next
 
 In [Chapter 2](../c2/index.qmd), we'll get our hands dirty while setting up the input data in a format that's designed for sequence modeling.
+
+Continue to the [next chapter](../c2/index.qmd).
 
 ---
 

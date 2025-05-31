@@ -1,5 +1,7 @@
 ---
-title: "Implement a RecSys Chapter 3 - Negative Sampling"
+title: |
+    Implement a RecSys, Chapter 3:<br>
+    Negative Sampling
 subtitle: "Why your model needs to see what users don't want—and how to generate those examples"
 date: "2025-05-26"
 categories: [recsys, implement-recsys-series]
@@ -10,6 +12,9 @@ format:
     code-annotations: hover
 # draft: true
 ---
+
+This is the **third chapter** of the tutorial series: Implement a RecSys.
+{{< include ../series-index.qmd >}}
 
 ## Introduction
 
@@ -218,6 +223,8 @@ All code for this chapter is in `notebooks/002-negative-sample.ipynb` and `src/n
 ## What's Next?
 
 With our balanced dataset of positive and negative samples, we're ready to tackle model evaluation. In [Chapter 4](../c4/index.qmd), we'll set up our evaluation framework and experiment tracking with MLflow while implementing a baseline model along the way as an illustration. This will give us the foundation for systematic model development and comparison.
+
+Continue to the [next chapter](../c4/index.qmd).
 
 ---
 

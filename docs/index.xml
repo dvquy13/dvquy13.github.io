@@ -20,6 +20,17 @@
 
 
 
+<ol type="1">
+<li><a href="./c1/index.html">Chapter 1 – Data &amp; Preprocessing</a><br>
+</li>
+<li><a href="./c2/index.html">Chapter 2 – Embeddings &amp; Sampling</a><br>
+</li>
+<li><a href="./c3/index.html">Chapter 3 – Negative-Sampling</a><br>
+</li>
+<li><a href="./c4/index.html">Chapter 4 – Evaluation &amp; Baseline</a><br>
+</li>
+<li><a href="./c5/index.html">Chapter 5 – Sequence Models</a></li>
+</ol>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In <a href="../../../projects/implement-recsys/c3/index.html">Chapter 3</a>, inspired by how Word2Vec cleverly samples out-of-context words to train its language model, we implemented our own popularity-based sampling strategy to generate negative samples for our training dataset. Now we’re ready to tackle one of the most critical aspects of any ML project: <strong>evaluation</strong>.</p>

@@ -8,7 +8,7 @@
 
 <meta name="dcterms.date" content="2025-05-25">
 
-<title>Implement a RecSys Chapter 2 - Understanding the Data and Feature Engineering – DvQ</title>
+<title>Implement a RecSys, Chapter 2:  Understanding the Data and Feature Engineering – DvQ</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -207,7 +207,7 @@ cookieconsent.run({
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Implement a RecSys Chapter 2 - Understanding the Data and Feature Engineering</h1>
+      <h1 class="title"><p>Implement a RecSys, Chapter 2:<br> Understanding the Data and Feature Engineering</p></h1>
             <p class="subtitle lead">Exploring Amazon product dataset and building features for sequence models</p>
                                 <div class="quarto-categories">
                 <div class="quarto-category">recsys</div>
@@ -260,6 +260,34 @@ cookieconsent.run({
 
 
 
+<p>This is the <strong>second chapter</strong> of the tutorial series: Implement a RecSys.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+List of chapters
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><a href="./c1/index.html">Chapter 1: Introduction and Project Overview</a><br>
+</li>
+<li><a href="./c2/index.html">Chapter 2: Understanding the Data and Feature Engineering</a><br>
+</li>
+<li><a href="./c3/index.html">Chapter 3: Negative Sampling</a><br>
+</li>
+<li><a href="./c4/index.html">Chapter 4: Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation</a><br>
+</li>
+<li><a href="./c5/index.html">Chapter 5: Session-based Recommendation Model</a><br>
+</li>
+</ul>
+</div>
+</div>
+</div>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In <a href="../../../projects/implement-recsys/c1/index.html">Chapter 1</a>, we set up our development environment and explored the project architecture. Now it’s time to dive into the heart of any recommendation system: <strong>data</strong>. The quality of our recommendations depends entirely on how well we understand, process, and engineer features from our data.</p>
@@ -319,7 +347,7 @@ Code
 </dd>
 </dl>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -328,7 +356,7 @@ Configuration Management
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.cfg <span class="im">import</span> ConfigLoader</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -525,10 +553,11 @@ Code
 <section id="whats-next" class="level2">
 <h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
 <p>In <a href="../../../projects/implement-recsys/c3/index.html">Chapter 3</a>, we’ll tackle the critical challenge of <strong>negative sampling</strong>. If our model only sees positive interactions (ratings), it can’t learn meaningful patterns for generalization. We need to generate negative examples so the model can distill the patterns by learning to distinguish between positive and negative interactions.</p>
+<p>Continue to the <a href="../../../projects/implement-recsys/c3/index.html">next chapter</a>.</p>
 <hr>
 <p><br> If you find this tutorial helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
-<p>Quy, Dinh. (May 2025). Implement a RecSys Chapter 2 - Understanding the Data and Feature Engineering. dvquys.com. https://dvquys.com/projects/implement-recsys/c2/.</p>
+<p>Quy, Dinh. (May 2025). Implement a RecSys, Chapter 2:<br> Understanding the Data and Feature Engineering. dvquys.com. https://dvquys.com/projects/implement-recsys/c2/.</p>
 </blockquote>
 
 

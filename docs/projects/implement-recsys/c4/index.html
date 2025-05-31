@@ -8,7 +8,7 @@
 
 <meta name="dcterms.date" content="2025-05-27">
 
-<title>Implement a RecSys Chapter 4 - Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation – DvQ</title>
+<title>Implement a RecSys, Chapter 4:  Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation – DvQ</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -204,8 +204,8 @@ cookieconsent.run({
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Implement a RecSys Chapter 4 - Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation</h1>
-            <p class="subtitle lead">Establishing the evaluation foundation and implementing your first recommendation model</p>
+      <h1 class="title"><p>Implement a RecSys, Chapter 4:<br> Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation</p></h1>
+            <p class="subtitle lead">Establishing the evaluation foundation and implementing your baseline</p>
                                 <div class="quarto-categories">
                 <div class="quarto-category">recsys</div>
                 <div class="quarto-category">implement-recsys-series</div>
@@ -262,6 +262,34 @@ cookieconsent.run({
 
 
 
+<p>This is the <strong>fourth chapter</strong> of the tutorial series: Implement a RecSys.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+List of chapters
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><a href="./c1/index.html">Chapter 1: Introduction and Project Overview</a><br>
+</li>
+<li><a href="./c2/index.html">Chapter 2: Understanding the Data and Feature Engineering</a><br>
+</li>
+<li><a href="./c3/index.html">Chapter 3: Negative Sampling</a><br>
+</li>
+<li><a href="./c4/index.html">Chapter 4: Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation</a><br>
+</li>
+<li><a href="./c5/index.html">Chapter 5: Session-based Recommendation Model</a><br>
+</li>
+</ul>
+</div>
+</div>
+</div>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In <a href="../../../projects/implement-recsys/c3/index.html">Chapter 3</a>, inspired by how Word2Vec cleverly samples out-of-context words to train its language model, we implemented our own popularity-based sampling strategy to generate negative samples for our training dataset. Now we’re ready to tackle one of the most critical aspects of any ML project: <strong>evaluation</strong>.</p>
@@ -517,15 +545,16 @@ Code
 </section>
 <section id="whats-next" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
-<p>In <a href="../c5/index.qmd">Chapter 5</a>, we’ll build on this foundation to implement sequence-based recommendation models that can capture temporal patterns in user behavior. The evaluation framework you’ve built here will be essential for measuring whether these more complex models actually improve upon our simple baseline. And if the our evaluation setup does a good job, the results would be hard to miss:</p>
+<p>In <a href="../c5/index.qmd">Chapter 5</a>, we’ll build on this foundation to implement session-based recommendation models that can capture temporal patterns in user behavior. The evaluation framework you’ve built here will be essential for measuring whether these more complex models actually improve upon our simple baseline. And if the our evaluation setup does a good job, the results would be hard to miss:</p>
 <div class="column-page">
 <p><img src="../static/model-compare.png" class="img-fluid"></p>
 </div>
 <p>As you can see, MLflow helps comparing model iterations easily 😉.</p>
+<p>Continue to the <a href="../c5/index.qmd">next chapter</a>.</p>
 <hr>
 <p><br> If you find this tutorial helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
-<p>Quy, Dinh. (May 2025). Implement a RecSys Chapter 4 - Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation. dvquys.com. https://dvquys.com/projects/implement-recsys/c4/.</p>
+<p>Quy, Dinh. (May 2025). Implement a RecSys, Chapter 4:<br> Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation. dvquys.com. https://dvquys.com/projects/implement-recsys/c4/.</p>
 </blockquote>
 
 

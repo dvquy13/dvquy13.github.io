@@ -1,6 +1,8 @@
 ---
-title: "Implement a RecSys Chapter 4 - Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation"
-subtitle: "Establishing the evaluation foundation and implementing your first recommendation model"
+title: |
+    Implement a RecSys, Chapter 4:<br>
+    Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation
+subtitle: "Establishing the evaluation foundation and implementing your baseline"
 date: "2025-05-27"
 categories: [recsys, implement-recsys-series]
 image: "../static/evaluation-framework.png"
@@ -10,6 +12,9 @@ format:
     code-annotations: hover
 # draft: true
 ---
+
+This is the **fourth chapter** of the tutorial series: Implement a RecSys.
+{{< include ../series-index.qmd >}}
 
 ## Introduction
 
@@ -266,13 +271,15 @@ All code for this chapter is available in the `notebooks/010-baseline-popular.ip
 
 ## What's Next
 
-In [Chapter 5](../c5/index.qmd), we'll build on this foundation to implement sequence-based recommendation models that can capture temporal patterns in user behavior. The evaluation framework you've built here will be essential for measuring whether these more complex models actually improve upon our simple baseline. And if the our evaluation setup does a good job, the results would be hard to miss:
+In [Chapter 5](../c5/index.qmd), we'll build on this foundation to implement session-based recommendation models that can capture temporal patterns in user behavior. The evaluation framework you've built here will be essential for measuring whether these more complex models actually improve upon our simple baseline. And if the our evaluation setup does a good job, the results would be hard to miss:
 
 ::: {.column-page}
 ![](../static/model-compare.png)
 :::
 
 As you can see, MLflow helps comparing model iterations easily 😉.
+
+Continue to the [next chapter](../c5/index.qmd).
 
 ---
 
