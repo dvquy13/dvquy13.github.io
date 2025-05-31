@@ -3,7 +3,7 @@ title: |
     Implement a RecSys, Chapter 4:<br>
     Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation
 subtitle: "Establishing the evaluation foundation and implementing your baseline"
-date: "2025-05-27"
+date: "2025-05-30"
 categories: [recsys, implement-recsys-series]
 image: "../static/evaluation-framework.png"
 format:
@@ -14,7 +14,7 @@ format:
 ---
 
 This is the **fourth chapter** of the tutorial series: Implement a RecSys.
-{{< include ../series-index.qmd >}}
+{{< include ../_series-index.qmd >}}
 
 ## Introduction
 

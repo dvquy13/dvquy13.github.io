@@ -14,7 +14,7 @@ format:
 ---
 
 This is the **second chapter** of the tutorial series: Implement a RecSys.
-{{< include ../series-index.qmd >}}
+{{< include ../_series-index.qmd >}}
 
 ## Introduction
 
