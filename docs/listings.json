@@ -2,6 +2,7 @@
   {
     "listing": "/projects.html",
     "items": [
+      "/projects/implement-recsys/c6/index.html",
       "/projects/implement-recsys/c5/index.html",
       "/projects/implement-recsys/c4/index.html",
       "/projects/implement-recsys/c3/index.html",
@@ -14,6 +15,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/projects/implement-recsys/c6/index.html",
       "/projects/implement-recsys/c5/index.html",
       "/projects/implement-recsys/c4/index.html",
       "/projects/implement-recsys/c3/index.html",

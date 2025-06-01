@@ -10,7 +10,1297 @@
 <atom:link href="https://dvquys.com/index.xml" rel="self" type="application/rss+xml"/>
 <description>DvQ Personal Website</description>
 <generator>quarto-1.6.40</generator>
-<lastBuildDate>Fri, 30 May 2025 16:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 31 May 2025 16:00:00 GMT</lastBuildDate>
+<item>
+  <title>Implement a RecSys, Chapter 6: Preparing for Serving</title>
+  <link>https://dvquys.com/projects/implement-recsys/c6/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>This is the <strong>sixth chapter</strong> of the tutorial series: Implement a RecSys.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+List of chapters
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><a href="../c1/index.html">Chapter 1: Introduction and Project Overview</a><br>
+</li>
+<li><a href="../c2/index.html">Chapter 2: Understanding the Data and Feature Engineering</a><br>
+</li>
+<li><a href="../c3/index.html">Chapter 3: Negative Sampling</a><br>
+</li>
+<li><a href="../c4/index.html">Chapter 4: Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation</a><br>
+</li>
+<li><a href="../c5/index.html">Chapter 5: Session-based Recommendation Model</a><br>
+</li>
+<li><a href="../c6/index.html">Chapter 6: Preparing for Serving</a><br>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In <a href="../../../projects/implement-recsys/c5/index.html">Chapter 5</a>, we have come a long way to build our sequence-based recommendation model which demonstrates significant metric uplifts over the popularity baseline. It can capture temporal patterns in user behavior and personalize recommendations based on interaction sequences. We’re finally ready to tell the world about our exciting new model! To do that, we need to package our work in a way that end-users can benefit from.</p>
+<p>This chapter aims to provide a transition ground from model development to deployment readiness. The challenge isn’t just loading a model and calling <code>predict()</code>—it’s building a proper system that can respond in milliseconds.</p>
+<p>Deploying ML models in production is actually a very huge area and deserves a series of its own. Within the scope of this tutorial, we will discuss the topic from the angle of an end-to-end data scientist—whose job is to design the complete pipeline from training to serving.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Code
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>All code for this chapter is available in the <code>notebooks/020-ann-index.ipynb</code> and <code>notebooks/021-store-user-item-sequence.ipynb</code> files, along with the infrastructure configuration in <code>compose.yml</code> and the <code>mlflow/</code> directory in the <a href="https://github.com/dvquy13/recsys-seq-model">project repository</a>.</p>
+</div>
+</div>
+</section>
+<section id="serving-paradigms-from-model-to-user-experience" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="serving-paradigms-from-model-to-user-experience">Serving Paradigms: From Model to User Experience</h2>
+<p>I have been always thinking that building a recommendation model is like crafting a perfect recipe for a gourmet dish. You might have the most sophisticated ingredients, precise measurements, and innovative techniques, but until that dish reaches hungry customers, it’s just potential sitting in the kitchen. The recipe itself doesn’t feed anyone—it’s the execution, plating, and delivery that creates value. Similarly, our sequence-based recommendation model, no matter how accurate its predictions, remains useless until it can respond to real user requests in real-time.</p>
+<p>This analogy extends further when we consider the restaurant’s serving strategy. A high-end restaurant doesn’t prepare each dish from scratch when a customer orders. Instead, they use a combination of pre-preparation (mise en place) and real-time cooking. Some components are prepped in batches during quiet hours, while others must be prepared fresh to order. Recommendation systems follow the same principle: we balance pre-computed results with real-time inference based on the specific requirements of each use case.</p>
+<section id="how-recommendations-reach-users" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="how-recommendations-reach-users">How Recommendations Reach Users</h3>
+<div class="column-page my-5">
+<p><img src="https://dvquys.com/projects/implement-recsys/static/Model Serving.drawio.png" class="img-fluid"></p>
+</div>
+<p>Understanding serving paradigms starts with tracing the journey from user action to displayed recommendations. When a user opens your app, a carefully orchestrated process begins:</p>
+<ol type="1">
+<li><strong>Frontend Request</strong>: The mobile app or web interface detects the user’s need for recommendations (homepage load, category browse, search query)</li>
+<li><strong>API Call</strong>: The frontend makes a REST API call to the backend, passing user context (user ID, current page, device info)</li>
+<li><strong>Backend Processing</strong>: The recommendation service processes this request, either by looking up pre-computed results or triggering real-time model inference</li>
+<li><strong>Response Assembly</strong>: Results are ranked, filtered for business rules, and formatted for display</li>
+<li><strong>Frontend Rendering</strong>: The app receives the recommendations and renders them in the user interface</li>
+</ol>
+<p>While the actual requirements vary between use cases, normally this entire pipeline must complete within 200ms at the 95th percentile to maintain user engagement. Any longer, and users start experiencing the dreaded loading spinner that kills conversion rates.</p>
+</section>
+<section id="two-paradigms-batch-pre-computation-vs-online-serving" class="level3">
+<h3 class="anchored" data-anchor-id="two-paradigms-batch-pre-computation-vs-online-serving">Two Paradigms: Batch Pre-computation vs Online Serving</h3>
+<p>The critical decision in this pipeline happens at step 3: how does the backend generate recommendations? There are two fundamental paradigms, each with distinct trade-offs:</p>
+<p><strong>Batch Pre-computation</strong> follows the “prepare ahead” strategy. Recommendations are generated offline for all users during low-traffic periods and stored in a key-value store like Redis or DynamoDB. When a user makes a request, the API simply looks up their pre-computed recommendations—a blazingly fast operation that typically completes in under 10ms.</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Batch pre-computation approach</span></span>
+<span id="cb1-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> batch_generate_recommendations():</span>
+<span id="cb1-3">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Run offline to pre-compute recommendations for all users."""</span></span>
+<span id="cb1-4">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> user_id <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> all_users:</span>
+<span id="cb1-5">        recommendations <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model.predict(user_id)</span>
+<span id="cb1-6">        redis_client.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"recs:</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>user_id<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>, recommendations, ex<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3600</span>)</span>
+<span id="cb1-7"></span>
+<span id="cb1-8"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> serve_recommendations(user_id):</span>
+<span id="cb1-9">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Fast lookup during serving."""</span></span>
+<span id="cb1-10">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> redis_client.get(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"recs:</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>user_id<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div>
+<p><strong>Online Serving</strong> follows the “cook to order” strategy. The model inference happens in real-time when users make requests. This requires the recommendation model to be deployed as a service that can respond to API calls within milliseconds.</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Online serving approach</span></span>
+<span id="cb2-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> serve_recommendations(user_id, context):</span>
+<span id="cb2-3">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Real-time model inference during serving."""</span></span>
+<span id="cb2-4">    user_features <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> get_user_features(user_id)</span>
+<span id="cb2-5">    contextual_features <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> extract_context(context)</span>
+<span id="cb2-6">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> model.predict(user_features, contextual_features)</span></code></pre></div>
+</section>
+<section id="when-to-choose-each-paradigm" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="when-to-choose-each-paradigm">When to Choose Each Paradigm</h3>
+<p>The choice between batch pre-computation and online serving isn’t arbitrary—it depends on your specific constraints and requirements. Batch pre-computation shines when recommendations don’t need real-time context. It’s also ideal when you can tolerate slightly stale recommendations that are updated periodically, perhaps hourly or daily, in exchange for guaranteed fast response times under all conditions. And it’s particularly attractive when your infrastructure needs to be simple and cost-effective, especially if you’re serving millions of users and want predictable resource utilization patterns.</p>
+<p>On the other hand, online serving becomes essential when having access to real-time contexts for recommendations is crucial in ensuring the relevance of our recommendations. Those contexts can be a user’s current shopping cart contents, her search query, or time-sensitive factors like current location or weather. All of these signals share an important property: we don’t know them in advance, so pre-computation is not an option.</p>
+<p>In practice, most production recommendation systems use a hybrid approach that combines both paradigms strategically. The default fallback homepage might display pre-computed “trending items” in cases of new users or errors from the recommendation services. In the remaining happy cases, we pass the relevant contexts to the model endpoints to provide better browsing experiences for users. This hybrid strategy optimizes for both performance and personalization.</p>
+<p>As you can see, the UI demo for our project also starts by showing the popular recommendations before updating the list with respect to user’s interactions.</p>
+<div class="column-page">
+<p><img src="https://dvquys.com/projects/implement-recsys/static/session-based retriever - demo v2.gif" class="img-fluid"></p>
+</div>
+</section>
+</section>
+<section id="three-pillar-serving-architecture" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="three-pillar-serving-architecture">Three-Pillar Serving Architecture</h2>
+<p>We’ll set up three main components that form the backbone of serving recommendation systems: <strong>MLflow</strong> for model registry and deployment, <strong>Qdrant</strong> for vector similarity search, and <strong>Redis</strong> as KV store for user sequences and metadata. Each addresses a specific aspect of the real-time recommendation challenge.</p>
+<div class="page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><img src="https://dvquys.com/projects/implement-recsys/static/Model Serving.drawio.png" class="img-fluid figure-img column-page"></p>
+<figcaption>Three-pillar serving architecture with Model Registry, Vector Store, and Key-Value Cache</figcaption>
+</figure>
+</div>
+</div>
+<section id="pillar-1-model-registry-mlflow" class="level3">
+<h3 class="anchored" data-anchor-id="pillar-1-model-registry-mlflow">Pillar 1: Model Registry (MLflow)</h3>
+<p>The <strong>Model Registry</strong> serves as the single source of truth for all model artifacts and metadata. Instead of need to look up which S3 path pointing to which model version, we have a nice abstraction layer to manage and use our trained models much more easily.</p>
+<p>MLflow Model Registry provides several useful capabilities for model serving:</p>
+<ul>
+<li><strong>Model Versioning</strong>: Every model training run produces a versioned artifact with associated metadata (metrics, parameters, training data lineage)</li>
+<li><strong>Stage Management</strong>: Models progress through stages like “Staging” → “Champion” → “Archived” with clear governance</li>
+<li><strong>A/B Testing Support</strong>: Multiple model versions can be deployed simultaneously with traffic splitting</li>
+</ul>
+</section>
+<section id="pillar-2-vector-store-qdrant" class="level3">
+<h3 class="anchored" data-anchor-id="pillar-2-vector-store-qdrant">Pillar 2: Vector Store (Qdrant)</h3>
+<p>The goal of <strong>Vector Store</strong> is to make similarity search efficient. While traditional databases excel at exact matches for structured data, the nature of our embeddings demands a different indexing approach. With the rising popularity of LLMs and their ability to generate embeddings, a handful of vector databases have emerged to provide solutions.</p>
+<p>In our case, our sequence model’s candidate tower generates embeddings for all items in the catalog. These embeddings are indexed in Qdrant, enabling fast retrieval of the most relevant candidates based on a user’s current sequence.</p>
+<p>The choice of using Qdrant here is nothing too special rather than personal, as I happen to find myself comfortable with it.</p>
+</section>
+<section id="pillar-3-key-value-cache-redis" class="level3">
+<h3 class="anchored" data-anchor-id="pillar-3-key-value-cache-redis">Pillar 3: Key-Value Cache (Redis)</h3>
+<p>The <strong>Key-Value Cache</strong> serves as the system’s memory for frequently accessed data and computational shortcuts. In recommendation systems, this typically includes user sequences, popular items, and pre-computed features that would be expensive to generate on-the-fly.</p>
+<p>For our recommender system, Redis stores each user’s recent interaction history, enabling the query tower to generate contextual embeddings without expensive database lookups. It also contains the popular items as a form of pre-computed recommendations.</p>
+<p>When thinking about which open source tool to use for the key-value store, I must admit that Redis is so widely used that I don’t really consider other options, especially for a tutorial project like this.</p>
+<p>After understanding those three pillars, let’s take a closer look at how we configure them running on our local environment.</p>
+</section>
+</section>
+<section id="docker-compose-configuration" class="level2">
+<h2 class="anchored" data-anchor-id="docker-compose-configuration">Docker Compose Configuration</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://dvquys.com/projects/implement-recsys/c6/docker-logo.svg" class="img-fluid figure-img"></p>
+<figcaption>Docker logo</figcaption>
+</figure>
+</div>
+<p><strong>Docker</strong> is a containerization platform that packages applications and their dependencies into lightweight, portable containers. Think of it as creating a standardized shipping container<sup>1</sup> for your software. Just as shipping containers can move seamlessly between trucks, ships, and trains regardless of their contents, Docker containers can run consistently across different environments, from your laptop to production servers. This is particularly valuable for ML systems where dependency management can become complex, with different services requiring specific versions of Python, database drivers, or system libraries. It’s becoming a standard approach to package application services for a lot of teams nowadays.</p>
+<p><strong>Docker Compose</strong> takes this concept one step further by orchestrating multiple containers as a unified application stack. Instead of manually starting each service and configuring their networking, Docker Compose allows us to define our entire infrastructure—MLflow, Qdrant, Redis, and their supporting databases—in a single configuration file. With a simple <code>docker-compose up</code> command, we can spin up our complete serving environment with all services properly connected and configured. This approach eliminates the “works on my machine” problem that often plagues ML deployments, ensuring that anyone can reproduce the exact same serving environment that we’ve designed.</p>
+<p>Here’s what our Docker Compose file looks like:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>compose.yml</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" data-filename="compose.yml" style="background: #f1f3f5;"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb3-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">services</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb3-2"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">qdrant</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb3-3"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">image</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> qdrant/qdrant:v1.12.0</span></span>
+<span id="cb3-4"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ports</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb3-5"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"6333:6333"</span></span>
+<span id="cb3-6"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"6334:6334"</span></span>
+<span id="cb3-7"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">volumes</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb3-8"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> ./data/qdrant_storage:/qdrant/storage:z</span></span>
+<span id="cb3-9"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">restart</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> always</span></span>
+<span id="cb3-10"></span>
+<span id="cb3-11"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">kv_store</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb3-12"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">image</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> redis:7.2-bookworm</span></span>
+<span id="cb3-13"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">container_name</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> kv_store</span></span>
+<span id="cb3-14"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ports</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb3-15"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"${REDIS_PORT}:6379"</span></span>
+<span id="cb3-16"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">volumes</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb3-17"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> ./data/redis:/data</span></span>
+<span id="cb3-18"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">env_file</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb3-19"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> .env</span></span>
+<span id="cb3-20"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">healthcheck</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb3-21"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">test</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">[</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"CMD"</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"redis-cli"</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"-p"</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"6379"</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"ping"</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">]</span></span>
+<span id="cb3-22"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">interval</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> 10s</span></span>
+<span id="cb3-23"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">timeout</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> 30s</span></span>
+<span id="cb3-24"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">retries</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span></span>
+<span id="cb3-25"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">start_period</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> 30s</span></span>
+<span id="cb3-26"></span>
+<span id="cb3-27"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mlflow_server</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb3-28"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">restart</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> always</span></span>
+<span id="cb3-29"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">build</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> ./mlflow</span></span>
+<span id="cb3-30"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">image</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> mlflow_server</span></span>
+<span id="cb3-31"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">container_name</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> mlflow_server</span></span>
+<span id="cb3-32"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">depends_on</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb3-33"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> mlflow_mc</span></span>
+<span id="cb3-34"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> mlflow_db</span></span>
+<span id="cb3-35"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ports</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb3-36"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"5002:5000"</span></span>
+<span id="cb3-37"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">environment</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb3-38"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> MLFLOW_S3_ENDPOINT_URL=http://minio:9000</span></span>
+<span id="cb3-39"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}</span></span>
+<span id="cb3-40"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">      </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}</span></span>
+<span id="cb3-41"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">    command</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">: </span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">&gt;</span></span>
+<span id="cb3-42">      mlflow server</span>
+<span id="cb3-43">        --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mlflow_db:3306/${MYSQL_DATABASE}</span>
+<span id="cb3-44">        --artifacts-destination s3://mlflow</span>
+<span id="cb3-45">        --serve-artifacts</span>
+<span id="cb3-46">        --host 0.0.0.0</span>
+<span id="cb3-47">        --port 5000</span></code></pre></div>
+</div>
+<p>This configuration defines our entire serving infrastructure as code. A simple <code>docker compose up -d</code> command brings up all services with proper networking, volumes, and health checks configured.</p>
+<p>Although it’s pretty straightforward when you look how Redis and Qdrant are defined, I need to elaborate a bit on the MLflow part.</p>
+<section id="setting-up-mlflow-model-registry" class="level3">
+<h3 class="anchored" data-anchor-id="setting-up-mlflow-model-registry">Setting up MLflow Model Registry</h3>
+<p>MLflow Model Registry serves as our model deployment pipeline, providing versioning, staging, and rollback capabilities essential for production ML systems. By design MLflow coordinates between two backend systems: a <strong>MySQL Database</strong> that stores all the metadata—experiments, runs, parameters, metrics, and model registry information—and <strong>MinIO S3 Storage</strong> that acts as the artifact store where the actual model binaries, datasets, and logs are persisted. <strong>MLflow Server</strong> acts as the central orchestration service, providing REST APIs for experiment tracking, model registration, and serving.</p>
+<p>This separation of metadata and artifacts provides both performance and scalability benefits. The database can quickly serve metadata queries for experiment comparisons and model lookups, while the object storage efficiently handles large model files without putting pressure on the database.</p>
+<p>Now it should be clear why we need to run <code>make ml-platform-up</code> before running our notebooks in previous chapters. We do not need to worry too much about where the train models are stored, cause they sit happily in MLflow Registry. Below is the example code snippet for loading models:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>notebooks/020-ann-index.ipynb</strong></pre>
+</div>
+<div class="sourceCode" id="cb4" data-filename="notebooks/020-ann-index.ipynb" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">mlf_client <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> mlflow.MlflowClient()</span>
+<span id="cb4-2">mlf_model <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> mlflow.pyfunc.load_model(</span>
+<span id="cb4-3">    model_uri<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"models:/</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>cfg<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>train<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>retriever<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mlf_model_name<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">@champion"</span></span>
+<span id="cb4-4">)</span>
+<span id="cb4-5">run_id <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> mlf_model.metadata.run_id</span>
+<span id="cb4-6">run_info <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> mlf_client.get_run(run_id).info</span>
+<span id="cb4-7">artifact_uri <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> run_info.artifact_uri</span>
+<span id="cb4-8"></span>
+<span id="cb4-9">inferer <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> mlf_model.unwrap_python_model()</span>
+<span id="cb4-10">id_mapping <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> inferer.idm</span></code></pre></div>
+</div>
+<p>Next we will populate Qdrant and Redis with the data they need to support online serving.</p>
+</section>
+</section>
+<section id="building-the-vector-index-with-qdrant" class="level2">
+<h2 class="anchored" data-anchor-id="building-the-vector-index-with-qdrant">Building the Vector Index with Qdrant</h2>
+<section id="item-embedding-extraction" class="level3">
+<h3 class="anchored" data-anchor-id="item-embedding-extraction">Item Embedding Extraction</h3>
+<p>The first step is extracting embeddings from our trained sequence model. Our two-tower implementation contains a method <code>get_candidate_embeddings</code> that makes this straightforward:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/sequence/model.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb5" data-filename="src/sequence/model.py" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> SoleSequenceRetriever(BaseSequenceRetriever):</span>
+<span id="cb5-2">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># ...</span></span>
+<span id="cb5-3"></span>
+<span id="cb5-4">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> get_candidate_embeddings(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, inputs: Dict[<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, torch.Tensor]) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> torch.Tensor:</span>
+<span id="cb5-5">        candidate_items <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> inputs.get(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"candidate_items"</span>)</span>
+<span id="cb5-6">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> candidate_items <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">is</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>:</span>
+<span id="cb5-7">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">raise</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">ValueError</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Missing required input key: 'candidate_items'"</span>)</span>
+<span id="cb5-8">        candidate_embedding <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.item_embedding(candidate_items)</span>
+<span id="cb5-9">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> candidate_embedding</span></code></pre></div>
+</div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>notebooks/020-ann-index.ipynb</strong></pre>
+</div>
+<div class="sourceCode" id="cb6" data-filename="notebooks/020-ann-index.ipynb" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># inferer is the model wrapper loaded from MLflow in the previous snippet</span></span>
+<span id="cb6-2">model <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> inferer.model</span>
+<span id="cb6-3"></span>
+<span id="cb6-4">all_item_ids <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.arange(num_items)</span>
+<span id="cb6-5">inputs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"candidate_items"</span>: all_item_ids}</span>
+<span id="cb6-6"></span>
+<span id="cb6-7"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">with</span> torch.no_grad():</span>
+<span id="cb6-8">    candidate_embeddings <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model.get_candidate_embeddings(inputs).detach().numpy()</span></code></pre></div>
+</div>
+</section>
+<section id="qdrant-collection-setup" class="level3">
+<h3 class="anchored" data-anchor-id="qdrant-collection-setup">Qdrant Collection Setup</h3>
+<p>Qdrant organizes vectors into collections with configurable distance metrics and indexing parameters:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>notebooks/020-ann-index.ipynb</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-7" data-filename="notebooks/020-ann-index.ipynb" style="background: #f1f3f5;"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-7-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> qdrant_client <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> QdrantClient, models</span>
+<span id="annotated-cell-7-2"></span>
+<span id="annotated-cell-7-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Initialize Qdrant client</span></span>
+<span id="annotated-cell-7-4">client <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> QdrantClient(url<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.vectorstore.qdrant.url)</span>
+<span id="annotated-cell-7-5"></span>
+<span id="annotated-cell-7-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Create collection for item embeddings</span></span>
+<span id="annotated-cell-7-7">client.create_collection(</span>
+<span id="annotated-cell-7-8">    collection_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.vectorstore.qdrant.collection_name,</span>
+<span id="annotated-cell-7-9">    vectors_config<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>models.VectorParams(</span>
+<span id="annotated-cell-7-10">        size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.train.embedding_dim,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1">1</button><span id="annotated-cell-7-11" class="code-annotation-target">        distance<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>models.Distance.COSINE</span>
+<span id="annotated-cell-7-12">    )</span>
+<span id="annotated-cell-7-13">)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div>
+</div>
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="11" data-code-annotation="1">Specify COSINE as the distance to align with how we implement the model forward pass.</span>
+</dd>
+</dl>
+</section>
+<section id="batch-indexing" class="level3">
+<h3 class="anchored" data-anchor-id="batch-indexing">Batch Indexing</h3>
+<p>We do not only upload the embeddings to Qdrant but also their metadata. This becomes quite handy later when preparing the demo as we can get the item metadata by ID from Qdrant without the need to set up new database.</p>
+<div class="sourceCode" id="annotated-cell-8" style="background: #f1f3f5;"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-8-1">points <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> []</span>
+<span id="annotated-cell-8-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> idx, vector <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(candidate_embeddings):</span>
+<span id="annotated-cell-8-3">    id_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> id_mapping.get_item_id(idx)</span>
+<span id="annotated-cell-8-4">    payload <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> metadata_map[id_]</span>
+<span id="annotated-cell-8-5">    payload[cfg.data.item_col] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> id_</span>
+<span id="annotated-cell-8-6">    point <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> PointStruct(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">id</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>idx, vector<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>vector.tolist(), payload<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>payload)</span>
+<span id="annotated-cell-8-7">    points.append(point)</span>
+<span id="annotated-cell-8-8"></span>
+<span id="annotated-cell-8-9">upsert_result <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ann_index.upsert(</span>
+<span id="annotated-cell-8-10">    collection_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.vectorstore.qdrant.collection_name,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="1">1</button><span id="annotated-cell-8-11" class="code-annotation-target">    points<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>points,</span>
+<span id="annotated-cell-8-12">)</span>
+<span id="annotated-cell-8-13"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">assert</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>(upsert_result.status) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"completed"</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div>
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-8" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="11" data-code-annotation="1">Note that we can send a batch of points to Qdrant in one go.</span>
+</dd>
+</dl>
+<p>Once indexed, we can search for nearest neighbors by inputing a query embedding:</p>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">id_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"043935806X"</span></span>
+<span id="cb7-2">idx <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> id_mapping.get_item_index(id_)</span>
+<span id="cb7-3">inputs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"item_seq"</span>: torch.tensor([[idx]])}</span>
+<span id="cb7-4">query_embedding <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model.get_query_embeddings(inputs)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb7-5"></span>
+<span id="cb7-6">hits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ann_index.search(</span>
+<span id="cb7-7">    collection_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.vectorstore.qdrant.collection_name,</span>
+<span id="cb7-8">    query_vector<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>query_embedding,</span>
+<span id="cb7-9">    limit<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">eval</span>.top_k_retrieve,</span>
+<span id="cb7-10">)</span>
+<span id="cb7-11"></span>
+<span id="cb7-12">display(hits)</span></code></pre></div>
+<p>Example output when <code>cfg.eval.top_k_retrieval = 2</code>:</p>
+<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">[</span>
+<span id="cb8-2">    ScoredPoint(</span>
+<span id="cb8-3">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">id</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">794</span>,</span>
+<span id="cb8-4">        version<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,</span>
+<span id="cb8-5">        score<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.89372206</span>,</span>
+<span id="cb8-6">        payload<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>{</span>
+<span id="cb8-7">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'main_category'</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Books'</span>,</span>
+<span id="cb8-8">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'title'</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'The Sword of Shannara'</span>,</span>
+<span id="cb8-9">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'average_rating'</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4.4</span>,</span>
+<span id="cb8-10">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'rating_number'</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5470</span>,</span>
+<span id="cb8-11">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'price'</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'8.25'</span>,</span>
+<span id="cb8-12">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'subtitle'</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Mass Market Paperback – July 12, 1983'</span>,</span>
+<span id="cb8-13">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'image_url'</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'https://placehold.co/350x525/0057a3/ffffff.png?text=The%0ASword%0Aof%0AShannara&amp;font=raleway'</span>,</span>
+<span id="cb8-14">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'parent_asin'</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'0345314255'</span></span>
+<span id="cb8-15">        },</span>
+<span id="cb8-16">        vector<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>,</span>
+<span id="cb8-17">        shard_key<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>,</span>
+<span id="cb8-18">        order_value<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span></span>
+<span id="cb8-19">    ),</span>
+<span id="cb8-20">    ScoredPoint(</span>
+<span id="cb8-21">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">id</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1381</span>,</span>
+<span id="cb8-22">        version<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,</span>
+<span id="cb8-23">        score<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.8898184</span>,</span>
+<span id="cb8-24">        payload<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>{</span>
+<span id="cb8-25">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'main_category'</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Books'</span>,</span>
+<span id="cb8-26">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'title'</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Harry Potter and the Chamber of Secrets'</span>,</span>
+<span id="cb8-27">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'average_rating'</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4.8</span>,</span>
+<span id="cb8-28">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'rating_number'</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">85813</span>,</span>
+<span id="cb8-29">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'price'</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'6.81'</span>,</span>
+<span id="cb8-30">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'subtitle'</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Hardcover – Big Book, July 1, 1999'</span>,</span>
+<span id="cb8-31">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'image_url'</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'https://m.media-amazon.com/images/I/519HQF7Vl6L._SY291_BO1,204,203,200_QL40_FMwebp_.jpg'</span>,</span>
+<span id="cb8-32">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'parent_asin'</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'0439064864'</span></span>
+<span id="cb8-33">        },</span>
+<span id="cb8-34">        vector<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>,</span>
+<span id="cb8-35">        shard_key<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>,</span>
+<span id="cb8-36">        order_value<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span></span>
+<span id="cb8-37">    )</span>
+<span id="cb8-38">]</span></code></pre></div>
+</section>
+</section>
+<section id="caching-user-sequences-in-redis" class="level2">
+<h2 class="anchored" data-anchor-id="caching-user-sequences-in-redis">Caching User Sequences in Redis</h2>
+<p>First we need to prepare our dataframe containing our user sequence signals. Since this is for serving, we would combine both train and val dataset and get the latest interaction for each user.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>notebooks/021-store-user-item-sequence.ipynb</strong></pre>
+</div>
+<div class="sourceCode" id="cb9" data-filename="notebooks/021-store-user-item-sequence.ipynb" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">train_features_df <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.read_parquet(cfg.data.train_features_fp)</span>
+<span id="cb9-2">val_features_df <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.read_parquet(cfg.data.val_features_fp)</span>
+<span id="cb9-3">full_df <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.concat([train_features_df, val_features_df], axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb9-4"></span>
+<span id="cb9-5"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Locate the last instance per user from our interaction data</span></span>
+<span id="cb9-6">latest_df <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> full_df.assign(</span>
+<span id="cb9-7">    recency<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">lambda</span> df: df.groupby(cfg.data.user_col)[cfg.data.timestamp_col].rank(</span>
+<span id="cb9-8">        method<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"first"</span>, ascending<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span></span>
+<span id="cb9-9">    )</span>
+<span id="cb9-10">).loc[<span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">lambda</span> df: df[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"recency"</span>].eq(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)]</span></code></pre></div>
+</div>
+<p>Dumping data into Redis is quite easy.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>notebooks/021-store-user-item-sequence.ipynb</strong></pre>
+</div>
+<div class="sourceCode" id="cb10" data-filename="notebooks/021-store-user-item-sequence.ipynb" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">r <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> redis.Redis(host<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.redis.host, port<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>cfg.redis.port, db<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, decode_responses<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb10-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">assert</span> r.ping(), (</span>
+<span id="cb10-3">    <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Redis at </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>cfg<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>redis<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>host<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">:</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>cfg<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>redis<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>port<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> is not running, please make sure you have started the Redis docker service"</span></span>
+<span id="cb10-4">)</span>
+<span id="cb10-5"></span>
+<span id="cb10-6"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i, row <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> tqdm(latest_df.iterrows(), total<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>latest_df.shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]):</span>
+<span id="cb10-7">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Since the row containing previous interacted items, we can get them and append the current item to compose the full sequence</span></span>
+<span id="cb10-8">    prev_item_indices <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>(item) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> item <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> row[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"item_sequence"</span>] <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> item <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]</span>
+<span id="cb10-9">    prev_item_ids <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [idm.get_item_id(idx) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> idx <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> prev_item_indices]</span>
+<span id="cb10-10">    updated_item_sequences <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> prev_item_ids <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> [row[cfg.data.item_col]]</span>
+<span id="cb10-11">    user_id <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> row[cfg.data.user_col]</span>
+<span id="cb10-12">    key <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> cfg.redis.keys.recent_key_prefix <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> user_id</span>
+<span id="cb10-13">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Here we convert those list of string IDs into a single string with "__" as separator</span></span>
+<span id="cb10-14">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># This is for convenience only since in Redis there are other data structures like the list</span></span>
+<span id="cb10-15">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># which can also be used to store the sequence</span></span>
+<span id="cb10-16">    value <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"__"</span>.join(updated_item_sequences)</span>
+<span id="cb10-17">    r.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>(key, value)</span></code></pre></div>
+</div>
+<p>Getting data is no harder.</p>
+<div class="sourceCode" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">test_user_id <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> latest_df.sample(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)[cfg.data.user_col].values[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb11-2">result <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> r.get(cfg.redis.keys.recent_key_prefix <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> test_user_id)</span>
+<span id="cb11-3">display(result)</span></code></pre></div>
+<p>Example output:</p>
+<div class="sourceCode" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">'B078GWN38X__B078JJFFGK__B07ZDG34ZC__B079QG6L98__B00M9GZTXG__B07CWSSFL3__B0031W1E86__B07LF2YL9S__B07BJZJ34M__B077XVF99N__B07F668MBT'</span></span></code></pre></div>
+<p>In a technically similar way, we can populate the popular items in Redis. I will skip the details here, as you can easily find it from <a href="https://github.com/dvquy13/recsys-seq-model/blob/main/notebooks/021-store-user-item-sequence.ipynb">the notebook</a>.</p>
+</section>
+<section id="recap" class="level2">
+<h2 class="anchored" data-anchor-id="recap">Recap</h2>
+<p>In this chapter, we mimic our local environment with the infrastructure foundation needed to transform our sequence-based model from a model prototype into a deployable recommendation system.</p>
+<p>We use Docker Compose to set up our stack of MLflow for model registry and versioning, Qdrant for fast vector similarity search, and Redis for caching user sequences and popular items. Then we implemented data population scripts to extract candidate embeddings from our trained model, index them in Qdrant with rich metadata, and populate Redis with user interaction sequences.</p>
+</section>
+<section id="next-steps" class="level2">
+<h2 class="anchored" data-anchor-id="next-steps">Next Steps</h2>
+<p>With our serving infrastructure ready and populated with data, we’re prepared for the final step: building the API layer that will expose our recommendation system to users. In <a href="../c7/index.qmd">Chapter 7</a>, we’ll learn how to use BentoML to host our model as an API endpoint and develop a FastAPI orchestrator to serve our recommendations.</p>
+<p>Continue to the <a href="../c7/index.qmd">next chapter</a>.</p>
+<hr>
+<p><br> If you find this tutorial helpful, please cite this writeup as:</p>
+<blockquote class="blockquote">
+<p>Quy, Dinh. (May 2025). Implement a RecSys, Chapter 6:<br> Preparing for Serving. dvquys.com. https://dvquys.com/projects/implement-recsys/c6/.</p>
+</blockquote>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>I love how Docker’s logo is actually a whale carrying containers on its back—it’s a perfect visual metaphor for what the platform does 👍.↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <category>recsys</category>
+  <category>implement-recsys-series</category>
+  <guid>https://dvquys.com/projects/implement-recsys/c6/</guid>
+  <pubDate>Sat, 31 May 2025 16:00:00 GMT</pubDate>
+  <media:content url="https://dvquys.com/projects/implement-recsys/static/Model Serving.drawio.png" medium="image" type="image/png" height="75" width="144"/>
+</item>
 <item>
   <title>Implement a RecSys, Chapter 5: Session-based Recommendation Model</title>
   <link>https://dvquys.com/projects/implement-recsys/c5/</link>
