@@ -16,6 +16,44 @@ $code-color: #0057a3;
   }
 }
 
+/* Remove blue background from navbar */
+.navbar {
+  background-color: white !important;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Ensure navbar text is black */
+.navbar .navbar-nav .nav-link {
+  color: black !important;
+}
+
+.navbar .navbar-nav .nav-link:hover {
+  color: #0057a3 !important;
+}
+
+.navbar-brand {
+  color: black !important;
+}
+
+.navbar-brand:hover {
+  color: #0057a3 !important;
+}
+
+/* Remove blue background from title banner if present */
+.quarto-title-banner {
+  background: white !important;
+  color: black !important;
+}
+
+/* Ensure title text is black */
+.quarto-title-banner .quarto-title .title {
+  color: black !important;
+}
+
+.quarto-title-banner .quarto-title .subtitle {
+  color: #666 !important;
+}
+
 div.listing-reading-time {
   font-size: 0.8em;
 }
@@ -27,7 +65,7 @@ div.quarto-post .thumbnail {
 /* Change listing's post metadata size */
 div.quarto-post .metadata {
   flex-basis: 20%;
-  text-align: right;
+  text-align: left;
   font-size: 1em;
   margin-top: 0;
 }
@@ -107,3 +145,8 @@ div.quarto-post a {
 //   color: white;
 //   opacity: 80%;
 // }
+
+/* Reduce bottom margin of title block header */
+.quarto-title-block {
+  margin-bottom: 0.1rem !important;
+}
