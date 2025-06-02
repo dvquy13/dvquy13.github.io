@@ -511,7 +511,18 @@ If you're looking to get a big summary, please go back to the [Chapter 1](../c1/
 If you understand Vietnamese and want to check out the webinar's version of this tutorial, you can find it [here](https://fullstackdatascience.com/en/webinars/webinar-5-recommendation-system-based-on-user-real-time-behaviors-odrjcm). Note that you will need to register the account on FSDS to access the recording, under Community > Webinars > Webinar 5.
 :::
 
-Until next time!
+As a farewell gift, I have composed a list of awesome RecSys resources for you (in no particular order):
+
+- [Eugene Yan's Blog](https://eugeneyan.com/tag/recsys/)
+- [Sequence models for Contextual Recommendations at Instacart](https://tech.instacart.com/sequence-models-for-contextual-recommendations-at-instacart-93414a28e70c)
+- [Youtube Paper Deep Recommendation 2016](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45530.pdf)
+- [Airbnb Search Ranking and Recommendations](https://medium.com/@chnwsw01/airbnb-search-ranking-and-recommendations-6070be067d6d)
+- [Related Pins at Pinterest: The Evolution of a Real-World Recommender System](https://arxiv.org/pdf/1702.07969)
+- [Blueprints for recommender system architectures: 10th anniversary edition](https://amatria.in/blog/RecsysArchitectures)
+
+They are all good reads that I have learned a lot from.
+
+Happy building!
 
 ---
 

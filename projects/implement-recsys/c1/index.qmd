@@ -219,6 +219,12 @@ After that you should have:
 
 ## What's Next
 
+Let's get started! Here's an overview of the roadmap ahead of us:
+
+:::{.column-page}
+![](../static/dev-roadmap.png){.lightbox}
+:::
+
 In [Chapter 2](../c2/index.qmd), we'll get our hands dirty while setting up the input data in a format that's designed for sequence modeling.
 
 Continue to the [next chapter](../c2/index.qmd).
