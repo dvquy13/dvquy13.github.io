@@ -6,4 +6,5 @@
 - [Chapter 4: Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation](../c4/index.html)  
 - [Chapter 5: Session-based Recommendation Model](../c5/index.html)  
 - [Chapter 6: Preparing for Serving](../c6/index.html)  
+- [Chapter 7: Building the API Layer](../c7/index.html)  
 :::

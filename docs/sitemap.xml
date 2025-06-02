@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://dvquys.com/about.html</loc>
-    <lastmod>2025-02-27T11:41:48.477Z</lastmod>
+    <lastmod>2025-06-01T13:19:28.530Z</lastmod>
   </url>
   <url>
     <loc>https://dvquys.com/projects.html</loc>
@@ -54,7 +54,7 @@
   </url>
   <url>
     <loc>https://dvquys.com/projects/implement-recsys/c1/index.html</loc>
-    <lastmod>2025-05-31T01:29:51.546Z</lastmod>
+    <lastmod>2025-06-02T14:58:48.907Z</lastmod>
   </url>
   <url>
     <loc>https://dvquys.com/projects/implement-recsys/c4/index.html</loc>
@@ -71,5 +71,9 @@
   <url>
     <loc>https://dvquys.com/projects/implement-recsys/c6/index.html</loc>
     <lastmod>2025-06-01T13:00:02.462Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects/implement-recsys/c7/index.html</loc>
+    <lastmod>2025-06-02T15:12:38.572Z</lastmod>
   </url>
 </urlset>

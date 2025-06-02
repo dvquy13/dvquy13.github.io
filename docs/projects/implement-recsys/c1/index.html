@@ -76,7 +76,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-86daaaaad7353f9cc0c554efc1dd6d94.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../../site_libs/bootstrap/bootstrap-c1d7b6365050eb3642bec814578358de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dfbb61b82ce601051c41824c3d072193.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="../../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="../../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="../../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
@@ -291,6 +291,10 @@ List of chapters
 </li>
 <li><a href="../c5/index.html">Chapter 5: Session-based Recommendation Model</a><br>
 </li>
+<li><a href="../c6/index.html">Chapter 6: Preparing for Serving</a><br>
+</li>
+<li><a href="../c7/index.html">Chapter 7: Building the API Layer</a><br>
+</li>
 </ul>
 </div>
 </div>
@@ -321,7 +325,7 @@ Enough Talking, Show Me the Code!
 <p>From a business standpoint, the primary goals of a recommender system are to create a sense of “we understand you” for each user and to drive revenue through personalized cross-selling opportunities. By tailoring recommendations to each user, companies can boost engagement and average order value.</p>
 <p>In practice, recommender systems power some of the world’s largest digital platforms. For example, Amazon’s “Frequently Bought Together” suggestions guide shoppers toward complementary products, Facebook uses recommendation algorithms to prioritize posts and ads in users’ feeds, and Netflix’s home screen is largely driven by personalized movie and show recommendations.</p>
 <div class="column-page">
-<p><img src="../static/recsys-biz-value.gif" class="img-fluid"></p>
+<p><a href="../static/recsys-biz-value.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="../static/recsys-biz-value.gif" class="img-fluid"></a></p>
 </div>
 <p>The impact of these systems is profound: According to <a href="https://www.mckinsey.com/industries/retail/our-insights/how-retailers-can-keep-up-with-consumers">this report from McKinsey</a>, roughly 75 percent of Netflix viewing hours come from recommended titles, 35 percent of Amazon’s purchases are influenced by its recommendations, and Netflix alone <a href="https://dl.acm.org/doi/pdf/10.1145/2843948">saves around $1 billion per year</a> through improved user retention and engagement. These metrics underscore why recommender systems have become a critical component of modern digital businesses.</p>
 </section>
@@ -338,7 +342,7 @@ Enough Talking, Show Me the Code!
 <div class="page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
-<p class="page-columns page-full"><a href="../static/session-based retriever - demo v2.gif" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-2" title="The Demo"><img src="../static/session-based retriever - demo v2.gif" class="img-fluid figure-img column-page" alt="The Demo"></a></p>
+<p class="page-columns page-full"><a href="../static/session-based retriever - demo v2.gif" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-3" title="The Demo"><img src="../static/session-based retriever - demo v2.gif" class="img-fluid figure-img column-page" alt="The Demo"></a></p>
 <figcaption>The Demo</figcaption>
 </figure>
 </div>
@@ -390,7 +394,7 @@ Enough Talking, Show Me the Code!
 <div class="page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
-<p class="page-columns page-full"><a href="../static/L2 - Data signals.excalidraw.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-3" title="Data signals"><img src="../static/L2 - Data signals.excalidraw.png" class="img-fluid figure-img column-page" alt="Data signals"></a></p>
+<p class="page-columns page-full"><a href="../static/L2 - Data signals.excalidraw.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-4" title="Data signals"><img src="../static/L2 - Data signals.excalidraw.png" class="img-fluid figure-img column-page" alt="Data signals"></a></p>
 <figcaption>Data signals</figcaption>
 </figure>
 </div>
@@ -406,7 +410,7 @@ Enough Talking, Show Me the Code!
 <div class="page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
-<p class="page-columns page-full"><a href="../static/api-payload.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-4" title="Example request payload"><img src="../static/api-payload.png" class="img-fluid figure-img column-page" alt="Example request payload"></a></p>
+<p class="page-columns page-full"><a href="../static/api-payload.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-5" title="Example request payload"><img src="../static/api-payload.png" class="img-fluid figure-img column-page" alt="Example request payload"></a></p>
 <figcaption>Example request payload</figcaption>
 </figure>
 </div>

@@ -43,7 +43,7 @@ From a business standpoint, the primary goals of a recommender system are to cre
 In practice, recommender systems power some of the world's largest digital platforms. For example, Amazon's "Frequently Bought Together" suggestions guide shoppers toward complementary products, Facebook uses recommendation algorithms to prioritize posts and ads in users' feeds, and Netflix's home screen is largely driven by personalized movie and show recommendations.
 
 :::{.column-page}
-![](../static/recsys-biz-value.gif)
+![](../static/recsys-biz-value.gif){.lightbox}
 :::
 
 
