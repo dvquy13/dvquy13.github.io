@@ -9,64 +9,12 @@
     <lastmod>2025-02-14T12:14:17.266Z</lastmod>
   </url>
   <url>
-    <loc>https://dvquys.com/projects/review-rec-bot/index.html</loc>
-    <lastmod>2025-02-14T12:14:17.266Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/posts/site-search-elasticsearch/index.html</loc>
-    <lastmod>2025-02-14T12:14:17.266Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/posts/deploy-ml-gcp/index.html</loc>
-    <lastmod>2025-02-20T17:53:23.965Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/reviews-parsing-mlsys/index.html</loc>
-    <lastmod>2025-02-14T12:14:17.271Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/index.html</loc>
-    <lastmod>2025-05-24T04:40:14.934Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/real-time-seq-recsys/c1/index.html</loc>
-    <lastmod>2025-05-30T12:05:31.752Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/real-time-seq-recsys/c2/index.html</loc>
-    <lastmod>2025-05-30T12:05:31.714Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/real-time-seq-recsys/c3/index.html</loc>
-    <lastmod>2025-05-30T12:05:31.752Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/real-time-seq-recsys/c4/index.html</loc>
-    <lastmod>2025-05-30T12:05:31.736Z</lastmod>
-  </url>
-  <url>
     <loc>https://dvquys.com/projects/implement-recsys/c2/index.html</loc>
-    <lastmod>2025-05-31T01:03:00.822Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/implement-recsys/c3/index.html</loc>
-    <lastmod>2025-05-31T14:08:34.383Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/implement-recsys/c1/index.html</loc>
-    <lastmod>2025-06-02T14:58:48.907Z</lastmod>
+    <lastmod>2025-05-31T01:29:51.546Z</lastmod>
   </url>
   <url>
     <loc>https://dvquys.com/projects/implement-recsys/c4/index.html</loc>
     <lastmod>2025-05-31T14:09:26.548Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/implement-recsys/c5/index.html</loc>
-    <lastmod>2025-06-01T04:05:34.360Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/implement-recsys/series-index.html</loc>
-    <lastmod>2025-05-31T01:27:46.575Z</lastmod>
   </url>
   <url>
     <loc>https://dvquys.com/projects/implement-recsys/c6/index.html</loc>
@@ -75,5 +23,37 @@
   <url>
     <loc>https://dvquys.com/projects/implement-recsys/c7/index.html</loc>
     <lastmod>2025-06-02T15:26:52.855Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/posts/deploy-ml-gcp/index.html</loc>
+    <lastmod>2025-02-20T17:53:23.965Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/posts/site-search-elasticsearch/index.html</loc>
+    <lastmod>2025-02-14T12:14:17.266Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects/review-rec-bot/index.html</loc>
+    <lastmod>2025-02-14T12:14:17.266Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects/implement-recsys/c1/index.html</loc>
+    <lastmod>2025-06-02T14:58:48.907Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects/implement-recsys/c3/index.html</loc>
+    <lastmod>2025-05-31T14:08:34.383Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects/implement-recsys/c5/index.html</loc>
+    <lastmod>2025-06-01T04:05:34.360Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects/reviews-parsing-mlsys/index.html</loc>
+    <lastmod>2025-02-14T12:14:17.271Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/index.html</loc>
+    <lastmod>2025-05-24T04:40:14.934Z</lastmod>
   </url>
 </urlset>
