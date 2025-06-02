@@ -1334,7 +1334,7 @@
     "href": "projects/implement-recsys/c7/index.html",
     "title": "Implement a RecSys, Chapter 7: Building the API Layer",
     "section": "",
-    "text": "This is the seventh chapter of the tutorial series: Implement a RecSys."
+    "text": "This is the seventh and the final chapter of the tutorial series: Implement a RecSys."
   },
   {
     "objectID": "projects/implement-recsys/c7/index.html#introduction",
@@ -1446,6 +1446,6 @@
     "href": "projects/implement-recsys/c7/index.html#final-step",
     "title": "Implement a RecSys, Chapter 7: Building the API Layer",
     "section": "Final Step",
-    "text": "Final Step\nLet’s not forget that in our code repository, we have a ui/ directory that contains the frontend demo that you saw in the introduction chapter.\nNow with all the pieces in place, you can just run: make ui-up to have it running. I believe this is a nice way to conclude our project!\n\n\n\n\nThe Demo"
+    "text": "Final Step\nLet’s not forget that in our code repository, we have a ui/ directory that contains the frontend demo that you saw in the introduction chapter.\nNow with all the pieces in place, refer to the project README.md &gt; Start UI section for how to get the frontend web application running. It’s a great way to conclude our project!\n\n\n\n\nThe Demo"
   }
 ]

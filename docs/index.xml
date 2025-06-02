@@ -20,7 +20,7 @@
 
 
 
-<p>This is the <strong>seventh chapter</strong> of the tutorial series: Implement a RecSys.</p>
+<p>This is the <strong>seventh and the final chapter</strong> of the tutorial series: Implement a RecSys.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1622,7 +1622,7 @@ Code
 <section id="final-step" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="final-step">Final Step</h2>
 <p>Let’s not forget that in our code repository, we have a <code>ui/</code> directory that contains the frontend demo that you saw in the introduction chapter.</p>
-<p>Now with all the pieces in place, you can just run: <code>make ui-up</code> to have it running. I believe this is a nice way to conclude our project!</p>
+<p>Now with all the pieces in place, refer to the project <code>README.md</code> &gt; <code>Start UI</code> section for how to get the frontend web application running. It’s a great way to conclude our project!</p>
 <div class="page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">

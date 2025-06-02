@@ -13,7 +13,7 @@ format:
 # draft: true
 ---
 
-This is the **seventh chapter** of the tutorial series: Implement a RecSys.
+This is the **seventh and the final chapter** of the tutorial series: Implement a RecSys.
 {{< include ../_series-index.qmd >}}
 
 ## Introduction
@@ -492,7 +492,7 @@ All code for this chapter is available in the `api/` and `model_server/` directo
 
 Let's not forget that in our code repository, we have a `ui/` directory that contains the frontend demo that you saw in the introduction chapter.
 
-Now with all the pieces in place, you can just run: `make ui-up` to have it running. I believe this is a nice way to conclude our project!
+Now with all the pieces in place, refer to the project `README.md` > `Start UI` section for how to get the frontend web application running. It's a great way to conclude our project!
 
 :::{.column-page}
 ![The Demo](../static/session-based%20retriever%20-%20demo%20v2.gif){.lightbox}
