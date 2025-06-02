@@ -439,26 +439,31 @@ Enough Talking, Show Me the Code!
 <td>High-performance API endpoints</td>
 </tr>
 <tr class="odd">
+<td><strong>Model Server</strong></td>
+<td>BentoML</td>
+<td>Model server</td>
+</tr>
+<tr class="even">
 <td><strong>Experiment Tracking</strong></td>
 <td>MLflow</td>
 <td>Model versioning and experiments</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>Vector Database</strong></td>
 <td>Qdrant</td>
 <td>Similarity search and retrieval</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><strong>Caching</strong></td>
 <td>Redis</td>
 <td>Real-time data storage</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>Package Management</strong></td>
 <td>uv</td>
 <td>Fast Python dependency management</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><strong>Containerization</strong></td>
 <td>Docker</td>
 <td>Consistent deployment environments</td>
@@ -470,29 +475,30 @@ Enough Talking, Show Me the Code!
 <h2 class="anchored" data-anchor-id="project-structure-overview">Project Structure Overview</h2>
 <p>The codebase can be found <a href="https://github.com/dvquy13/recsys-seq-model">here</a>. Below is a quick glance into its structure.</p>
 <pre><code>recsys-seq-model/
-├── notebooks/           # Progressive tutorial notebooks
+├── notebooks/                   # Progressive tutorial notebooks
 │   ├── 000-prep-data.ipynb
 │   ├── 001-features.ipynb
 │   ├── 002-negative-sample.ipynb
 │   ├── 010-baseline-popular.ipynb
 │   ├── 011-sequence-modeling.ipynb
 │   ├── 020-ann-index.ipynb
-│   └── 021-redis-prep.ipynb
-├── src/                 # Core implementation modules
-│   ├── cfg.py          # Configuration management
-│   ├── dataset.py      # Data loading utilities  
-│   ├── id_mapper.py    # ID mapping functionality
-│   ├── negative_sampling.py  # Sampling strategies
-│   ├── sequence/       # Sequence model implementations
-│   ├── eval/          # Evaluation frameworks
-│   └── vectorstore.py # Qdrant integration
-├── api/                # FastAPI service
-│   ├── app.py         # Main application
-│   ├── services.py    # Business logic
-│   └── models.py      # Request/response schemas
-├── mlflow/            # MLflow configuration
-├── data/              # Dataset storage
-└── compose.yml        # Docker orchestration</code></pre>
+│   └── 021-store-user-item-sequence.ipynb # Sequence storage
+├── src/                         # Core implementation modules
+│   ├── cfg.py                   # Configuration management
+│   ├── dataset.py               # Data loading utilities  
+│   ├── id_mapper.py             # ID mapping functionality
+│   ├── negative_sampling.py     # Sampling strategies
+│   ├── sequence/                # Sequence model implementations
+│   ├── eval/                    # Evaluation frameworks
+│   └── vectorstore.py           # Qdrant integration
+├── api/                         # FastAPI Orchestrator service
+│   ├── app.py                   # Main application
+│   ├── services.py              # Business logic
+│   └── models.py                # Request/response schemas
+├── model_server/                # BentoML model server
+├── data/                        # Dataset storage
+├── compose.yml                  # ML support toolings
+└── compose.api.yml              # Build API services</code></pre>
 <section id="progressive-notebook-approach" class="level3">
 <h3 class="anchored" data-anchor-id="progressive-notebook-approach">Progressive Notebook Approach</h3>
 <p>Notice the <strong>numbered notebook sequence</strong> (000, 001, 002, etc.). This design ensures you build knowledge progressively:</p>
