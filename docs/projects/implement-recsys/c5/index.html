@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2025-05-31">
+
+<title>Implement a RecSys, Chapter 5:  Session-based Recommendation Model – DvQ</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../avatar.png" rel="icon" type="image/png">
+<script src="../../../site_libs/cookie-consent/cookie-consent.js"></script>
+<link href="../../../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
+<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-86daaaaad7353f9cc0c554efc1dd6d94.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-dfbb61b82ce601051c41824c3d072193.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-NH6GYY9FZV"></script>
+
+<script type="text/plain" cookie-consent="tracking">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-NH6GYY9FZV', { 'anonymize_ip': true});
+</script>
+
+<script type="text/javascript" charset="UTF-8">
+document.addEventListener('DOMContentLoaded', function () {
+cookieconsent.run({
+  "notice_banner_type":"simple",
+  "consent_type":"implied",
+  "palette":"light",
+  "language":"en",
+  "page_load_consent_levels":["strictly-necessary","functionality","tracking","targeting"],
+  "notice_banner_reject_button_hide":false,
+  "preferences_center_close_button_hide":false,
+  "website_name":""
+  ,
+"language":"en"
+  });
+});
+</script> 
+  
+<style>html{ scroll-behavior: smooth; }</style>
+<!-- Inter -->
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<!-- Roboto Mono -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&amp;display=swap" rel="stylesheet">
+
+
+<link rel="stylesheet" href="../../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">DvQ</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../projects.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/dvquy/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/dvquy13"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://x.com/dvquys"> <i class="bi bi-twitter-x" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../../index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title"><p>Implement a RecSys, Chapter 5:<br> Session-based Recommendation Model</p></h1>
+            <p class="subtitle lead">Design and build sequence models that capture temporal patterns in user behavior</p>
+                                <div class="quarto-categories">
+                <div class="quarto-category">recsys</div>
+                <div class="quarto-category">implement-recsys-series</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 31, 2025</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#why-sequence-modeling-matters-in-recommendations" id="toc-why-sequence-modeling-matters-in-recommendations" class="nav-link" data-scroll-target="#why-sequence-modeling-matters-in-recommendations">Why Sequence Modeling Matters in Recommendations</a></li>
+  <li><a href="#sequence-modeling-approaches" id="toc-sequence-modeling-approaches" class="nav-link" data-scroll-target="#sequence-modeling-approaches">Sequence Modeling Approaches</a></li>
+  <li><a href="#retrieval-vs-ranking" id="toc-retrieval-vs-ranking" class="nav-link" data-scroll-target="#retrieval-vs-ranking">Retrieval vs Ranking</a>
+  <ul class="collapse">
+  <li><a href="#the-two-phase-architecture" id="toc-the-two-phase-architecture" class="nav-link" data-scroll-target="#the-two-phase-architecture">The Two-Phase Architecture</a></li>
+  <li><a href="#retrieval-as-a-standalone-system" id="toc-retrieval-as-a-standalone-system" class="nav-link" data-scroll-target="#retrieval-as-a-standalone-system">Retrieval as a Standalone System</a></li>
+  <li><a href="#our-two-tower-retriever" id="toc-our-two-tower-retriever" class="nav-link" data-scroll-target="#our-two-tower-retriever">Our Two-Tower Retriever</a></li>
+  <li><a href="#training-setup" id="toc-training-setup" class="nav-link" data-scroll-target="#training-setup">Training Setup</a></li>
+  <li><a href="#serving-architecture" id="toc-serving-architecture" class="nav-link" data-scroll-target="#serving-architecture">Serving Architecture</a></li>
+  </ul></li>
+  <li><a href="#model-implementation" id="toc-model-implementation" class="nav-link" data-scroll-target="#model-implementation">Model Implementation</a>
+  <ul class="collapse">
+  <li><a href="#the-case-for-session-only-models" id="toc-the-case-for-session-only-models" class="nav-link" data-scroll-target="#the-case-for-session-only-models">The Case for Session-Only Models</a></li>
+  <li><a href="#core-architecture" id="toc-core-architecture" class="nav-link" data-scroll-target="#core-architecture">Core Architecture</a></li>
+  </ul></li>
+  <li><a href="#model-training" id="toc-model-training" class="nav-link" data-scroll-target="#model-training">Model Training</a>
+  <ul class="collapse">
+  <li><a href="#mask-pooling" id="toc-mask-pooling" class="nav-link" data-scroll-target="#mask-pooling">Mask Pooling</a></li>
+  <li><a href="#training-loop" id="toc-training-loop" class="nav-link" data-scroll-target="#training-loop">Training Loop</a></li>
+  <li><a href="#preparing-pytorch-datasets" id="toc-preparing-pytorch-datasets" class="nav-link" data-scroll-target="#preparing-pytorch-datasets">Preparing PyTorch Datasets</a></li>
+  </ul></li>
+  <li><a href="#integration-with-mlflow-for-experiment-tracking" id="toc-integration-with-mlflow-for-experiment-tracking" class="nav-link" data-scroll-target="#integration-with-mlflow-for-experiment-tracking">Integration with MLflow for Experiment Tracking</a></li>
+  <li><a href="#model-comparison" id="toc-model-comparison" class="nav-link" data-scroll-target="#model-comparison">Model Comparison</a>
+  <ul class="collapse">
+  <li><a href="#recall-the-heart-of-retrieval-performance" id="toc-recall-the-heart-of-retrieval-performance" class="nav-link" data-scroll-target="#recall-the-heart-of-retrieval-performance">Recall: The Heart of Retrieval Performance</a></li>
+  <li><a href="#ranking-quality-validation" id="toc-ranking-quality-validation" class="nav-link" data-scroll-target="#ranking-quality-validation">Ranking Quality Validation</a></li>
+  <li><a href="#what-this-means-for-users" id="toc-what-this-means-for-users" class="nav-link" data-scroll-target="#what-this-means-for-users">What This Means for Users</a></li>
+  </ul></li>
+  <li><a href="#model-registry-and-versioning" id="toc-model-registry-and-versioning" class="nav-link" data-scroll-target="#model-registry-and-versioning">Model Registry and Versioning</a></li>
+  <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap">Recap</a></li>
+  <li><a href="#whats-next" id="toc-whats-next" class="nav-link" data-scroll-target="#whats-next">What’s Next?</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content">
+
+
+
+
+
+<p>This is the <strong>fifth chapter</strong> of the tutorial series: Implement a RecSys.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+List of chapters
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><a href="../c1/index.html">Chapter 1: Introduction and Project Overview</a><br>
+</li>
+<li><a href="../c2/index.html">Chapter 2: Understanding the Data and Feature Engineering</a><br>
+</li>
+<li><a href="../c3/index.html">Chapter 3: Negative Sampling</a><br>
+</li>
+<li><a href="../c4/index.html">Chapter 4: Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation</a><br>
+</li>
+<li><a href="../c5/index.html">Chapter 5: Session-based Recommendation Model</a><br>
+</li>
+<li><a href="../c6/index.html">Chapter 6: Preparing for Serving</a><br>
+</li>
+<li><a href="../c7/index.html">Chapter 7: Building the API Layer</a><br>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In <a href="../../../projects/implement-recsys/c4/index.html">Chapter 4</a>, we established our evaluation framework, implemented MLflow experiment tracking, and built a popularity-based baseline model. Since our baseline is simple, it treats all users similarly—everyone gets the same popular items regardless of their personal browsing history or preferences.</p>
+<p>This chapter marks the transition from simple heuristics to a more sophisticated machine learning approach aimed towards personalization. We’ll dive deep into the rationales behind <strong>sequence-based recommendation models</strong> and explore the design decisions that make them effective.</p>
+<p>These models excel at understanding the temporal patterns hidden in user behavior. Instead of just knowing that a user liked certain books, our model will learn to recognize meaningful sequences. For example, when someone browses “Python Programming” followed by “Machine Learning,” the model understands they might be interested in “Deep Learning with PyTorch” next.</p>
+<p>This is going to be a long post. So grab your coffee, and let’s dive in.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Code
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>All code for this chapter is available in the <code>notebooks/011-sequence-modeling.ipynb</code> file and the <code>src/sequence/</code> directory in the <a href="https://github.com/dvquy13/recsys-seq-model">project repository</a>.</p>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Jargon
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Throughout the series I would be using <strong>sequence modeling</strong> and <strong>session-based recommendation</strong> interchangeably to refer to the same technique of modeling user’s behavior based on their sequential interactions.</p>
+</div>
+</div>
+</section>
+<section id="why-sequence-modeling-matters-in-recommendations" class="level2">
+<h2 class="anchored" data-anchor-id="why-sequence-modeling-matters-in-recommendations">Why Sequence Modeling Matters in Recommendations</h2>
+<p>Traditional collaborative filtering approaches treat user preferences as static snapshots. They might know that User A liked Items 1, 3, and 7, but they miss the story hidden in the order and timing of these interactions.</p>
+<p>Consider these two users with identical item preferences but different behavioral patterns:</p>
+<pre><code>User A: Book1 → Book2 → Book3 → Book4 → Book5
+User B: Book5 → Book1 → Book4 → Book2 → Book3</code></pre>
+<p>Both users interacted with the same five books, but their sequences tell very different stories. User A might be following a structured learning path (beginner to advanced), while User B might be jumping between topics based on immediate curiosity. Traditional collaborative filtering would treat these users identically, but sequence models can capture these nuanced patterns.</p>
+<p>The even-more-compelling part about this our sequential model is that it gives you two very strong arguments to argue with: real-time adaptation and cold start handling.</p>
+<p>Think about what happens in static recommendation systems when new users sign up. They get the same boring popular items everyone else sees. “Here are the top 10 books everyone’s reading!” It’s like walking into a bookstore and having the clerk hand you a list without asking what you’re interested in. The user has to suffer through generic recommendations until the system has enough data about them. This is the cold start problem, which is, trust me, a real typical ask your Product Manager would come up during your recommendation model pitch.</p>
+<p>Our sequence model flips this on its head. The moment a new user clicks on their first book, the model springs into action. They browse “Python Programming,” then click on “Machine Learning Basics”—the model immediately understands they’re on a learning journey. The system starts personalizing from interaction number one, like having a shop assistant who gets better at helping you the longer you browse.</p>
+<p>And all of this happens without retraining the model or updating any databases, dealing with one of the biggest problems in recommendation systems: how do you stay relevant when user interests change quickly? Traditional collaborative filtering models need to be retrained to pick up new patterns. Our sequence model adapts immediately. If thriller readers suddenly start buying romance novels (maybe it’s Valentine’s Day), the model notices the shift in the very next recommendation request.</p>
+<p>Now that we understand why sequence modeling is crucial, let’s explore how to actually design it.</p>
+</section>
+<section id="sequence-modeling-approaches" class="level2">
+<h2 class="anchored" data-anchor-id="sequence-modeling-approaches">Sequence Modeling Approaches</h2>
+<p>The central challenge in sequence modeling boils down to one question: how do you take a bunch of user interactions and turn them into something useful for predictions? You have a sequence like “Book A → Book B → Book C” and somehow need to compress all that information into a representation that captures what the user is really interested in.</p>
+<p>I like to think of this as a “pooling” problem. You’re pooling information from multiple items into a single representation. It’s like trying to summarize a conversation—you want to keep the important bits and throw away the noise.</p>
+<p>The simplest pooling method is <strong>averaging</strong>. But wait, you might think, average what exactly? We’re talking about sequences of item IDs that users clicked on. You can’t just average “book_123” and “book_456” like they’re numbers, right?</p>
+<p>This is where embeddings become your best friend. Here’s the key insight: every item in your catalog gets converted into a vector of numbers before any learning happens. Instead of working with raw item IDs, your model works with these dense numerical representations. It’s the same trick that made Word2Vec so powerful—remember from Chapter 3 how it could tell you that “king” minus “man” plus “woman” equals “queen”<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>? That magic happens because words become vectors, and vectors can be manipulated mathematically.</p>
+<p>So when we talk about averaging a sequence, we’re actually averaging the embedding vectors of the items in that sequence. Book A becomes a 128-dimensional vector, Book B becomes another 128-dimensional vector, and averaging them gives you a single 128-dimensional vector that somehow captures the essence of “someone who reads both Book A and Book B.”</p>
+<p>The beautiful thing about embeddings, just like in ML in general, is that they can start random but learn to be meaningful. During training, the model adjusts these vectors so that similar items end up close together in the embedding space. Books about Python programming cluster together, romance novels form their own neighborhood, and so on.</p>
+<p>Now, averaging is wonderfully simple, and sometimes simplicity wins. I’ve seen myself trying other pooling methods only to discover that good old averaging works just as well. But that doesn’t mean you shouldn’t experiment. Some sequences have patterns that averaging destroys—like the difference between reading “Beginner Python → Advanced Python” versus “Advanced Python → Beginner Python”.</p>
+<p>This is where more sophisticated pooling methods come in. The field of sequence modeling offers several architectural choices, each with its own strengths and trade-offs. The simplest approach uses Recurrent Neural Networks (RNNs), which process sequences step by step, maintaining a hidden state that captures information from previous steps. Think of an RNN as reading a book one page at a time, trying to remember everything important from earlier pages. While this sounds intuitive, vanilla RNNs have a memory problem—they forget important details from way back in the sequence, what researchers call the vanishing gradient problem.</p>
+<p>To fix this memory issue, researchers developed Long Short-Term Memory (LSTM) and Gated Recurrent Unit (GRU) networks. These use clever gating mechanisms to decide what to remember and what to forget. GRUs, in particular, have become the go-to choice for recommendation systems. They’re simpler than LSTMs but perform just as well—like getting 90% of the benefit with 60% of the complexity.</p>
+<p>More recently, Transformer models have taken the field by storm. Instead of processing sequences step by step, they use self-attention mechanisms to look at all parts of the sequence simultaneously. It’s like being able to read an entire book at once and instantly connect themes from chapter 1 to chapter 20. Transformers are incredibly powerful for capturing long-range dependencies, but there’s a catch—they can be computationally expensive, especially when you have thousands or millions of items in your catalog.</p>
+<p>Now that we’ve explored different sequence modeling approaches—from simple averaging to sophisticated Transformers—let’s not forget that all architecture decisions should consider the following question: how do we deploy these models in production systems that need to handle millions of items in real-time?</p>
+</section>
+<section id="retrieval-vs-ranking" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="retrieval-vs-ranking">Retrieval vs Ranking</h2>
+<p>While the main task is still to rank the most relevant and likely-to-be-interacted items on top, in reality it’s not uncommon that we need to deal with ranking for millions of items. Training a scoring model that takes into account each instance of <code>&lt;user, context, item&gt;</code> and uses it from the start is not feasible because of latency constraints. Calling that model to give fine-grained scores to all millions of items would take forever, and neither our users have that kind of patience nor do we as engineers find that idea sane.</p>
+<section id="the-two-phase-architecture" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="the-two-phase-architecture">The Two-Phase Architecture</h3>
+<p>To deal with this problem, we break the whole ranking process into two phases: first we quickly retrieve a shortlist of candidates from millions of items, then we use a fine-grained ranker to give the final ranking on the shortlist.</p>
+<p>The difference in naming between these two phases already reveals their distinct characteristics. The retrieval phase needs to quickly scan millions of items to find about 1,000 potential candidates in milliseconds. This speed requirement means it cannot use complex computations and often needs to leverage indexing structures like vector databases for fast similarity search. The focus here is on <strong>recall</strong>—ensuring that relevant items make it into the candidate set, even if the initial scoring isn’t perfect.</p>
+<p>The ranking phase operates under very different constraints. With bandwidth and a much more limited scope of hundreds to thousands of items, it can afford to adopt many more signals and complex features into its model. This phase delivers much better fine-grained scores for final ordering, focusing on <strong>precision</strong>—getting the order exactly right among the candidates that have already been deemed potentially relevant.</p>
+<div class="page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><img src="../static/discovery-system-design.webp" class="img-fluid figure-img column-page"></p>
+<figcaption><a href="https://eugeneyan.com/writing/system-design-for-discovery/">Yan, Ziyou. (Jun 2021). System Design for Recommendations and Search.</a></figcaption>
+</figure>
+</div>
+</div>
+</section>
+<section id="retrieval-as-a-standalone-system" class="level3">
+<h3 class="anchored" data-anchor-id="retrieval-as-a-standalone-system">Retrieval as a Standalone System</h3>
+<p>One important thing to note: most of the time the retrieval phase provides scores together with the candidates, which indicates to some extent how well they match the query. We can already use this signal to rank the candidates and provide recommendations to users.</p>
+<p>It also allows us to approach building recommendation systems in an incremental manner. In most of my RecSys projects, I start with building and deploying the retrieval model as the first version. The idea is to get both early impact and actual feedback from users interacting with our recommendations. This user feedback becomes a much better source of labeling signals to train our later ranking model on.</p>
+<p>The benefits are twofold. First, you get a working system deployed quickly, enabling faster time to impact rather than waiting months to build a complex multi-stage system. More importantly, you start collecting actual interaction data from users engaging with your recommendations, rather than relying solely on historical patterns<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. This real user feedback becomes invaluable—it’s a much richer source of labeling signals for training your later ranking model than any offline evaluation could provide.</p>
+<p>Finally, it allows you to build the serving and monitoring infrastructure in phases, learning how to handle recommendation traffic, monitor model performance, and debug issues at a manageable scale before introducing the additional complexity of a ranking layer.</p>
+</section>
+<section id="our-two-tower-retriever" class="level3">
+<h3 class="anchored" data-anchor-id="our-two-tower-retriever">Our Two-Tower Retriever</h3>
+<p>In that spirit, the implementation of our sequential recommendation model in this series is a <strong>retrieval-based one</strong>. It follows a typical <strong>Two Tower architecture</strong>, where the query tower embeds information about the user and context—in our case, the user’s sequence of interactions—while the candidate tower represents the candidate items.</p>
+<p>This separation is crucial for efficient serving. The candidate tower can precompute embeddings for all items and store them in a vector index. The query tower only needs to run at request time to generate the user’s current context embedding.</p>
+<p><img src="../static/two-tower-architecture.png" class="img-fluid"></p>
+</section>
+<section id="training-setup" class="level3">
+<h3 class="anchored" data-anchor-id="training-setup">Training Setup</h3>
+<p>The labels for training come from our preparation in previous chapters. We create positive instances from <code>&lt;user, context, item&gt;</code> tuples which have actual interaction records in the past, while negative examples are sampled from the unseen item space for each user-context pair. This creates a binary classification problem where the model learns to distinguish between items a user would interact with versus items they would ignore.</p>
+</section>
+<section id="serving-architecture" class="level3">
+<h3 class="anchored" data-anchor-id="serving-architecture">Serving Architecture</h3>
+<p>For serving, our retrieval system works in two phases. First, in an offline process, we index all candidate item embeddings in a nearest neighbor vector search system. Then, during online serving, we send the <code>&lt;user, context&gt;</code> as input to the query tower to get a query embedding vector, use similarity lookup to search for the nearest candidate neighbors in the index, and return the corresponding items with their similarity scores.</p>
+<p>This architecture enables low-latency response times even when searching through millions of items, making it practical for recommendation serving.</p>
+<p>Again, the beauty of this approach is that it’s both a complete recommendation system on its own and a foundation for more sophisticated ranking models. You can deploy it immediately to start serving personalized recommendations, then later add a ranking layer on top without changing the underlying retrieval infrastructure.</p>
+</section>
+</section>
+<section id="model-implementation" class="level2">
+<h2 class="anchored" data-anchor-id="model-implementation">Model Implementation</h2>
+<p>Now let’s translate the two-tower architecture into concrete code. But first, let me explain a key design decision that shapes our implementation.</p>
+<section id="the-case-for-session-only-models" class="level3">
+<h3 class="anchored" data-anchor-id="the-case-for-session-only-models">The Case for Session-Only Models</h3>
+<p>Traditional two-tower retrievers include both user embeddings and sequence representations in the query tower. But I’ve chosen to build what I call a “SoleSequenceRetriever”—a model that relies entirely on the sequence of interactions, without any user-specific embeddings.</p>
+<p>This isn’t just a technical choice; it’s a strategic one<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> that fundamentally changes how the model behaves. By removing user embeddings, we’re making a bet that the sequence itself contains enough signal to make good recommendations. A user browsing “Python Programming → Machine Learning → Data Analysis” tells us more about their immediate intent than knowing they’re “User #47832” with some historical preference profile.</p>
+<p>This approach solves several practical problems. New users get meaningful recommendations from their very first interaction—no cold start period where they see generic popular items. Operationally, serving becomes a bit simpler since we don’t need to manage user embedding lookups or worry about user ID mapping issues.</p>
+</section>
+<section id="core-architecture" class="level3">
+<h3 class="anchored" data-anchor-id="core-architecture">Core Architecture</h3>
+<p>With that context, let’s look at our implementation. The core is simple and straightforward.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/sequence/model.py</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-2" data-filename="src/sequence/model.py"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SoleSequenceRetriever(BaseSequenceRetriever):</span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(</span>
+<span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a>        num_items: <span class="bu">int</span>,</span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>        embedding_dim: <span class="bu">int</span>,</span>
+<span id="annotated-cell-2-6"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a>        pooling_method: <span class="bu">str</span> <span class="op">=</span> <span class="st">"mean"</span>,</span>
+<span id="annotated-cell-2-7"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a>        dropout: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a>        mask_pooling: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="annotated-cell-2-9"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="annotated-cell-2-10"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_items <span class="op">=</span> num_items</span>
+<span id="annotated-cell-2-11"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.embedding_dim <span class="op">=</span> embedding_dim</span>
+<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pooling_method <span class="op">=</span> pooling_method.lower()</span>
+<span id="annotated-cell-2-13"><a href="#annotated-cell-2-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mask_pooling <span class="op">=</span> mask_pooling</span>
+<span id="annotated-cell-2-14"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-15"><a href="#annotated-cell-2-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> item_embedding <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-2-16"><a href="#annotated-cell-2-16" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.item_embedding <span class="op">=</span> nn.Embedding(</span>
+<span id="annotated-cell-2-17"><a href="#annotated-cell-2-17" aria-hidden="true" tabindex="-1"></a>                num_items <span class="op">+</span> <span class="dv">1</span>,  <span class="co"># extra index for unknown/padding</span></span>
+<span id="annotated-cell-2-18"><a href="#annotated-cell-2-18" aria-hidden="true" tabindex="-1"></a>                embedding_dim,</span>
+<span id="annotated-cell-2-19"><a href="#annotated-cell-2-19" aria-hidden="true" tabindex="-1"></a>                padding_idx<span class="op">=</span>num_items,</span>
+<span id="annotated-cell-2-20"><a href="#annotated-cell-2-20" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-2-21"><a href="#annotated-cell-2-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-22" class="code-annotation-target"><a href="#annotated-cell-2-22" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.item_embedding <span class="op">=</span> item_embedding</span>
+<span id="annotated-cell-2-23"><a href="#annotated-cell-2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-24"><a href="#annotated-cell-2-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.pooling_method <span class="op">==</span> <span class="st">"gru"</span>:</span>
+<span id="annotated-cell-2-25"><a href="#annotated-cell-2-25" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.gru <span class="op">=</span> nn.GRU(embedding_dim, embedding_dim, batch_first<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-2-26"><a href="#annotated-cell-2-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> <span class="va">self</span>.pooling_method <span class="op">==</span> <span class="st">"mean"</span>:</span>
+<span id="annotated-cell-2-27"><a href="#annotated-cell-2-27" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.gru <span class="op">=</span> <span class="va">None</span></span>
+<span id="annotated-cell-2-28"><a href="#annotated-cell-2-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="annotated-cell-2-29"><a href="#annotated-cell-2-29" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Invalid pooling_method. Choose 'gru' or 'mean'."</span>)</span>
+<span id="annotated-cell-2-30"><a href="#annotated-cell-2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-31"><a href="#annotated-cell-2-31" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.query_fc <span class="op">=</span> nn.Sequential(</span>
+<span id="annotated-cell-2-32"><a href="#annotated-cell-2-32" aria-hidden="true" tabindex="-1"></a>            nn.Linear(embedding_dim, embedding_dim),</span>
+<span id="annotated-cell-2-33"><a href="#annotated-cell-2-33" aria-hidden="true" tabindex="-1"></a>            nn.BatchNorm1d(embedding_dim),</span>
+<span id="annotated-cell-2-34"><a href="#annotated-cell-2-34" aria-hidden="true" tabindex="-1"></a>            nn.Dropout(dropout),</span>
+<span id="annotated-cell-2-35"><a href="#annotated-cell-2-35" aria-hidden="true" tabindex="-1"></a>        )</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="22" data-code-annotation="1">We support pre-trained item embeddings, which can be useful if you have embeddings from other models or external sources.</span>
+</dd>
+</dl>
+<p>The architecture reflects our key principles. The item embedding layer converts raw item IDs into dense vectors that can capture semantic relationships. The configurable pooling method (mean or GRU) aggregates the sequence into a single representation. The fully connected layer in the query tower adds learning capacity while batch normalization and dropout help with generalization.</p>
+<p>Notice what’s <em>not</em> here: any mention of user IDs. The model’s query tower depends entirely on the sequence of items, making it truly session-based.</p>
+</section>
+</section>
+<section id="model-training" class="level2">
+<h2 class="anchored" data-anchor-id="model-training">Model Training</h2>
+<p>The forward pass computes cosine similarity between the query embedding (pooled sequence representation) and candidate embedding, scaled to [0,1] to match our binary labels. This choice of cosine similarity isn’t arbitrary—it aligns with how we’ll serve the model using nearest neighbor search in production, i.e.&nbsp;we perform the exact same similarity computation, just against pre-indexed candidate embeddings rather than individual examples.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/sequence/model.py</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-3" data-filename="src/sequence/model.py"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-3-1"><a href="#annotated-cell-3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SoleSequenceRetriever(BaseSequenceRetriever):</span>
+<span id="annotated-cell-3-2"><a href="#annotated-cell-3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
+<span id="annotated-cell-3-3"><a href="#annotated-cell-3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-4"><a href="#annotated-cell-3-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get_query_embeddings(<span class="va">self</span>, inputs: Dict[<span class="bu">str</span>, torch.Tensor]) <span class="op">-&gt;</span> torch.Tensor:</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1">1</button><span id="annotated-cell-3-5" class="code-annotation-target"><a href="#annotated-cell-3-5" aria-hidden="true" tabindex="-1"></a>        item_seq <span class="op">=</span> inputs.get(<span class="st">"item_seq"</span>)</span>
+<span id="annotated-cell-3-6"><a href="#annotated-cell-3-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> item_seq <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-3-7"><a href="#annotated-cell-3-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Missing required input key: 'item_seq'"</span>)</span>
+<span id="annotated-cell-3-8"><a href="#annotated-cell-3-8" aria-hidden="true" tabindex="-1"></a>        item_seq <span class="op">=</span> <span class="va">self</span>.replace_neg_one_with_padding(item_seq)</span>
+<span id="annotated-cell-3-9"><a href="#annotated-cell-3-9" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> item_seq <span class="op">!=</span> <span class="va">self</span>.item_embedding.padding_idx</span>
+<span id="annotated-cell-3-10"><a href="#annotated-cell-3-10" aria-hidden="true" tabindex="-1"></a>        seq_embeds <span class="op">=</span> <span class="va">self</span>.item_embedding(item_seq)</span>
+<span id="annotated-cell-3-11"><a href="#annotated-cell-3-11" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Pool the sequence; the method will decide whether to use the mask based on self.mask_pooling</span></span>
+<span id="annotated-cell-3-12"><a href="#annotated-cell-3-12" aria-hidden="true" tabindex="-1"></a>        seq_rep <span class="op">=</span> <span class="va">self</span>.pool_sequence(seq_embeds, mask)</span>
+<span id="annotated-cell-3-13"><a href="#annotated-cell-3-13" aria-hidden="true" tabindex="-1"></a>        query_embedding <span class="op">=</span> <span class="va">self</span>.query_fc(seq_rep)</span>
+<span id="annotated-cell-3-14"><a href="#annotated-cell-3-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> F.normalize(query_embedding, p<span class="op">=</span><span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-3-15"><a href="#annotated-cell-3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-16"><a href="#annotated-cell-3-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, inputs):</span>
+<span id="annotated-cell-3-17"><a href="#annotated-cell-3-17" aria-hidden="true" tabindex="-1"></a>        query_embedding <span class="op">=</span> <span class="va">self</span>.get_query_embeddings(inputs)      </span>
+<span id="annotated-cell-3-18"><a href="#annotated-cell-3-18" aria-hidden="true" tabindex="-1"></a>        candidate_embedding <span class="op">=</span> <span class="va">self</span>.get_candidate_embeddings(inputs)  </span>
+<span id="annotated-cell-3-19"><a href="#annotated-cell-3-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="annotated-cell-3-20"><a href="#annotated-cell-3-20" aria-hidden="true" tabindex="-1"></a>        query_embedding <span class="op">=</span> F.normalize(query_embedding, p<span class="op">=</span><span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-3-21"><a href="#annotated-cell-3-21" aria-hidden="true" tabindex="-1"></a>        candidate_embedding <span class="op">=</span> F.normalize(candidate_embedding, p<span class="op">=</span><span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-3-22"><a href="#annotated-cell-3-22" aria-hidden="true" tabindex="-1"></a>        cos_sim <span class="op">=</span> torch.<span class="bu">sum</span>(query_embedding <span class="op">*</span> candidate_embedding, dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-3-23"><a href="#annotated-cell-3-23" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="annotated-cell-3-24"><a href="#annotated-cell-3-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (cos_sim <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> <span class="dv">2</span>  <span class="co"># Scale to [0,1] since cosine similarity is in [-1, 1]</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="5" data-code-annotation="1">Note how we only need the item_seq from the inputs dict. This handles the cold start problem—new users immediately get meaningful recommendations based solely on their current session, without needing historical preference data.</span>
+</dd>
+</dl>
+<section id="mask-pooling" class="level3">
+<h3 class="anchored" data-anchor-id="mask-pooling">Mask Pooling</h3>
+<p>One challenge we need to address: <strong>variable sequence lengths</strong>. In practice, users have different numbers of interactions—some might have browsed 3 books, others 15. To batch these sequences efficiently for training, we need to pad shorter sequences to a fixed length. We do this by filling empty positions with a special padding token (typically -1).</p>
+<p><strong>Masked pooling</strong> can help us deal with this issue. Without masking, our pooling operations would include these padding tokens in their calculations, diluting the actual sequence representation. For mean pooling, averaging real embeddings with padding embeddings would give us a less meaningful representation. For GRU pooling, the model might learn spurious patterns from the padding tokens.</p>
+<p>By implementing masked pooling, we tell the model to ignore these -1 padding tokens during sequence aggregation. The mask ensures that only genuine user interactions contribute to the final sequence representation, preserving the integrity of the learned patterns.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/sequence/model.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" data-filename="src/sequence/model.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SoleSequenceRetriever(BaseSequenceRetriever):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> pool_sequence(<span class="va">self</span>, seq_embeds: torch.Tensor, mask: torch.Tensor <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.mask_pooling <span class="kw">and</span> mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.pooling_method <span class="op">==</span> <span class="st">"gru"</span>:</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                lengths <span class="op">=</span> mask.<span class="bu">sum</span>(dim<span class="op">=</span><span class="dv">1</span>).clamp(<span class="bu">min</span><span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                packed_seq <span class="op">=</span> nn.utils.rnn.pack_padded_sequence(</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                    seq_embeds, lengths.cpu(), batch_first<span class="op">=</span><span class="va">True</span>, enforce_sorted<span class="op">=</span><span class="va">False</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                _, hidden_state <span class="op">=</span> <span class="va">self</span>.gru(packed_seq)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> hidden_state.squeeze(<span class="dv">0</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> <span class="va">self</span>.pooling_method <span class="op">==</span> <span class="st">"mean"</span>:</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>                mask_float <span class="op">=</span> mask.unsqueeze(<span class="op">-</span><span class="dv">1</span>).<span class="bu">float</span>()</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>                sum_embeds <span class="op">=</span> (seq_embeds <span class="op">*</span> mask_float).<span class="bu">sum</span>(dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>                count <span class="op">=</span> mask_float.<span class="bu">sum</span>(dim<span class="op">=</span><span class="dv">1</span>).clamp(<span class="bu">min</span><span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> sum_embeds <span class="op">/</span> count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>As with other ideas, feel free to experiment with using masked pooling or not. It may seem sound but not always lead to noticeable improvements according to my experience.</p>
+</section>
+<section id="training-loop" class="level3">
+<h3 class="anchored" data-anchor-id="training-loop">Training Loop</h3>
+<p>The training function uses binary cross-entropy loss against our positive/negative samples. We use PyTorch Lightning to leverage its built-in training loop, logging capabilities and integration with MLflow instead of implementing ourselves<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/sequence/trainer.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" data-filename="src/sequence/trainer.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LitSequenceRetriever(L.LightningModule):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> training_step(<span class="va">self</span>, batch, batch_idx):</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Get model's predictions</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        predictions <span class="op">=</span> <span class="va">self</span>.model({</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"user_ids"</span>: batch[<span class="st">"user"</span>],</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"item_seq"</span>: batch[<span class="st">"item_sequence"</span>], </span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"candidate_items"</span>: batch[<span class="st">"item"</span>]</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compare to actual user behavior</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">=</span> batch[<span class="st">"rating"</span>].<span class="bu">float</span>()</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> nn.BCELoss()(predictions, labels)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># This loss drives the learning process</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> loss</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="preparing-pytorch-datasets" class="level3">
+<h3 class="anchored" data-anchor-id="preparing-pytorch-datasets">Preparing PyTorch Datasets</h3>
+<p>PyTorch models work best with PyTorch datasets. Our <code>UserItemRatingDFDataset</code> class handles the conversion from pandas DataFrames to PyTorch tensors:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/dataset.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb4" data-filename="src/dataset.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> UserItemRatingDFDataset(Dataset):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, df, user_col: <span class="bu">str</span>, item_col: <span class="bu">str</span>, rating_col: <span class="bu">str</span>, timestamp_col: <span class="bu">str</span>):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.df <span class="op">=</span> df.assign(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>            <span class="op">**</span>{rating_col: (df[rating_col] <span class="op">/</span> MAX_RATING).astype(np.float32)}  <span class="co"># Normalize rating to [0,1]</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, idx):</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">dict</span>(</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            user<span class="op">=</span>torch.as_tensor(<span class="va">self</span>.df[<span class="va">self</span>.user_col].iloc[idx]),</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>            item<span class="op">=</span>torch.as_tensor(<span class="va">self</span>.df[<span class="va">self</span>.item_col].iloc[idx]),</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>            rating<span class="op">=</span>torch.as_tensor(<span class="va">self</span>.df[<span class="va">self</span>.rating_col].iloc[idx]),</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>            item_sequence<span class="op">=</span>torch.tensor(<span class="va">self</span>.df[<span class="st">"item_sequence"</span>].iloc[idx], dtype<span class="op">=</span>torch.<span class="bu">long</span>),</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This dataset is then wrapped into a PyTorch DataLoader for batching and shuffling.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    train_dataset,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    batch_size<span class="op">=</span>batch_size,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    shuffle<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    num_workers<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="integration-with-mlflow-for-experiment-tracking" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="integration-with-mlflow-for-experiment-tracking">Integration with MLflow for Experiment Tracking</h2>
+<p>Every training run is automatically logged to MLflow through our configuration system:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cfg <span class="op">=</span> ConfigLoader(<span class="st">"../cfg/common.yaml"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>cfg.run.run_name <span class="op">=</span> <span class="st">"002-sequence-retriever-gru"</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>cfg.run.experiment_name <span class="op">=</span> <span class="st">"Retrieve - Binary"</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>cfg.init()  <span class="co"># Automatically sets up MLflow logging</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We customzize our Lightning trainer module to help us automatically log:</p>
+<ul>
+<li><strong>Training metrics</strong>: Loss, learning rate, weight norms</li>
+<li><strong>Validation metrics</strong>: ROC-AUC, PR-AUC, ranking metrics</li>
+<li><strong>Model artifacts</strong>: Best model checkpoints</li>
+</ul>
+<p>While the model is training, we can observe how it converges and how it performs on the validation set in real-time on MLflow Web UI:</p>
+<div class="column-page">
+<p><img src="./mlflow-training.png" class="img-fluid"></p>
+</div>
+</section>
+<section id="model-comparison" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="model-comparison">Model Comparison</h2>
+<p>After training, we can compare the performance of our model with the popularity baseline:</p>
+<div class="column-page">
+<p><img src="../static/model-compare.png" class="img-fluid"></p>
+</div>
+<p>The results validate our sequence-based approach with substantial improvements across all metrics. Let’s break down what these numbers tell us about our retrieval system’s effectiveness.</p>
+<section id="recall-the-heart-of-retrieval-performance" class="level3">
+<h3 class="anchored" data-anchor-id="recall-the-heart-of-retrieval-performance">Recall: The Heart of Retrieval Performance</h3>
+<p>Since we’re building a retrieval system, <strong>recall is chosen to be our north-star metric</strong>. Recall measures what fraction of relevant items we successfully include in our candidate set. In the two-stage retrieval-ranking framework, if our retrieval system misses a relevant item, no amount of sophisticated ranking can fix that—the item is gone forever from the user’s recommendations.</p>
+<p>Our sequence-based model achieves significant improvements in recall across thresholds:</p>
+<ul>
+<li><strong>Recall@100</strong>: 0.186 vs 0.062 (197% improvement)</li>
+<li><strong>Recall@10</strong>: 0.038 vs 0.01 for the popularity baseline (280% improvement)</li>
+</ul>
+<p>These numbers tell two important stories. Assuming we would send hundreds of candidates as the output to the later ranking stage, the recall@100 improvement shows we’re nearly doubling our ability to capture relevant items in a typical retrieval pass. This is crucial for the downstream ranking stage—we’re giving it much better raw material to work with.</p>
+<p>The recall@10 improvement indicates positive sign but for a different reason. When we deploy this retrieval system as a standalone recommender (without a ranking stage), users see these top-10 results directly. A 280% improvement means users are nearly three times more likely to find something relevant in their immediate recommendations.</p>
+</section>
+<section id="ranking-quality-validation" class="level3">
+<h3 class="anchored" data-anchor-id="ranking-quality-validation">Ranking Quality Validation</h3>
+<p>However, when talking about the end-result ranking for users, NDCG tells a more complete story. The significant improvements in NDCG ranking metrics provide additional validation: <strong>NDCG@10</strong>: 0.018 vs 0.005 (360% improvement). NDCG measures whether we’re putting the most relevant items at the top of our candidate list. This improvement suggests our retrieval system isn’t just finding relevant items—it’s finding them and scoring them appropriately.</p>
+<p>This ranking quality matters regardless of whether we add a downstream ranking stage. If we deploy the retrieval system directly, users get better-ordered recommendations. If we add ranking later, we’re providing the ranking model with better-scored candidates to work with.</p>
+</section>
+<section id="what-this-means-for-users" class="level3">
+<h3 class="anchored" data-anchor-id="what-this-means-for-users">What This Means for Users</h3>
+<p>These metric improvements translate to concrete user experience benefits:</p>
+<ul>
+<li><strong>Immediate Impact</strong>: Users are 3x more likely to find relevant items in their top recommendations, dramatically reducing the time spent browsing through irrelevant suggestions.</li>
+<li><strong>Better Cold Start</strong>: New users get personalized recommendations from their very first interaction, eliminating the typical cold start period of generic popular items.</li>
+<li><strong>System Flexibility</strong>: The improved candidate quality gives us options—we can deploy this as a complete recommendation system now, or use it as a strong foundation for a more sophisticated ranking stage later.</li>
+</ul>
+<p>The results demonstrate that sequence modeling captures meaningful patterns in user behavior that static approaches miss entirely.</p>
+<p>That said, while the uplifts are strong, the absolute numbers are still low. This is expected since we haven’t really optimized the model, so keep in mind that this is just the beginning. But if you ask me what high or good numbers look like, I would say this kind of improvement is already sufficient for us to deploy in production, given that we have no other models and are currently using the popularity baseline.</p>
+</section>
+</section>
+<section id="model-registry-and-versioning" class="level2">
+<h2 class="anchored" data-anchor-id="model-registry-and-versioning">Model Registry and Versioning</h2>
+<p>As mentioned earlier, MLflow does not only help us track the training process but also provides a <strong>model registry</strong> for version management and easier deployment. We can easily log the training output artifacts to MLflow, while including a quality gate to ensure that only models that exceed minimum performance thresholds get registered:</p>
+<div class="sourceCode" id="annotated-cell-9"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Automatic model registration after successful training</span></span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> val_roc_auc <span class="op">&gt;</span> cfg.<span class="bu">eval</span>.min_roc_auc:</span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Register model as new version</span></span>
+<span id="annotated-cell-9-4"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a>    mlflow.pytorch.log_model(</span>
+<span id="annotated-cell-9-5"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a>        model, </span>
+<span id="annotated-cell-9-6"><a href="#annotated-cell-9-6" aria-hidden="true" tabindex="-1"></a>        cfg.train.retriever.mlf_model_name,</span>
+<span id="annotated-cell-9-7"><a href="#annotated-cell-9-7" aria-hidden="true" tabindex="-1"></a>        registered_model_name<span class="op">=</span>cfg.train.retriever.mlf_model_name</span>
+<span id="annotated-cell-9-8"><a href="#annotated-cell-9-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-9-9"><a href="#annotated-cell-9-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="annotated-cell-9-10"><a href="#annotated-cell-9-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Tag as champion if performance exceeds threshold</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1">1</button><span id="annotated-cell-9-11" class="code-annotation-target"><a href="#annotated-cell-9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> val_roc_auc <span class="op">&gt;</span> champion_threshold:</span>
+<span id="annotated-cell-9-12"><a href="#annotated-cell-9-12" aria-hidden="true" tabindex="-1"></a>        client.set_registered_model_alias(</span>
+<span id="annotated-cell-9-13"><a href="#annotated-cell-9-13" aria-hidden="true" tabindex="-1"></a>            cfg.train.retriever.mlf_model_name, </span>
+<span id="annotated-cell-9-14"><a href="#annotated-cell-9-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"champion"</span>, </span>
+<span id="annotated-cell-9-15"><a href="#annotated-cell-9-15" aria-hidden="true" tabindex="-1"></a>            latest_version</span>
+<span id="annotated-cell-9-16"><a href="#annotated-cell-9-16" aria-hidden="true" tabindex="-1"></a>        )</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-9" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="11" data-code-annotation="1">Champion is a special alias for the current best model. It makes it easier for a new model to go online since we just need to tag it as champion without having to change the code or worry about version number.</span>
+</dd>
+</dl>
+<p>That’s it. Finally we are ready to conclude the chapter. If you have made this far, I give you my respect!</p>
+</section>
+<section id="recap" class="level2">
+<h2 class="anchored" data-anchor-id="recap">Recap</h2>
+<p>In this chapter, we achieved a major milestone in our recommendation system journey—transitioning from simple heuristic-based approaches to personalized machine learning models that capture temporal patterns in user behavior. Here’s what we accomplished:</p>
+<p><strong>From Theory to Practice:</strong></p>
+<ul>
+<li><strong>Why sequence modeling matters</strong>: We established that traditional collaborative filtering misses the crucial story hidden in the order and timing of user interactions. By modeling sequences, we can distinguish between users who follow structured learning paths versus those who jump between topics randomly.</li>
+<li><strong>Real-time adaptation and cold start solutions</strong>: We demonstrated how sequence-based models solve two critical RecSys challenges. New users get personalized recommendations from their very first interaction, and the model adapts immediately to changing user interests without requiring retraining.</li>
+</ul>
+<p><strong>Architectural Decisions:</strong></p>
+<ul>
+<li><strong>Two-tower retrieval architecture</strong>: We chose a retrieval-focused approach over end-to-end ranking, enabling fast candidate selection from millions of items while maintaining millisecond-level response times.</li>
+<li><strong>Session-only modeling</strong>: By building a “SoleSequenceRetriever” that relies entirely on interaction sequences without user embeddings, we prioritized adaptability and simplified serving infrastructure while solving cold start problems elegantly.</li>
+</ul>
+<p><strong>Technical Implementation:</strong></p>
+<ul>
+<li><strong>Masked pooling for variable sequences</strong>: We addressed the practical challenge of variable-length user sessions by implementing masked pooling that ignores padding tokens during sequence aggregation.</li>
+<li><strong>Cosine similarity alignment</strong>: Our training objective uses the same cosine similarity computation as production serving, ensuring consistency between offline training and online inference.</li>
+<li><strong>PyTorch Lightning integration</strong>: We leveraged Lightning’s capabilities for training loops, distributed training, and automatic MLflow integration, avoiding the complexity of custom implementations.</li>
+</ul>
+<p><strong>Validation and Results:</strong></p>
+<ul>
+<li><strong>Substantial performance improvements</strong>: Our sequence-based retriever achieved 197% improvement in Recall@100 and 280% improvement in Recall@10 compared to the popularity baseline, demonstrating that temporal patterns contain meaningful signals for recommendations.</li>
+<li><strong>MLflow model registry</strong>: We established automated model versioning with quality gates, ensuring only models exceeding minimum performance thresholds get registered for potential deployment.</li>
+</ul>
+<p>This sequence-based retriever represents a complete, deployable recommendation system that can serve personalized suggestions in real-time. More importantly, it provides a solid foundation for future enhancements—whether adding a downstream ranking layer or incorporating additional features like item content or user demographics.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Code
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>All code for this chapter is available in the <code>notebooks/011-sequence-modeling.ipynb</code> file and the <code>src/sequence/</code> directory in the <a href="https://github.com/dvquy13/recsys-seq-model">project repository</a>.</p>
+</div>
+</div>
+</section>
+<section id="whats-next" class="level2">
+<h2 class="anchored" data-anchor-id="whats-next">What’s Next?</h2>
+<p>With our sequence-based retrieval model performing strongly, we have several exciting directions for future development:</p>
+<p><strong>Short-term enhancements</strong> could include experimenting with Transformer-based pooling for better long-range dependency modeling or implementing more sophisticated negative sampling strategies like hard negative mining. Most importantly though, as long as request-level latency is still kept in check, we can always experiment with adding more input features to our towers.</p>
+<p>Examples:</p>
+<ul>
+<li>Incorporating item content features to improve cold-start item recommendations</li>
+<li>Provide query tower with user profile features, focusing on the information that we may be able to extract even for new users</li>
+<li>Help model be aware of the timings of the items in the interaction sequence</li>
+</ul>
+<p><strong>Medium-term evolution</strong> might involve building the ranking layer on top of our retrieval system based on the actual feedback labels from the new deployed recommendation module.</p>
+<p><strong>Production deployment</strong> includes setting up the vector database infrastructure for candidate indexing, implementing real-time serving APIs, and establishing A/B testing frameworks for online evaluation.</p>
+<p>In <a href="../../../projects/implement-recsys/c6/index.html">Chapter 6</a>, we will continue our journey to build an end-to-end recommendation system by preparing the offline computation and online serving infrastructure, e.g.&nbsp;MLflow, Redis, Qdrant. The focus would shift a bit towards platform/infrastructure, but we only touch upon how we set them up locally so hopefully it should not be too much of a stretch.</p>
+<p>Continue to the <a href="../../../projects/implement-recsys/c6/index.html">next chapter</a>.</p>
+<hr>
+<p><br> If you find this tutorial helpful, please cite this writeup as:</p>
+<blockquote class="blockquote">
+<p>Quy, Dinh. (May 2025). Implement a RecSys, Chapter 5:<br> Session-based Recommendation Model. dvquys.com. https://dvquys.com/projects/implement-recsys/c5/.</p>
+</blockquote>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>If you don’t recall anything about king and queen… Well, yeah, cause I didn’t say anything about that (LOL). But I would assume if you read any random article about Word2Vec, you would run into this famous analogy.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The sequence itself can also serves as a long-term historical signal, like containing the interactions from two months ago. Just that in this case we would want to couple those interactions with their timestamps to help the model differentiate.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Or… it’s not entirely wrong if you think I’m just a lazy guy who doesn’t want to deal with the missing of user embedding for new users 😅.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>I still remember how frustrating it was trying to implement DDP (Distributed Data Parallel) training loop with pure PyTorch. After figuring out that Lightning does not only handle that elegently but also has a lot of other features that I would have to implement myself, I never looked back.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/dvquys\.com");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+      for (let i=0; i<annoteTargets.length; i++) {
+        const annoteTarget = annoteTargets[i];
+        const targetCell = annoteTarget.getAttribute("data-target-cell");
+        const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+        const contentFn = () => {
+          const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          if (content) {
+            const tipContent = content.cloneNode(true);
+            tipContent.classList.add("code-annotation-tip-content");
+            return tipContent.outerHTML;
+          }
+        }
+        const config = {
+          allowHTML: true,
+          content: contentFn,
+          onShow: (instance) => {
+            selectCodeLines(instance.reference);
+            instance.reference.classList.add('code-annotation-active');
+            window.tippy.hideAll();
+          },
+          onHide: (instance) => {
+            unselectCodeLines();
+            instance.reference.classList.remove('code-annotation-active');
+          },
+          maxWidth: 300,
+          delay: [50, 0],
+          duration: [200, 0],
+          offset: [5, 10],
+          arrow: true,
+          appendTo: function(el) {
+            return el.parentElement.parentElement.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'quarto',
+          placement: 'right',
+          popperOptions: {
+            modifiers: [
+            {
+              name: 'flip',
+              options: {
+                flipVariations: false, // true by default
+                allowedAutoPlacements: ['right'],
+                fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+              },
+            },
+            {
+              name: 'preventOverflow',
+              options: {
+                mainAxis: false,
+                altAxis: false
+              }
+            }
+            ]        
+          }      
+        };
+        window.tippy(annoteTarget, config); 
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="dvquy13/icy-touch-comments" data-repo-id="R_kgDONEpzPA" data-category="General" data-category-id="DIC_kwDONEpzPM4Cjn8n" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" data-loading="lazy" async="">
+</script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark">
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+
+<div class="cookie-consent-footer"><a href="#" id="open_preferences_center">Cookie Preferences</a></div></div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="../../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

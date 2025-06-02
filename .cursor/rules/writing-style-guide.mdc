@@ -1,0 +1,40 @@
+---
+description: When asked to rephrase/rewrite, refer to this personal writing guideline
+globs: 
+alwaysApply: false
+---
+---
+description:
+globs:
+alwaysApply: false
+---
+# Writing Style Guide
+
+This rule captures the distinctive writing style and tone found in the blog posts and technical tutorials.
+
+## My role models
+- Paul Graham for his essays
+- Miguel Grinberg for this Flask-Mega Tutorial techincal blog series
+- Tim Urban for his Wait But Why blog
+
+## Core Writing Philosophy
+
+You should generate writing that is easy to read, using simple words and sentences. You should write like you talk.
+
+In generally don't use bullets, I often expect you to help with the idea development flow in writing.
+
+## Example good writings where we want to have both the writing styles and it contains ideas of how to write
+
+Below are some representative paragraph where Paul Graham discusses good writing. I want you to learn his writing style and how he develops the idea into words.
+
+<Example 1: Good Writing>
+There are two senses in which writing can be good: it can sound good, and the ideas can be right. It can have nice, flowing sentences, and it can draw correct conclusions about important things. It might seem as if these two kinds of good would be unrelated, like the speed of a car and the color it’s painted. And yet I don’t think they are. I think writing that sounds good is more likely to be right.
+
+How could trying to make sentences sound good help you do that? The clue to the answer is something I noticed 30 years ago when I was doing the layout for my first book. Sometimes when you’re laying out text you have bad luck. For example, you get a section that runs one line longer than the page. I don’t know what ordinary typesetters do in this situation, but what I did was rewrite the section to make it a line shorter. You’d expect such an arbitrary constraint to make the writing worse. But I found, to my surprise, that it never did. I always ended up with something I liked better.
+
+The best analogy for this phenomenon is when you shake a bin full of different objects. The shakes are arbitrary motions. Or more precisely, they’re not calculated to make any two specific objects fit more closely together. And yet repeated shaking inevitably makes the objects discover brilliantly clever ways of packing themselves. Gravity won’t let them become less tightly packed, so any change has to be a change for the better.
+
+The reason is that it makes the essay easier to read. It’s less work to read writing that flows well. How does that help the writer? Because the writer is the first reader. When I’m working on an essay, I spend far more time reading than writing. I’ll reread some parts 50 or 100 times, replaying the thoughts in them and asking myself, like someone sanding a piece of wood, does anything catch? Does anything feel wrong? And the easier the essay is to read, the easier it is to notice if something catches.
+
+Obviously there’s a connection at the level of individual words. There are lots of words in English that sound like what they mean, often in wonderfully subtle ways. Glitter. Round. Scrape. Prim. Cavalcade. But the sound of good writing depends even more on the way you put words together, and there’s a connection at that level too. When writing sounds good, it’s mostly because it has good rhythm. But the rhythm of good writing is not the rhythm of music, or the meter of verse. It’s not so regular. If it were, it wouldn’t be good, because the rhythm of good writing has to match the ideas in it, and ideas have all kinds of different shapes. Sometimes they’re simple and you just state them. But other times they’re more subtle, and you need longer, more complicated sentences to tease out all the implications.
+</Example 1: Good Writing>

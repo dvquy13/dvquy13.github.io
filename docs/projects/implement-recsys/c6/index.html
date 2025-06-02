@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2025-06-01">
+
+<title>Implement a RecSys, Chapter 6:  Preparing for Serving – DvQ</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../avatar.png" rel="icon" type="image/png">
+<script src="../../../site_libs/cookie-consent/cookie-consent.js"></script>
+<link href="../../../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
+<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-86daaaaad7353f9cc0c554efc1dd6d94.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-dfbb61b82ce601051c41824c3d072193.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-NH6GYY9FZV"></script>
+
+<script type="text/plain" cookie-consent="tracking">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-NH6GYY9FZV', { 'anonymize_ip': true});
+</script>
+
+<script type="text/javascript" charset="UTF-8">
+document.addEventListener('DOMContentLoaded', function () {
+cookieconsent.run({
+  "notice_banner_type":"simple",
+  "consent_type":"implied",
+  "palette":"light",
+  "language":"en",
+  "page_load_consent_levels":["strictly-necessary","functionality","tracking","targeting"],
+  "notice_banner_reject_button_hide":false,
+  "preferences_center_close_button_hide":false,
+  "website_name":""
+  ,
+"language":"en"
+  });
+});
+</script> 
+  
+<style>html{ scroll-behavior: smooth; }</style>
+<!-- Inter -->
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<!-- Roboto Mono -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&amp;display=swap" rel="stylesheet">
+
+
+<link rel="stylesheet" href="../../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">DvQ</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../projects.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/dvquy/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/dvquy13"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://x.com/dvquys"> <i class="bi bi-twitter-x" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../../index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title"><p>Implement a RecSys, Chapter 6:<br> Preparing for Serving</p></h1>
+            <p class="subtitle lead">Build the foundation that bridges model training to serving</p>
+                                <div class="quarto-categories">
+                <div class="quarto-category">recsys</div>
+                <div class="quarto-category">implement-recsys-series</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">June 1, 2025</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#serving-paradigms-from-model-to-user-experience" id="toc-serving-paradigms-from-model-to-user-experience" class="nav-link" data-scroll-target="#serving-paradigms-from-model-to-user-experience">Serving Paradigms: From Model to User Experience</a>
+  <ul class="collapse">
+  <li><a href="#how-recommendations-reach-users" id="toc-how-recommendations-reach-users" class="nav-link" data-scroll-target="#how-recommendations-reach-users">How Recommendations Reach Users</a></li>
+  <li><a href="#two-paradigms-batch-pre-computation-vs-online-serving" id="toc-two-paradigms-batch-pre-computation-vs-online-serving" class="nav-link" data-scroll-target="#two-paradigms-batch-pre-computation-vs-online-serving">Two Paradigms: Batch Pre-computation vs Online Serving</a></li>
+  <li><a href="#when-to-choose-each-paradigm" id="toc-when-to-choose-each-paradigm" class="nav-link" data-scroll-target="#when-to-choose-each-paradigm">When to Choose Each Paradigm</a></li>
+  </ul></li>
+  <li><a href="#three-pillar-serving-architecture" id="toc-three-pillar-serving-architecture" class="nav-link" data-scroll-target="#three-pillar-serving-architecture">Three-Pillar Serving Architecture</a>
+  <ul class="collapse">
+  <li><a href="#pillar-1-model-registry-mlflow" id="toc-pillar-1-model-registry-mlflow" class="nav-link" data-scroll-target="#pillar-1-model-registry-mlflow">Pillar 1: Model Registry (MLflow)</a></li>
+  <li><a href="#pillar-2-vector-store-qdrant" id="toc-pillar-2-vector-store-qdrant" class="nav-link" data-scroll-target="#pillar-2-vector-store-qdrant">Pillar 2: Vector Store (Qdrant)</a></li>
+  <li><a href="#pillar-3-key-value-cache-redis" id="toc-pillar-3-key-value-cache-redis" class="nav-link" data-scroll-target="#pillar-3-key-value-cache-redis">Pillar 3: Key-Value Cache (Redis)</a></li>
+  </ul></li>
+  <li><a href="#docker-compose-configuration" id="toc-docker-compose-configuration" class="nav-link" data-scroll-target="#docker-compose-configuration">Docker Compose Configuration</a>
+  <ul class="collapse">
+  <li><a href="#setting-up-mlflow-model-registry" id="toc-setting-up-mlflow-model-registry" class="nav-link" data-scroll-target="#setting-up-mlflow-model-registry">Setting up MLflow Model Registry</a></li>
+  </ul></li>
+  <li><a href="#building-the-vector-index-with-qdrant" id="toc-building-the-vector-index-with-qdrant" class="nav-link" data-scroll-target="#building-the-vector-index-with-qdrant">Building the Vector Index with Qdrant</a>
+  <ul class="collapse">
+  <li><a href="#item-embedding-extraction" id="toc-item-embedding-extraction" class="nav-link" data-scroll-target="#item-embedding-extraction">Item Embedding Extraction</a></li>
+  <li><a href="#qdrant-collection-setup" id="toc-qdrant-collection-setup" class="nav-link" data-scroll-target="#qdrant-collection-setup">Qdrant Collection Setup</a></li>
+  <li><a href="#batch-indexing" id="toc-batch-indexing" class="nav-link" data-scroll-target="#batch-indexing">Batch Indexing</a></li>
+  </ul></li>
+  <li><a href="#caching-user-sequences-in-redis" id="toc-caching-user-sequences-in-redis" class="nav-link" data-scroll-target="#caching-user-sequences-in-redis">Caching User Sequences in Redis</a></li>
+  <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap">Recap</a></li>
+  <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps">Next Steps</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content">
+
+
+
+
+
+<p>This is the <strong>sixth chapter</strong> of the tutorial series: Implement a RecSys.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+List of chapters
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><a href="../c1/index.html">Chapter 1: Introduction and Project Overview</a><br>
+</li>
+<li><a href="../c2/index.html">Chapter 2: Understanding the Data and Feature Engineering</a><br>
+</li>
+<li><a href="../c3/index.html">Chapter 3: Negative Sampling</a><br>
+</li>
+<li><a href="../c4/index.html">Chapter 4: Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation</a><br>
+</li>
+<li><a href="../c5/index.html">Chapter 5: Session-based Recommendation Model</a><br>
+</li>
+<li><a href="../c6/index.html">Chapter 6: Preparing for Serving</a><br>
+</li>
+<li><a href="../c7/index.html">Chapter 7: Building the API Layer</a><br>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In <a href="../../../projects/implement-recsys/c5/index.html">Chapter 5</a>, we have come a long way to build our sequence-based recommendation model which demonstrates significant metric uplifts over the popularity baseline. It can capture temporal patterns in user behavior and personalize recommendations based on interaction sequences. We’re finally ready to tell the world about our exciting new model! To do that, we need to package our work in a way that end-users can benefit from.</p>
+<p>This chapter aims to provide a transition ground from model development to deployment readiness. The challenge isn’t just loading a model and calling <code>predict()</code>—it’s building a proper system that can respond in milliseconds.</p>
+<p>Deploying ML models in production is actually a very huge area and deserves a series of its own. Within the scope of this tutorial, we will discuss the topic from the angle of an end-to-end data scientist—whose job is to design the complete pipeline from training to serving.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Code
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>All code for this chapter is available in the <code>notebooks/020-ann-index.ipynb</code> and <code>notebooks/021-store-user-item-sequence.ipynb</code> files, along with the infrastructure configuration in <code>compose.yml</code> and the <code>mlflow/</code> directory in the <a href="https://github.com/dvquy13/recsys-seq-model">project repository</a>.</p>
+</div>
+</div>
+</section>
+<section id="serving-paradigms-from-model-to-user-experience" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="serving-paradigms-from-model-to-user-experience">Serving Paradigms: From Model to User Experience</h2>
+<p>I have been always thinking that building a recommendation model is like crafting a perfect recipe for a gourmet dish. You might have the most sophisticated ingredients, precise measurements, and innovative techniques, but until that dish reaches hungry customers, it’s just potential sitting in the kitchen. The recipe itself doesn’t feed anyone—it’s the execution, plating, and delivery that creates value. Similarly, our sequence-based recommendation model, no matter how accurate its predictions, remains useless until it can respond to real user requests in real-time.</p>
+<p>This analogy extends further when we consider the restaurant’s serving strategy. A high-end restaurant doesn’t prepare each dish from scratch when a customer orders. Instead, they use a combination of pre-preparation (mise en place) and real-time cooking. Some components are prepped in batches during quiet hours, while others must be prepared fresh to order. Recommendation systems follow the same principle: we balance pre-computed results with real-time inference based on the specific requirements of each use case.</p>
+<section id="how-recommendations-reach-users" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="how-recommendations-reach-users">How Recommendations Reach Users</h3>
+<div class="column-page my-5">
+<p><img src="../static/Model Serving.drawio.png" class="img-fluid"></p>
+</div>
+<p>Understanding serving paradigms starts with tracing the journey from user action to displayed recommendations. When a user opens your app, a carefully orchestrated process begins:</p>
+<ol type="1">
+<li><strong>Frontend Request</strong>: The mobile app or web interface detects the user’s need for recommendations (homepage load, category browse, search query)</li>
+<li><strong>API Call</strong>: The frontend makes a REST API call to the backend, passing user context (user ID, current page, device info)</li>
+<li><strong>Backend Processing</strong>: The recommendation service processes this request, either by looking up pre-computed results or triggering real-time model inference</li>
+<li><strong>Response Assembly</strong>: Results are ranked, filtered for business rules, and formatted for display</li>
+<li><strong>Frontend Rendering</strong>: The app receives the recommendations and renders them in the user interface</li>
+</ol>
+<p>While the actual requirements vary between use cases, normally this entire pipeline must complete within 200ms at the 95th percentile to maintain user engagement. Any longer, and users start experiencing the dreaded loading spinner that kills conversion rates.</p>
+</section>
+<section id="two-paradigms-batch-pre-computation-vs-online-serving" class="level3">
+<h3 class="anchored" data-anchor-id="two-paradigms-batch-pre-computation-vs-online-serving">Two Paradigms: Batch Pre-computation vs Online Serving</h3>
+<p>The critical decision in this pipeline happens at step 3: how does the backend generate recommendations? There are two fundamental paradigms, each with distinct trade-offs:</p>
+<p><strong>Batch Pre-computation</strong> follows the “prepare ahead” strategy. Recommendations are generated offline for all users during low-traffic periods and stored in a key-value store like Redis or DynamoDB. When a user makes a request, the API simply looks up their pre-computed recommendations—a blazingly fast operation that typically completes in under 10ms.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Batch pre-computation approach</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> batch_generate_recommendations():</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Run offline to pre-compute recommendations for all users."""</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> user_id <span class="kw">in</span> all_users:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        recommendations <span class="op">=</span> model.predict(user_id)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        redis_client.<span class="bu">set</span>(<span class="ss">f"recs:</span><span class="sc">{</span>user_id<span class="sc">}</span><span class="ss">"</span>, recommendations, ex<span class="op">=</span><span class="dv">3600</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> serve_recommendations(user_id):</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Fast lookup during serving."""</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> redis_client.get(<span class="ss">f"recs:</span><span class="sc">{</span>user_id<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Online Serving</strong> follows the “cook to order” strategy. The model inference happens in real-time when users make requests. This requires the recommendation model to be deployed as a service that can respond to API calls within milliseconds.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Online serving approach</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> serve_recommendations(user_id, context):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Real-time model inference during serving."""</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    user_features <span class="op">=</span> get_user_features(user_id)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    contextual_features <span class="op">=</span> extract_context(context)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model.predict(user_features, contextual_features)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="when-to-choose-each-paradigm" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="when-to-choose-each-paradigm">When to Choose Each Paradigm</h3>
+<p>The choice between batch pre-computation and online serving isn’t arbitrary—it depends on your specific constraints and requirements. Batch pre-computation shines when recommendations don’t need real-time context. It’s also ideal when you can tolerate slightly stale recommendations that are updated periodically, perhaps hourly or daily, in exchange for guaranteed fast response times under all conditions. And it’s particularly attractive when your infrastructure needs to be simple and cost-effective, especially if you’re serving millions of users and want predictable resource utilization patterns.</p>
+<p>On the other hand, online serving becomes essential when having access to real-time contexts for recommendations is crucial in ensuring the relevance of our recommendations. Those contexts can be a user’s current shopping cart contents, her search query, or time-sensitive factors like current location or weather. All of these signals share an important property: we don’t know them in advance, so pre-computation is not an option.</p>
+<p>In practice, most production recommendation systems use a hybrid approach that combines both paradigms strategically. The default fallback homepage might display pre-computed “trending items” in cases of new users or errors from the recommendation services. In the remaining happy cases, we pass the relevant contexts to the model endpoints to provide better browsing experiences for users. This hybrid strategy optimizes for both performance and personalization.</p>
+<p>As you can see, the UI demo for our project also starts by showing the popular recommendations before updating the list with respect to user’s interactions.</p>
+<div class="column-page">
+<p><img src="../static/session-based retriever - demo v2.gif" class="img-fluid"></p>
+</div>
+</section>
+</section>
+<section id="three-pillar-serving-architecture" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="three-pillar-serving-architecture">Three-Pillar Serving Architecture</h2>
+<p>We’ll set up three main components that form the backbone of serving recommendation systems: <strong>MLflow</strong> for model registry and deployment, <strong>Qdrant</strong> for vector similarity search, and <strong>Redis</strong> as KV store for user sequences and metadata. Each addresses a specific aspect of the real-time recommendation challenge.</p>
+<div class="page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><img src="../static/Model Serving.drawio.png" class="img-fluid figure-img column-page"></p>
+<figcaption>Three-pillar serving architecture with Model Registry, Vector Store, and Key-Value Cache</figcaption>
+</figure>
+</div>
+</div>
+<section id="pillar-1-model-registry-mlflow" class="level3">
+<h3 class="anchored" data-anchor-id="pillar-1-model-registry-mlflow">Pillar 1: Model Registry (MLflow)</h3>
+<p>The <strong>Model Registry</strong> serves as the single source of truth for all model artifacts and metadata. Instead of need to look up which S3 path pointing to which model version, we have a nice abstraction layer to manage and use our trained models much more easily.</p>
+<p>MLflow Model Registry provides several useful capabilities for model serving:</p>
+<ul>
+<li><strong>Model Versioning</strong>: Every model training run produces a versioned artifact with associated metadata (metrics, parameters, training data lineage)</li>
+<li><strong>Stage Management</strong>: Models progress through stages like “Staging” → “Champion” → “Archived” with clear governance</li>
+<li><strong>A/B Testing Support</strong>: Multiple model versions can be deployed simultaneously with traffic splitting</li>
+</ul>
+</section>
+<section id="pillar-2-vector-store-qdrant" class="level3">
+<h3 class="anchored" data-anchor-id="pillar-2-vector-store-qdrant">Pillar 2: Vector Store (Qdrant)</h3>
+<p>The goal of <strong>Vector Store</strong> is to make similarity search efficient. While traditional databases excel at exact matches for structured data, the nature of our embeddings demands a different indexing approach. With the rising popularity of LLMs and their ability to generate embeddings, a handful of vector databases have emerged to provide solutions.</p>
+<p>In our case, our sequence model’s candidate tower generates embeddings for all items in the catalog. These embeddings are indexed in Qdrant, enabling fast retrieval of the most relevant candidates based on a user’s current sequence.</p>
+<p>The choice of using Qdrant here is nothing too special rather than personal, as I happen to find myself comfortable with it.</p>
+</section>
+<section id="pillar-3-key-value-cache-redis" class="level3">
+<h3 class="anchored" data-anchor-id="pillar-3-key-value-cache-redis">Pillar 3: Key-Value Cache (Redis)</h3>
+<p>The <strong>Key-Value Cache</strong> serves as the system’s memory for frequently accessed data and computational shortcuts. In recommendation systems, this typically includes user sequences, popular items, and pre-computed features that would be expensive to generate on-the-fly.</p>
+<p>For our recommender system, Redis stores each user’s recent interaction history, enabling the query tower to generate contextual embeddings without expensive database lookups. It also contains the popular items as a form of pre-computed recommendations.</p>
+<p>When thinking about which open source tool to use for the key-value store, I must admit that Redis is so widely used that I don’t really consider other options, especially for a tutorial project like this.</p>
+<p>After understanding those three pillars, let’s take a closer look at how we configure them running on our local environment.</p>
+</section>
+</section>
+<section id="docker-compose-configuration" class="level2">
+<h2 class="anchored" data-anchor-id="docker-compose-configuration">Docker Compose Configuration</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./docker-logo.svg" class="img-fluid figure-img"></p>
+<figcaption>Docker logo</figcaption>
+</figure>
+</div>
+<p><strong>Docker</strong> is a containerization platform that packages applications and their dependencies into lightweight, portable containers. Think of it as creating a standardized shipping container<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> for your software. Just as shipping containers can move seamlessly between trucks, ships, and trains regardless of their contents, Docker containers can run consistently across different environments, from your laptop to production servers. This is particularly valuable for ML systems where dependency management can become complex, with different services requiring specific versions of Python, database drivers, or system libraries. It’s becoming a standard approach to package application services for a lot of teams nowadays.</p>
+<p><strong>Docker Compose</strong> takes this concept one step further by orchestrating multiple containers as a unified application stack. Instead of manually starting each service and configuring their networking, Docker Compose allows us to define our entire infrastructure—MLflow, Qdrant, Redis, and their supporting databases—in a single configuration file. With a simple <code>docker-compose up</code> command, we can spin up our complete serving environment with all services properly connected and configured. This approach eliminates the “works on my machine” problem that often plagues ML deployments, ensuring that anyone can reproduce the exact same serving environment that we’ve designed.</p>
+<p>Here’s what our Docker Compose file looks like:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>compose.yml</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" data-filename="compose.yml"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">qdrant</span><span class="kw">:</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> qdrant/qdrant:v1.12.0</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"6333:6333"</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"6334:6334"</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ./data/qdrant_storage:/qdrant/storage:z</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">restart</span><span class="kw">:</span><span class="at"> always</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">kv_store</span><span class="kw">:</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> redis:7.2-bookworm</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">container_name</span><span class="kw">:</span><span class="at"> kv_store</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"${REDIS_PORT}:6379"</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ./data/redis:/data</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">env_file</span><span class="kw">:</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> .env</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">healthcheck</span><span class="kw">:</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">test</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"CMD"</span><span class="kw">,</span><span class="at"> </span><span class="st">"redis-cli"</span><span class="kw">,</span><span class="at"> </span><span class="st">"-p"</span><span class="kw">,</span><span class="at"> </span><span class="st">"6379"</span><span class="kw">,</span><span class="at"> </span><span class="st">"ping"</span><span class="kw">]</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 10s</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">50</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">start_period</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">mlflow_server</span><span class="kw">:</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">restart</span><span class="kw">:</span><span class="at"> always</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span><span class="at"> ./mlflow</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> mlflow_server</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">container_name</span><span class="kw">:</span><span class="at"> mlflow_server</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">depends_on</span><span class="kw">:</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> mlflow_mc</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> mlflow_db</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"5002:5000"</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> MLFLOW_S3_ENDPOINT_URL=http://minio:9000</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="fu">    command</span><span class="kw">: </span><span class="ch">&gt;</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>      mlflow server</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>        --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mlflow_db:3306/${MYSQL_DATABASE}</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>        --artifacts-destination s3://mlflow</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>        --serve-artifacts</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>        --host 0.0.0.0</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>        --port 5000</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This configuration defines our entire serving infrastructure as code. A simple <code>docker compose up -d</code> command brings up all services with proper networking, volumes, and health checks configured.</p>
+<p>Although it’s pretty straightforward when you look how Redis and Qdrant are defined, I need to elaborate a bit on the MLflow part.</p>
+<section id="setting-up-mlflow-model-registry" class="level3">
+<h3 class="anchored" data-anchor-id="setting-up-mlflow-model-registry">Setting up MLflow Model Registry</h3>
+<p>MLflow Model Registry serves as our model deployment pipeline, providing versioning, staging, and rollback capabilities essential for production ML systems. By design MLflow coordinates between two backend systems: a <strong>MySQL Database</strong> that stores all the metadata—experiments, runs, parameters, metrics, and model registry information—and <strong>MinIO S3 Storage</strong> that acts as the artifact store where the actual model binaries, datasets, and logs are persisted. <strong>MLflow Server</strong> acts as the central orchestration service, providing REST APIs for experiment tracking, model registration, and serving.</p>
+<p>This separation of metadata and artifacts provides both performance and scalability benefits. The database can quickly serve metadata queries for experiment comparisons and model lookups, while the object storage efficiently handles large model files without putting pressure on the database.</p>
+<p>Now it should be clear why we need to run <code>make ml-platform-up</code> before running our notebooks in previous chapters. We do not need to worry too much about where the train models are stored, cause they sit happily in MLflow Registry. Below is the example code snippet for loading models:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>notebooks/020-ann-index.ipynb</strong></pre>
+</div>
+<div class="sourceCode" id="cb4" data-filename="notebooks/020-ann-index.ipynb"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>mlf_client <span class="op">=</span> mlflow.MlflowClient()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>mlf_model <span class="op">=</span> mlflow.pyfunc.load_model(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    model_uri<span class="op">=</span><span class="ss">f"models:/</span><span class="sc">{</span>cfg<span class="sc">.</span>train<span class="sc">.</span>retriever<span class="sc">.</span>mlf_model_name<span class="sc">}</span><span class="ss">@champion"</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>run_id <span class="op">=</span> mlf_model.metadata.run_id</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>run_info <span class="op">=</span> mlf_client.get_run(run_id).info</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>artifact_uri <span class="op">=</span> run_info.artifact_uri</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>inferer <span class="op">=</span> mlf_model.unwrap_python_model()</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>id_mapping <span class="op">=</span> inferer.idm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next we will populate Qdrant and Redis with the data they need to support online serving.</p>
+</section>
+</section>
+<section id="building-the-vector-index-with-qdrant" class="level2">
+<h2 class="anchored" data-anchor-id="building-the-vector-index-with-qdrant">Building the Vector Index with Qdrant</h2>
+<section id="item-embedding-extraction" class="level3">
+<h3 class="anchored" data-anchor-id="item-embedding-extraction">Item Embedding Extraction</h3>
+<p>The first step is extracting embeddings from our trained sequence model. Our two-tower implementation contains a method <code>get_candidate_embeddings</code> that makes this straightforward:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/sequence/model.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb5" data-filename="src/sequence/model.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SoleSequenceRetriever(BaseSequenceRetriever):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get_candidate_embeddings(<span class="va">self</span>, inputs: Dict[<span class="bu">str</span>, torch.Tensor]) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        candidate_items <span class="op">=</span> inputs.get(<span class="st">"candidate_items"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> candidate_items <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Missing required input key: 'candidate_items'"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        candidate_embedding <span class="op">=</span> <span class="va">self</span>.item_embedding(candidate_items)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> candidate_embedding</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>notebooks/020-ann-index.ipynb</strong></pre>
+</div>
+<div class="sourceCode" id="cb6" data-filename="notebooks/020-ann-index.ipynb"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># inferer is the model wrapper loaded from MLflow in the previous snippet</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> inferer.model</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>all_item_ids <span class="op">=</span> torch.arange(num_items)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> {<span class="st">"candidate_items"</span>: all_item_ids}</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    candidate_embeddings <span class="op">=</span> model.get_candidate_embeddings(inputs).detach().numpy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="qdrant-collection-setup" class="level3">
+<h3 class="anchored" data-anchor-id="qdrant-collection-setup">Qdrant Collection Setup</h3>
+<p>Qdrant organizes vectors into collections with configurable distance metrics and indexing parameters:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>notebooks/020-ann-index.ipynb</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-7" data-filename="notebooks/020-ann-index.ipynb"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> qdrant_client <span class="im">import</span> QdrantClient, models</span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize Qdrant client</span></span>
+<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> QdrantClient(url<span class="op">=</span>cfg.vectorstore.qdrant.url)</span>
+<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-6"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Create collection for item embeddings</span></span>
+<span id="annotated-cell-7-7"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a>client.create_collection(</span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a>    collection_name<span class="op">=</span>cfg.vectorstore.qdrant.collection_name,</span>
+<span id="annotated-cell-7-9"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a>    vectors_config<span class="op">=</span>models.VectorParams(</span>
+<span id="annotated-cell-7-10"><a href="#annotated-cell-7-10" aria-hidden="true" tabindex="-1"></a>        size<span class="op">=</span>cfg.train.embedding_dim,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1">1</button><span id="annotated-cell-7-11" class="code-annotation-target"><a href="#annotated-cell-7-11" aria-hidden="true" tabindex="-1"></a>        distance<span class="op">=</span>models.Distance.COSINE</span>
+<span id="annotated-cell-7-12"><a href="#annotated-cell-7-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-7-13"><a href="#annotated-cell-7-13" aria-hidden="true" tabindex="-1"></a>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="11" data-code-annotation="1">Specify COSINE as the distance to align with how we implement the model forward pass.</span>
+</dd>
+</dl>
+</section>
+<section id="batch-indexing" class="level3">
+<h3 class="anchored" data-anchor-id="batch-indexing">Batch Indexing</h3>
+<p>We do not only upload the embeddings to Qdrant but also their metadata. This becomes quite handy later when preparing the demo as we can get the item metadata by ID from Qdrant without the need to set up new database.</p>
+<div class="sourceCode" id="annotated-cell-8"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a>points <span class="op">=</span> []</span>
+<span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, vector <span class="kw">in</span> <span class="bu">enumerate</span>(candidate_embeddings):</span>
+<span id="annotated-cell-8-3"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a>    id_ <span class="op">=</span> id_mapping.get_item_id(idx)</span>
+<span id="annotated-cell-8-4"><a href="#annotated-cell-8-4" aria-hidden="true" tabindex="-1"></a>    payload <span class="op">=</span> metadata_map[id_]</span>
+<span id="annotated-cell-8-5"><a href="#annotated-cell-8-5" aria-hidden="true" tabindex="-1"></a>    payload[cfg.data.item_col] <span class="op">=</span> id_</span>
+<span id="annotated-cell-8-6"><a href="#annotated-cell-8-6" aria-hidden="true" tabindex="-1"></a>    point <span class="op">=</span> PointStruct(<span class="bu">id</span><span class="op">=</span>idx, vector<span class="op">=</span>vector.tolist(), payload<span class="op">=</span>payload)</span>
+<span id="annotated-cell-8-7"><a href="#annotated-cell-8-7" aria-hidden="true" tabindex="-1"></a>    points.append(point)</span>
+<span id="annotated-cell-8-8"><a href="#annotated-cell-8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-9"><a href="#annotated-cell-8-9" aria-hidden="true" tabindex="-1"></a>upsert_result <span class="op">=</span> ann_index.upsert(</span>
+<span id="annotated-cell-8-10"><a href="#annotated-cell-8-10" aria-hidden="true" tabindex="-1"></a>    collection_name<span class="op">=</span>cfg.vectorstore.qdrant.collection_name,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="1">1</button><span id="annotated-cell-8-11" class="code-annotation-target"><a href="#annotated-cell-8-11" aria-hidden="true" tabindex="-1"></a>    points<span class="op">=</span>points,</span>
+<span id="annotated-cell-8-12"><a href="#annotated-cell-8-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-8-13"><a href="#annotated-cell-8-13" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">str</span>(upsert_result.status) <span class="op">==</span> <span class="st">"completed"</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-8" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="11" data-code-annotation="1">Note that we can send a batch of points to Qdrant in one go.</span>
+</dd>
+</dl>
+<p>Once indexed, we can search for nearest neighbors by inputing a query embedding:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>id_ <span class="op">=</span> <span class="st">"043935806X"</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>idx <span class="op">=</span> id_mapping.get_item_index(id_)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> {<span class="st">"item_seq"</span>: torch.tensor([[idx]])}</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>query_embedding <span class="op">=</span> model.get_query_embeddings(inputs)[<span class="dv">0</span>]</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>hits <span class="op">=</span> ann_index.search(</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    collection_name<span class="op">=</span>cfg.vectorstore.qdrant.collection_name,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    query_vector<span class="op">=</span>query_embedding,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    limit<span class="op">=</span>cfg.<span class="bu">eval</span>.top_k_retrieve,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>display(hits)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Example output when <code>cfg.eval.top_k_retrieval = 2</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>[</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    ScoredPoint(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">id</span><span class="op">=</span><span class="dv">794</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        version<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        score<span class="op">=</span><span class="fl">0.89372206</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        payload<span class="op">=</span>{</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">'main_category'</span>: <span class="st">'Books'</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">'title'</span>: <span class="st">'The Sword of Shannara'</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">'average_rating'</span>: <span class="fl">4.4</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">'rating_number'</span>: <span class="dv">5470</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>            <span class="st">'price'</span>: <span class="st">'8.25'</span>,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">'subtitle'</span>: <span class="st">'Mass Market Paperback – July 12, 1983'</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">'image_url'</span>: <span class="st">'https://placehold.co/350x525/0057a3/ffffff.png?text=The%0ASword%0Aof%0AShannara&amp;font=raleway'</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">'parent_asin'</span>: <span class="st">'0345314255'</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        vector<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        shard_key<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        order_value<span class="op">=</span><span class="va">None</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    ScoredPoint(</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        <span class="bu">id</span><span class="op">=</span><span class="dv">1381</span>,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        version<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        score<span class="op">=</span><span class="fl">0.8898184</span>,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        payload<span class="op">=</span>{</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>            <span class="st">'main_category'</span>: <span class="st">'Books'</span>,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>            <span class="st">'title'</span>: <span class="st">'Harry Potter and the Chamber of Secrets'</span>,</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>            <span class="st">'average_rating'</span>: <span class="fl">4.8</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>            <span class="st">'rating_number'</span>: <span class="dv">85813</span>,</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>            <span class="st">'price'</span>: <span class="st">'6.81'</span>,</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>            <span class="st">'subtitle'</span>: <span class="st">'Hardcover – Big Book, July 1, 1999'</span>,</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>            <span class="st">'image_url'</span>: <span class="st">'https://m.media-amazon.com/images/I/519HQF7Vl6L._SY291_BO1,204,203,200_QL40_FMwebp_.jpg'</span>,</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>            <span class="st">'parent_asin'</span>: <span class="st">'0439064864'</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        vector<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>        shard_key<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        order_value<span class="op">=</span><span class="va">None</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="caching-user-sequences-in-redis" class="level2">
+<h2 class="anchored" data-anchor-id="caching-user-sequences-in-redis">Caching User Sequences in Redis</h2>
+<p>First we need to prepare our dataframe containing our user sequence signals. Since this is for serving, we would combine both train and val dataset and get the latest interaction for each user.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>notebooks/021-store-user-item-sequence.ipynb</strong></pre>
+</div>
+<div class="sourceCode" id="cb9" data-filename="notebooks/021-store-user-item-sequence.ipynb"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>train_features_df <span class="op">=</span> pd.read_parquet(cfg.data.train_features_fp)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>val_features_df <span class="op">=</span> pd.read_parquet(cfg.data.val_features_fp)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>full_df <span class="op">=</span> pd.concat([train_features_df, val_features_df], axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Locate the last instance per user from our interaction data</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>latest_df <span class="op">=</span> full_df.assign(</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    recency<span class="op">=</span><span class="kw">lambda</span> df: df.groupby(cfg.data.user_col)[cfg.data.timestamp_col].rank(</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        method<span class="op">=</span><span class="st">"first"</span>, ascending<span class="op">=</span><span class="va">False</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>).loc[<span class="kw">lambda</span> df: df[<span class="st">"recency"</span>].eq(<span class="dv">1</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Dumping data into Redis is quite easy.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>notebooks/021-store-user-item-sequence.ipynb</strong></pre>
+</div>
+<div class="sourceCode" id="cb10" data-filename="notebooks/021-store-user-item-sequence.ipynb"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> redis.Redis(host<span class="op">=</span>cfg.redis.host, port<span class="op">=</span>cfg.redis.port, db<span class="op">=</span><span class="dv">0</span>, decode_responses<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> r.ping(), (</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Redis at </span><span class="sc">{</span>cfg<span class="sc">.</span>redis<span class="sc">.</span>host<span class="sc">}</span><span class="ss">:</span><span class="sc">{</span>cfg<span class="sc">.</span>redis<span class="sc">.</span>port<span class="sc">}</span><span class="ss"> is not running, please make sure you have started the Redis docker service"</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, row <span class="kw">in</span> tqdm(latest_df.iterrows(), total<span class="op">=</span>latest_df.shape[<span class="dv">0</span>]):</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Since the row containing previous interacted items, we can get them and append the current item to compose the full sequence</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    prev_item_indices <span class="op">=</span> [<span class="bu">int</span>(item) <span class="cf">for</span> item <span class="kw">in</span> row[<span class="st">"item_sequence"</span>] <span class="cf">if</span> item <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    prev_item_ids <span class="op">=</span> [idm.get_item_id(idx) <span class="cf">for</span> idx <span class="kw">in</span> prev_item_indices]</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    updated_item_sequences <span class="op">=</span> prev_item_ids <span class="op">+</span> [row[cfg.data.item_col]]</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    user_id <span class="op">=</span> row[cfg.data.user_col]</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    key <span class="op">=</span> cfg.redis.keys.recent_key_prefix <span class="op">+</span> user_id</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Here we convert those list of string IDs into a single string with "__" as separator</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># This is for convenience only since in Redis there are other data structures like the list</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># which can also be used to store the sequence</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="st">"__"</span>.join(updated_item_sequences)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    r.<span class="bu">set</span>(key, value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Getting data is no harder.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>test_user_id <span class="op">=</span> latest_df.sample(<span class="dv">1</span>)[cfg.data.user_col].values[<span class="dv">0</span>]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> r.get(cfg.redis.keys.recent_key_prefix <span class="op">+</span> test_user_id)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>display(result)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Example output:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">'B078GWN38X__B078JJFFGK__B07ZDG34ZC__B079QG6L98__B00M9GZTXG__B07CWSSFL3__B0031W1E86__B07LF2YL9S__B07BJZJ34M__B077XVF99N__B07F668MBT'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>In a technically similar way, we can populate the popular items in Redis. I will skip the details here, as you can easily find it from <a href="https://github.com/dvquy13/recsys-seq-model/blob/main/notebooks/021-store-user-item-sequence.ipynb">the notebook</a>.</p>
+</section>
+<section id="recap" class="level2">
+<h2 class="anchored" data-anchor-id="recap">Recap</h2>
+<p>In this chapter, we mimic our local environment with the infrastructure foundation needed to transform our sequence-based model from a model prototype into a deployable recommendation system.</p>
+<p>We use Docker Compose to set up our stack of MLflow for model registry and versioning, Qdrant for fast vector similarity search, and Redis for caching user sequences and popular items. Then we implemented data population scripts to extract candidate embeddings from our trained model, index them in Qdrant with rich metadata, and populate Redis with user interaction sequences.</p>
+</section>
+<section id="next-steps" class="level2">
+<h2 class="anchored" data-anchor-id="next-steps">Next Steps</h2>
+<p>With our serving infrastructure ready and populated with data, we’re prepared for the final step: building the API layer that will expose our recommendation system to users. In <a href="../../../projects/implement-recsys/c7/index.html">Chapter 7</a>, we’ll learn how to use BentoML to host our model as an API endpoint and develop a FastAPI orchestrator to serve our recommendations.</p>
+<p>Continue to the <a href="../../../projects/implement-recsys/c7/index.html">next chapter</a>.</p>
+<hr>
+<p><br> If you find this tutorial helpful, please cite this writeup as:</p>
+<blockquote class="blockquote">
+<p>Quy, Dinh. (May 2025). Implement a RecSys, Chapter 6:<br> Preparing for Serving. dvquys.com. https://dvquys.com/projects/implement-recsys/c6/.</p>
+</blockquote>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>I love how Docker’s logo is actually a whale carrying containers on its back—it’s a perfect visual metaphor for what the platform does 👍.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/dvquys\.com");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+      for (let i=0; i<annoteTargets.length; i++) {
+        const annoteTarget = annoteTargets[i];
+        const targetCell = annoteTarget.getAttribute("data-target-cell");
+        const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+        const contentFn = () => {
+          const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          if (content) {
+            const tipContent = content.cloneNode(true);
+            tipContent.classList.add("code-annotation-tip-content");
+            return tipContent.outerHTML;
+          }
+        }
+        const config = {
+          allowHTML: true,
+          content: contentFn,
+          onShow: (instance) => {
+            selectCodeLines(instance.reference);
+            instance.reference.classList.add('code-annotation-active');
+            window.tippy.hideAll();
+          },
+          onHide: (instance) => {
+            unselectCodeLines();
+            instance.reference.classList.remove('code-annotation-active');
+          },
+          maxWidth: 300,
+          delay: [50, 0],
+          duration: [200, 0],
+          offset: [5, 10],
+          arrow: true,
+          appendTo: function(el) {
+            return el.parentElement.parentElement.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'quarto',
+          placement: 'right',
+          popperOptions: {
+            modifiers: [
+            {
+              name: 'flip',
+              options: {
+                flipVariations: false, // true by default
+                allowedAutoPlacements: ['right'],
+                fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+              },
+            },
+            {
+              name: 'preventOverflow',
+              options: {
+                mainAxis: false,
+                altAxis: false
+              }
+            }
+            ]        
+          }      
+        };
+        window.tippy(annoteTarget, config); 
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="dvquy13/icy-touch-comments" data-repo-id="R_kgDONEpzPA" data-category="General" data-category-id="DIC_kwDONEpzPM4Cjn8n" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" data-loading="lazy" async="">
+</script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark">
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+
+<div class="cookie-consent-footer"><a href="#" id="open_preferences_center">Cookie Preferences</a></div></div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="../../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
