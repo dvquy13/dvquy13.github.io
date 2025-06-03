@@ -18,11 +18,15 @@ This is the **first chapter** of the tutorial series: Implement a RecSys.
 
 ## Introduction
 
-Imagine you're browsing an e-commerce site and notice something remarkable: the recommendations update almost instantly as you click through products. You view a pair of headphones, and suddenly complementary items appear. You check out a laptop, and the "you might also like" section refreshes with relevant accessories. You think to yourself—*"Wow, how do they do that?"* Then curiosity kicks in: How do they capture your evolving intent so quickly? How do they serve personalized suggestions fast enough to feel real-time? How do they handle the complexity of understanding your browsing patterns on the fly?
+Imagine you're browsing an e-commerce site and notice something very interesting: the recommendations update almost instantly as you click through products. You view a pair of headphones, and suddenly phone cases, audio cables, and portable chargers appear. You check out a laptop, and the "you might also like" section refreshes with wireless mice, laptop bags, and USB hubs. You think to yourself—How do they capture your evolving intent so quickly? How do they serve personalized suggestions fast enough to feel real-time? How do they handle the complexity of understanding your browsing patterns on the fly?
 
 If you've ever have those questions, this tutorial series is for you. 
 
-Over the next several chapters, I'll walk you through building an end-to-end **recommendation system** that reacts in real-time based on user behavior sequences. We'll go from raw data to a complete recommender system that personalizes recommendations as users interact with your platform.
+Over the next 7 chapters, I'll walk you through building an end-to-end **recommendation system** that reacts in real-time based on user behavior sequences. We'll go from raw data to a complete recommender system that personalizes recommendations as users interact with your platform. The final product looks like this:
+
+:::{.column-page}
+![The Demo](../static/session-based%20retriever%20-%20demo%20v2.gif){.lightbox}
+:::
 
 ::: {.callout-note appearance="simple"}
 ## Enough Talking, Show Me the Code!
@@ -30,7 +34,7 @@ Over the next several chapters, I'll walk you through building an end-to-end **r
 If you're familiar with RecSys and just want to see the code, here it is: [https://github.com/dvquy13/recsys-seq-model](https://github.com/dvquy13/recsys-seq-model).
 :::
 
-For those who aren't well aware of what a recommender system is, here is a quick recap. Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.
+A quick recap for those who aren't well aware of what a recommender system is: Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.
 
 :::{.column-page}
 ![](../static/recommender%20system.png){.lightbox}
@@ -51,19 +55,15 @@ The impact of these systems is profound: According to [this report from McKinsey
 
 ## What You'll Build
 
-By the end of this series, you'll have constructed an end-to-end recommendation system while know how to:
+By the end of this series, you'll have constructed an end-to-end recommendation system while knowing how to:
  
-- **Design and Train Session-based RecSys models** using PyTorch to **personalizes recommendations in real-time** based on users' recent interaction sequences
-- **Track experiments** with MLflow for reproducible ML workflows
-- **Serve predictions** through a FastAPI service in conjunction with a vector database and caching
-- **Package the project** using Docker and modern ML infrastructure
-- **Launch aninteractive demo** with a frontend[^1]
-
-[^1]: Though not covered in this tutorial, there would be example UI code in the repo.
-
-:::{.column-page}
-![The Demo](../static/session-based%20retriever%20-%20demo%20v2.gif){.lightbox}
-:::
+- **Design and Train Session-based RecSys models** to personalize recommendations in real-time based on users' recent interaction sequences
+- **Handle complex data engineering challenges** including sampling techniques that avoid sparsity cascade, sequence generation from timestamps, and popularity-based negative sampling
+- **Track experiments** with MLflow for reproducible ML workflows, automated model versioning, and systematic performance comparison
+- **Implement a PyTorch sequential retrieval architecture** optimized for serving millions of items with millisecond response times
+- **Deploy model servers** using BentoML with seamless MLflow integration
+- **Build recommendation serving pipelines** through a FastAPI orchestrator that coordinates vector similarity search, user context retrieval, and fallback strategiesz
+- **Mimic production infrastructure setup** with Docker Compose orchestrating MLflow (model registry), Qdrant (vector database), and Redis (key-value store)
 
 ## Target Audience
 
@@ -74,51 +74,51 @@ This tutorial series is designed for:
 - **Backend Developers** interested in ML/RecSys architecture
 - **Anyone** curious about a modern and real-time end-to-end RecSys project
 
-All in all, it's good to have some basic knowledge of Machine Learning and Python to follow along.
+In most of the discussions, I assume readers have basic understanding of **Machine Learning** and **Python** to follow along.
 
 ## Session-Based vs Traditional Recommendations
 
-### Traditional Collaborative Filtering
-
-Traditional recommendation systems often rely on collaborative filtering, which uses historical user-item interaction matrices to find similar users or items. While effective, these approaches have limitations:
+Traditional recommendation systems often rely on collaborative filtering, which uses historical user-item interaction signals to find similar users or items. While effective, these approaches have limitations:
 
 - **Static representations**: User preferences are treated as fixed
 - **Cold start problems**: Difficulty with new users or items
 - **Limited temporal understanding**: Doesn't capture evolving user interests within a session
 
-### Session-Based Recommendations
+Session-based recommendation systems take a fundamentally different approach by focusing on user behavior patterns within individual sessions or short time windows. Instead of building static user profiles from historical data, these systems analyze the sequence of actions a user takes during their current browsing session—the order they click through products, the time they spend on each item, and how their interests evolve in real-time.
 
-Session-based recommendation systems address these limitations by:
-
-- **Modeling sequences**: Understanding the order and timing of user interactions
-- **Capturing short-term intent**: Focusing on recent behaviors within a session
-- **Handling anonymity**: Working even without persistent user identifiers
-- **Real-time adaptation**: Continuously updating recommendations as users interact
-
-## Why Session-based Recommendations Matters
-
-User behavior is inherently sequential. Consider an e-commerce browsing session:
+Consider a typical e-commerce browsing session that illustrates why this sequential understanding matters:
 
 1. User searches for "wireless headphones"
 2. Views a Sony model
 3. Checks reviews for Audio-Technica alternatives
 4. Compares prices across brands
 
-Each step provides context for the next recommendation. Traditional systems might miss this sequential pattern, while sequence models capture the evolving intent throughout the session.
+Each step provides context for the next recommendation. Traditional systems might miss this sequential pattern and treat each interaction independently, while session-based models capture the evolving intent throughout the entire journey—understanding that the user is comparison shopping for headphones within a specific price range.
 
 :::{.column-page}
-![Data signals](../static/L2%20-%20Data%20signals.excalidraw.png){.lightbox}
+![The signals we can leverage to deliver better recommenations](../static/L2%20-%20Data%20signals.excalidraw.png){.lightbox}
 :::
 
-## How to react in real-time: A Simplified Payload Approach
+In essence, this approach addresses the limitations of traditional methods by:
 
-In production, real-time recommendation systems typically leverage **streaming architectures** with event pipelines (Kafka, Kinesis, etc.) that process user interactions. The streaming system is normally built in a centralized manner by a platform team with the aim to provide real-time data processing capabilities to multiple downstream usages. This approach also ensures scalability and reliability.
+- **Modeling sequences**: Understanding the order and timing of user interactions
+- **Capturing short-term intent**: Focusing on recent behaviors within a session
+- **Handling anonymity**: Working even without persistent user identifiers
+- **Real-time adaptation**: Continuously updating recommendations as users interact
 
-However, for the purpose of this tutorial, we'll use the **simplified request-payload approach** to focus on the ML aspects rather than streaming infrastructure complexity. 
+Now that we understand why session-based recommendations make sense, it might be tempting to jump straight into building one. But I would advise you to hold on, cause there's still one big question we need to address: **How do you ensure your model gets access to the data it needs?** When talking about serving this kind of real-time model in production, even the most powerful one is useless if it can't receive timely user interaction signals.
 
-Basically we would include the real-time events in the payload of the requests coming in to RecSys APIs. In real-world, implementation can be done by frontend capturing user interactions locally (clicks, views, etc.) and includes recent session history in each API request.
+## A Simplified Payload Approach
 
-While this approach looks like a hacky-workaround ways, I have seen teams using this in production for early-stage real-time ML RecSys. In the end, the idea in and of itself has some merits such as minimal signal delay, users not needing to refresh to get updated recommendations and easier to implement and debug.
+Large-scale real-time recommendation engines are typically built on top of **streaming architectures** with event pipelines (Kafka, Kinesis, etc.) that process user interactions. The streaming system is normally managed in a centralized manner by a platform team with the aim to provide real-time data processing capabilities to multiple downstream usages. This approach also ensures scalability and reliability.
+
+However, for the purpose of this tutorial, we can relax the requirements of serving multiple use cases. This leaves us with more room to think about how we can approach getting real-time user signals. Why can't we just ask our app client to store and directly provide us the recent user interactions as context whenever it requests our recommendation service?
+
+If the answer is yes, then I have a name for our approach: The Simplied Payload.
+
+Basically we would attach the real-time events along with the requests coming to our RecSys APIs (in the payload—hence its name). In practice, this implementation can be done by frontend engineers capturing user interactions locally (clicks, views, etc.).
+
+While this approach looks like a hacky-workaround ways, I have seen teams using this in production for early-stage real-time ML RecSys. When really thinking about it, the idea has some merits in and of itself. They include (1) minimal signal delay, (2) users not needing to refresh to get updated recommendations and (3) easier to implement and debug. (4) User privacy is another reason worth considering.
 
 In the below screenshot you can see that in the POST request payload sending to a recommendation endpoint, we include the recent user interacted item IDs in `item_seq_raw` in the payload.
 
@@ -147,7 +147,7 @@ The codebase can be found [here](https://github.com/dvquy13/recsys-seq-model). B
 
 ```
 recsys-seq-model/
-├── notebooks/                   # Progressive tutorial notebooks
+├── notebooks/
 │   ├── 000-prep-data.ipynb
 │   ├── 001-features.ipynb
 │   ├── 002-negative-sample.ipynb
@@ -173,46 +173,44 @@ recsys-seq-model/
 └── compose.api.yml              # Build API services
 ```
 
-### Progressive Notebook Approach
-
 Notice the **numbered notebook sequence** (000, 001, 002, etc.). This design ensures you build knowledge progressively:
 
 - **000-series**: Data preparation and exploration
 - **010-series**: Model training and evaluation  
-- **020-series**: Production deployment preparation
+- **020-series**: Post-training preparation for serving
 
 Each notebook represents a complete milestone, allowing you to pause and resume at any point.
 
 ### A note on the commonly used commands
 
-You may found the below commands useful, as I have myself running them regularly when developing the projects. Treating them as shortcuts, I have put them in the Makefile:
+You may found the below commands useful, as I have myself running them regularly when developing the projects. I have put them in the Makefile as they are my shortcuts:
 
 ```bash
-# Environment setup
-uv sync --all-groups     # Install/update dependencies
-make requirements-txt    # Export requirements for Docker
+# Install Python dependencies
+uv sync --all-groups
 
-# Development session
-make lab                 # Start Jupyter Lab  # <1>
-make ml-platform-up      # Start MLflow, Qdrant, Redis  # <2>
-make ml-platform-down    # Stop all services
-make ml-platform-logs    # View service logs
+# Start Jupyter Lab
+make lab
 
-# API Operations (covered in later chapters)
-make api-up             # Start the FastAPI service
-make api-test           # Run API tests
+# Start supporting tools like MLflow and check their logs
+make ml-platform-up && make ml-platform-logs
 
-# UI Demo (optional)
-make ui-up              # Start the frontend demo
+# API Services
+make api-up
+make api-test
+
+# Start the Demo
+make ui-up
+
+# Shut down all services
+make down
 ```
-1. This is a shortcut to start Jupyter Lab, you will need to run this in every chapter.
-2. The tools that we will use to support our model development and serving are grouped into this ml-platform umbrella.
 
 ## Recap
 
-To get a hands on the system that we will build together, you can clone the repo and follow the instructions in the README to get the project running.
+To get a hand on the system that we will build together, you can clone the [repo](https://github.com/dvquy13/recsys-seq-model) and follow the instructions in the README to get the project running. If you're familiar with the technical details, mainly exploring the code and occasionally come back to the blog series for rationale/design decisions may be a great way to get the most from the tutorial.
 
-After that you should have:
+After following the README (hopefully no issues), you should have:
 
 - **A clear picture** of what session-based recommendations are and why they're useful
 - **Your development environment** ready to go with all services running  
@@ -221,7 +219,7 @@ After that you should have:
 
 ## What's Next
 
-Let's get started! Here's an overview of the roadmap ahead of us:
+For those who want a linear progression, let's get started! Here's a preview of the roadmap ahead of us:
 
 :::{.column-page}
 ![](../static/dev-roadmap.png){.lightbox}

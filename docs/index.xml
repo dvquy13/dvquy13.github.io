@@ -5782,9 +5782,17 @@ List of chapters
 </div>
 <section id="introduction" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Imagine you’re browsing an e-commerce site and notice something remarkable: the recommendations update almost instantly as you click through products. You view a pair of headphones, and suddenly complementary items appear. You check out a laptop, and the “you might also like” section refreshes with relevant accessories. You think to yourself—<em>“Wow, how do they do that?”</em> Then curiosity kicks in: How do they capture your evolving intent so quickly? How do they serve personalized suggestions fast enough to feel real-time? How do they handle the complexity of understanding your browsing patterns on the fly?</p>
+<p>Imagine you’re browsing an e-commerce site and notice something very interesting: the recommendations update almost instantly as you click through products. You view a pair of headphones, and suddenly phone cases, audio cables, and portable chargers appear. You check out a laptop, and the “you might also like” section refreshes with wireless mice, laptop bags, and USB hubs. You think to yourself—How do they capture your evolving intent so quickly? How do they serve personalized suggestions fast enough to feel real-time? How do they handle the complexity of understanding your browsing patterns on the fly?</p>
 <p>If you’ve ever have those questions, this tutorial series is for you.</p>
-<p>Over the next several chapters, I’ll walk you through building an end-to-end <strong>recommendation system</strong> that reacts in real-time based on user behavior sequences. We’ll go from raw data to a complete recommender system that personalizes recommendations as users interact with your platform.</p>
+<p>Over the next 7 chapters, I’ll walk you through building an end-to-end <strong>recommendation system</strong> that reacts in real-time based on user behavior sequences. We’ll go from raw data to a complete recommender system that personalizes recommendations as users interact with your platform. The final product looks like this:</p>
+<div class="page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><a href="../static/session-based retriever - demo v2.gif" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-1" title="The Demo"><img src="https://dvquys.com/projects/implement-recsys/static/session-based retriever - demo v2.gif" class="img-fluid figure-img column-page" alt="The Demo"></a></p>
+<figcaption>The Demo</figcaption>
+</figure>
+</div>
+</div>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -5798,36 +5806,30 @@ Enough Talking, Show Me the Code!
 <p>If you’re familiar with RecSys and just want to see the code, here it is: <a href="https://github.com/dvquy13/recsys-seq-model">https://github.com/dvquy13/recsys-seq-model</a>.</p>
 </div>
 </div>
-<p>For those who aren’t well aware of what a recommender system is, here is a quick recap. Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.</p>
+<p>A quick recap for those who aren’t well aware of what a recommender system is: Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.</p>
 <div class="column-page">
-<p><a href="../static/recommender system.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://dvquys.com/projects/implement-recsys/static/recommender system.png" class="img-fluid"></a></p>
+<p><a href="../static/recommender system.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="https://dvquys.com/projects/implement-recsys/static/recommender system.png" class="img-fluid"></a></p>
 </div>
 <p>From the user’s perspective, these systems help uncover content or products they might never have discovered on their own and save time by surfacing the most relevant options up front.</p>
 <p>From a business standpoint, the primary goals of a recommender system are to create a sense of “we understand you” for each user and to drive revenue through personalized cross-selling opportunities. By tailoring recommendations to each user, companies can boost engagement and average order value.</p>
 <p>In practice, recommender systems power some of the world’s largest digital platforms. For example, Amazon’s “Frequently Bought Together” suggestions guide shoppers toward complementary products, Facebook uses recommendation algorithms to prioritize posts and ads in users’ feeds, and Netflix’s home screen is largely driven by personalized movie and show recommendations.</p>
 <div class="column-page">
-<p><a href="../static/recsys-biz-value.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="https://dvquys.com/projects/implement-recsys/static/recsys-biz-value.gif" class="img-fluid"></a></p>
+<p><a href="../static/recsys-biz-value.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="https://dvquys.com/projects/implement-recsys/static/recsys-biz-value.gif" class="img-fluid"></a></p>
 </div>
 <p>The impact of these systems is profound: According to <a href="https://www.mckinsey.com/industries/retail/our-insights/how-retailers-can-keep-up-with-consumers">this report from McKinsey</a>, roughly 75 percent of Netflix viewing hours come from recommended titles, 35 percent of Amazon’s purchases are influenced by its recommendations, and Netflix alone <a href="https://dl.acm.org/doi/pdf/10.1145/2843948">saves around $1 billion per year</a> through improved user retention and engagement. These metrics underscore why recommender systems have become a critical component of modern digital businesses.</p>
 </section>
-<section id="what-youll-build" class="level2 page-columns page-full">
+<section id="what-youll-build" class="level2">
 <h2 class="anchored" data-anchor-id="what-youll-build">What You’ll Build</h2>
-<p>By the end of this series, you’ll have constructed an end-to-end recommendation system while know how to:</p>
+<p>By the end of this series, you’ll have constructed an end-to-end recommendation system while knowing how to:</p>
 <ul>
-<li><strong>Design and Train Session-based RecSys models</strong> using PyTorch to <strong>personalizes recommendations in real-time</strong> based on users’ recent interaction sequences</li>
-<li><strong>Track experiments</strong> with MLflow for reproducible ML workflows</li>
-<li><strong>Serve predictions</strong> through a FastAPI service in conjunction with a vector database and caching</li>
-<li><strong>Package the project</strong> using Docker and modern ML infrastructure</li>
-<li><strong>Launch aninteractive demo</strong> with a frontend<sup>1</sup></li>
+<li><strong>Design and Train Session-based RecSys models</strong> to personalize recommendations in real-time based on users’ recent interaction sequences</li>
+<li><strong>Handle complex data engineering challenges</strong> including sampling techniques that avoid sparsity cascade, sequence generation from timestamps, and popularity-based negative sampling</li>
+<li><strong>Track experiments</strong> with MLflow for reproducible ML workflows, automated model versioning, and systematic performance comparison</li>
+<li><strong>Implement a PyTorch sequential retrieval architecture</strong> optimized for serving millions of items with millisecond response times</li>
+<li><strong>Deploy model servers</strong> using BentoML with seamless MLflow integration</li>
+<li><strong>Build recommendation serving pipelines</strong> through a FastAPI orchestrator that coordinates vector similarity search, user context retrieval, and fallback strategiesz</li>
+<li><strong>Mimic production infrastructure setup</strong> with Docker Compose orchestrating MLflow (model registry), Qdrant (vector database), and Redis (key-value store)</li>
 </ul>
-<div class="page-columns page-full">
-<div class="quarto-figure quarto-figure-center page-columns page-full">
-<figure class="figure page-columns page-full">
-<p class="page-columns page-full"><a href="../static/session-based retriever - demo v2.gif" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-3" title="The Demo"><img src="https://dvquys.com/projects/implement-recsys/static/session-based retriever - demo v2.gif" class="img-fluid figure-img column-page" alt="The Demo"></a></p>
-<figcaption>The Demo</figcaption>
-</figure>
-</div>
-</div>
 </section>
 <section id="target-audience" class="level2">
 <h2 class="anchored" data-anchor-id="target-audience">Target Audience</h2>
@@ -5838,55 +5840,49 @@ Enough Talking, Show Me the Code!
 <li><strong>Backend Developers</strong> interested in ML/RecSys architecture</li>
 <li><strong>Anyone</strong> curious about a modern and real-time end-to-end RecSys project</li>
 </ul>
-<p>All in all, it’s good to have some basic knowledge of Machine Learning and Python to follow along.</p>
+<p>In most of the discussions, I assume readers have basic understanding of <strong>Machine Learning</strong> and <strong>Python</strong> to follow along.</p>
 </section>
-<section id="session-based-vs-traditional-recommendations" class="level2">
+<section id="session-based-vs-traditional-recommendations" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="session-based-vs-traditional-recommendations">Session-Based vs Traditional Recommendations</h2>
-<section id="traditional-collaborative-filtering" class="level3">
-<h3 class="anchored" data-anchor-id="traditional-collaborative-filtering">Traditional Collaborative Filtering</h3>
-<p>Traditional recommendation systems often rely on collaborative filtering, which uses historical user-item interaction matrices to find similar users or items. While effective, these approaches have limitations:</p>
+<p>Traditional recommendation systems often rely on collaborative filtering, which uses historical user-item interaction signals to find similar users or items. While effective, these approaches have limitations:</p>
 <ul>
 <li><strong>Static representations</strong>: User preferences are treated as fixed</li>
 <li><strong>Cold start problems</strong>: Difficulty with new users or items</li>
 <li><strong>Limited temporal understanding</strong>: Doesn’t capture evolving user interests within a session</li>
 </ul>
-</section>
-<section id="session-based-recommendations" class="level3">
-<h3 class="anchored" data-anchor-id="session-based-recommendations">Session-Based Recommendations</h3>
-<p>Session-based recommendation systems address these limitations by:</p>
-<ul>
-<li><strong>Modeling sequences</strong>: Understanding the order and timing of user interactions</li>
-<li><strong>Capturing short-term intent</strong>: Focusing on recent behaviors within a session</li>
-<li><strong>Handling anonymity</strong>: Working even without persistent user identifiers</li>
-<li><strong>Real-time adaptation</strong>: Continuously updating recommendations as users interact</li>
-</ul>
-</section>
-</section>
-<section id="why-session-based-recommendations-matters" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="why-session-based-recommendations-matters">Why Session-based Recommendations Matters</h2>
-<p>User behavior is inherently sequential. Consider an e-commerce browsing session:</p>
+<p>Session-based recommendation systems take a fundamentally different approach by focusing on user behavior patterns within individual sessions or short time windows. Instead of building static user profiles from historical data, these systems analyze the sequence of actions a user takes during their current browsing session—the order they click through products, the time they spend on each item, and how their interests evolve in real-time.</p>
+<p>Consider a typical e-commerce browsing session that illustrates why this sequential understanding matters:</p>
 <ol type="1">
 <li>User searches for “wireless headphones”</li>
 <li>Views a Sony model</li>
 <li>Checks reviews for Audio-Technica alternatives</li>
 <li>Compares prices across brands</li>
 </ol>
-<p>Each step provides context for the next recommendation. Traditional systems might miss this sequential pattern, while sequence models capture the evolving intent throughout the session.</p>
+<p>Each step provides context for the next recommendation. Traditional systems might miss this sequential pattern and treat each interaction independently, while session-based models capture the evolving intent throughout the entire journey—understanding that the user is comparison shopping for headphones within a specific price range.</p>
 <div class="page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
-<p class="page-columns page-full"><a href="../static/L2 - Data signals.excalidraw.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-4" title="Data signals"><img src="https://dvquys.com/projects/implement-recsys/static/L2 - Data signals.excalidraw.png" class="img-fluid figure-img column-page" alt="Data signals"></a></p>
-<figcaption>Data signals</figcaption>
+<p class="page-columns page-full"><a href="../static/L2 - Data signals.excalidraw.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-4" title="The signals we can leverage to deliver better recommenations"><img src="https://dvquys.com/projects/implement-recsys/static/L2 - Data signals.excalidraw.png" class="img-fluid figure-img column-page" alt="The signals we can leverage to deliver better recommenations"></a></p>
+<figcaption>The signals we can leverage to deliver better recommenations</figcaption>
 </figure>
 </div>
 </div>
+<p>In essence, this approach addresses the limitations of traditional methods by:</p>
+<ul>
+<li><strong>Modeling sequences</strong>: Understanding the order and timing of user interactions</li>
+<li><strong>Capturing short-term intent</strong>: Focusing on recent behaviors within a session</li>
+<li><strong>Handling anonymity</strong>: Working even without persistent user identifiers</li>
+<li><strong>Real-time adaptation</strong>: Continuously updating recommendations as users interact</li>
+</ul>
+<p>Now that we understand why session-based recommendations make sense, it might be tempting to jump straight into building one. But I would advise you to hold on, cause there’s still one big question we need to address: <strong>How do you ensure your model gets access to the data it needs?</strong> When talking about serving this kind of real-time model in production, even the most powerful one is useless if it can’t receive timely user interaction signals.</p>
 </section>
-<section id="how-to-react-in-real-time-a-simplified-payload-approach" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="how-to-react-in-real-time-a-simplified-payload-approach">How to react in real-time: A Simplified Payload Approach</h2>
-<p>In production, real-time recommendation systems typically leverage <strong>streaming architectures</strong> with event pipelines (Kafka, Kinesis, etc.) that process user interactions. The streaming system is normally built in a centralized manner by a platform team with the aim to provide real-time data processing capabilities to multiple downstream usages. This approach also ensures scalability and reliability.</p>
-<p>However, for the purpose of this tutorial, we’ll use the <strong>simplified request-payload approach</strong> to focus on the ML aspects rather than streaming infrastructure complexity.</p>
-<p>Basically we would include the real-time events in the payload of the requests coming in to RecSys APIs. In real-world, implementation can be done by frontend capturing user interactions locally (clicks, views, etc.) and includes recent session history in each API request.</p>
-<p>While this approach looks like a hacky-workaround ways, I have seen teams using this in production for early-stage real-time ML RecSys. In the end, the idea in and of itself has some merits such as minimal signal delay, users not needing to refresh to get updated recommendations and easier to implement and debug.</p>
+<section id="a-simplified-payload-approach" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="a-simplified-payload-approach">A Simplified Payload Approach</h2>
+<p>Large-scale real-time recommendation engines are typically built on top of <strong>streaming architectures</strong> with event pipelines (Kafka, Kinesis, etc.) that process user interactions. The streaming system is normally managed in a centralized manner by a platform team with the aim to provide real-time data processing capabilities to multiple downstream usages. This approach also ensures scalability and reliability.</p>
+<p>However, for the purpose of this tutorial, we can relax the requirements of serving multiple use cases. This leaves us with more room to think about how we can approach getting real-time user signals. Why can’t we just ask our app client to store and directly provide us the recent user interactions as context whenever it requests our recommendation service?</p>
+<p>If the answer is yes, then I have a name for our approach: The Simplied Payload.</p>
+<p>Basically we would attach the real-time events along with the requests coming to our RecSys APIs (in the payload—hence its name). In practice, this implementation can be done by frontend engineers capturing user interactions locally (clicks, views, etc.).</p>
+<p>While this approach looks like a hacky-workaround ways, I have seen teams using this in production for early-stage real-time ML RecSys. When really thinking about it, the idea has some merits in and of itself. They include (1) minimal signal delay, (2) users not needing to refresh to get updated recommendations and (3) easier to implement and debug. (4) User privacy is another reason worth considering.</p>
 <p>In the below screenshot you can see that in the POST request payload sending to a recommendation endpoint, we include the recent user interacted item IDs in <code>item_seq_raw</code> in the payload.</p>
 <div class="page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
@@ -5956,7 +5952,7 @@ Enough Talking, Show Me the Code!
 <h2 class="anchored" data-anchor-id="project-structure-overview">Project Structure Overview</h2>
 <p>The codebase can be found <a href="https://github.com/dvquy13/recsys-seq-model">here</a>. Below is a quick glance into its structure.</p>
 <pre><code>recsys-seq-model/
-├── notebooks/                   # Progressive tutorial notebooks
+├── notebooks/
 │   ├── 000-prep-data.ipynb
 │   ├── 001-features.ipynb
 │   ├── 002-negative-sample.ipynb
@@ -5980,98 +5976,74 @@ Enough Talking, Show Me the Code!
 ├── data/                        # Dataset storage
 ├── compose.yml                  # ML support toolings
 └── compose.api.yml              # Build API services</code></pre>
-<section id="progressive-notebook-approach" class="level3">
-<h3 class="anchored" data-anchor-id="progressive-notebook-approach">Progressive Notebook Approach</h3>
 <p>Notice the <strong>numbered notebook sequence</strong> (000, 001, 002, etc.). This design ensures you build knowledge progressively:</p>
 <ul>
 <li><strong>000-series</strong>: Data preparation and exploration</li>
 <li><strong>010-series</strong>: Model training and evaluation<br>
 </li>
-<li><strong>020-series</strong>: Production deployment preparation</li>
+<li><strong>020-series</strong>: Post-training preparation for serving</li>
 </ul>
 <p>Each notebook represents a complete milestone, allowing you to pause and resume at any point.</p>
-</section>
 <section id="a-note-on-the-commonly-used-commands" class="level3">
 <h3 class="anchored" data-anchor-id="a-note-on-the-commonly-used-commands">A note on the commonly used commands</h3>
-<p>You may found the below commands useful, as I have myself running them regularly when developing the projects. Treating them as shortcuts, I have put them in the Makefile:</p>
-<div class="sourceCode" id="annotated-cell-2" style="background: #f1f3f5;"><pre class="sourceCode bash code-annotation-code code-with-copy code-annotated"><code class="sourceCode bash"><span id="annotated-cell-2-1"><span class="co" style="color: #5E5E5E;
+<p>You may found the below commands useful, as I have myself running them regularly when developing the projects. I have put them in the Makefile as they are my shortcuts:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># Environment setup</span></span>
-<span id="annotated-cell-2-2"><span class="ex" style="color: null;
+font-style: inherit;"># Install Python dependencies</span></span>
+<span id="cb2-2"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">uv</span> sync <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">--all-groups</span>     <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Install/update dependencies</span></span>
-<span id="annotated-cell-2-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">make</span> requirements-txt    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Export requirements for Docker</span></span>
-<span id="annotated-cell-2-4"></span>
-<span id="annotated-cell-2-5"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Development session</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-6" class="code-annotation-target"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">make</span> lab                 <span class="co" style="color: #5E5E5E;
+font-style: inherit;">--all-groups</span></span>
+<span id="cb2-3"></span>
+<span id="cb2-4"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Start Jupyter Lab</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2">2</button><span id="annotated-cell-2-7" class="code-annotation-target"><span class="fu" style="color: #4758AB;
+<span id="cb2-5"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">make</span> ml-platform-up      <span class="co" style="color: #5E5E5E;
+font-style: inherit;">make</span> lab</span>
+<span id="cb2-6"></span>
+<span id="cb2-7"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># Start MLflow, Qdrant, Redis</span></span>
-<span id="annotated-cell-2-8"><span class="fu" style="color: #4758AB;
+font-style: inherit;"># Start supporting tools like MLflow and check their logs</span></span>
+<span id="cb2-8"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">make</span> ml-platform-down    <span class="co" style="color: #5E5E5E;
+font-style: inherit;">make</span> ml-platform-up <span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;"># Stop all services</span></span>
-<span id="annotated-cell-2-9"><span class="fu" style="color: #4758AB;
+font-weight: bold;
+font-style: inherit;">&amp;&amp;</span> <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">make</span> ml-platform-logs    <span class="co" style="color: #5E5E5E;
+font-style: inherit;">make</span> ml-platform-logs</span>
+<span id="cb2-9"></span>
+<span id="cb2-10"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># View service logs</span></span>
-<span id="annotated-cell-2-10"></span>
-<span id="annotated-cell-2-11"><span class="co" style="color: #5E5E5E;
+font-style: inherit;"># API Services</span></span>
+<span id="cb2-11"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;"># API Operations (covered in later chapters)</span></span>
-<span id="annotated-cell-2-12"><span class="fu" style="color: #4758AB;
+font-style: inherit;">make</span> api-up</span>
+<span id="cb2-12"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">make</span> api-up             <span class="co" style="color: #5E5E5E;
+font-style: inherit;">make</span> api-test</span>
+<span id="cb2-13"></span>
+<span id="cb2-14"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># Start the FastAPI service</span></span>
-<span id="annotated-cell-2-13"><span class="fu" style="color: #4758AB;
+font-style: inherit;"># Start the Demo</span></span>
+<span id="cb2-15"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">make</span> api-test           <span class="co" style="color: #5E5E5E;
+font-style: inherit;">make</span> ui-up</span>
+<span id="cb2-16"></span>
+<span id="cb2-17"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># Run API tests</span></span>
-<span id="annotated-cell-2-14"></span>
-<span id="annotated-cell-2-15"><span class="co" style="color: #5E5E5E;
+font-style: inherit;"># Shut down all services</span></span>
+<span id="cb2-18"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;"># UI Demo (optional)</span></span>
-<span id="annotated-cell-2-16"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">make</span> ui-up              <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Start the frontend demo</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div>
-<dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
-<dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="6" data-code-annotation="1">This is a shortcut to start Jupyter Lab, you will need to run this in every chapter.</span>
-</dd>
-<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
-<dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="7" data-code-annotation="2">The tools that we will use to support our model development and serving are grouped into this ml-platform umbrella.</span>
-</dd>
-</dl>
+font-style: inherit;">make</span> down</span></code></pre></div>
 </section>
 </section>
 <section id="recap" class="level2">
 <h2 class="anchored" data-anchor-id="recap">Recap</h2>
-<p>To get a hands on the system that we will build together, you can clone the repo and follow the instructions in the README to get the project running.</p>
-<p>After that you should have:</p>
+<p>To get a hand on the system that we will build together, you can clone the <a href="https://github.com/dvquy13/recsys-seq-model">repo</a> and follow the instructions in the README to get the project running. If you’re familiar with the technical details, mainly exploring the code and occasionally come back to the blog series for rationale/design decisions may be a great way to get the most from the tutorial.</p>
+<p>After following the README (hopefully no issues), you should have:</p>
 <ul>
 <li><strong>A clear picture</strong> of what session-based recommendations are and why they’re useful</li>
 <li><strong>Your development environment</strong> ready to go with all services running<br>
@@ -6083,7 +6055,7 @@ font-style: inherit;"># Start the frontend demo</span></span><div class="code-an
 </section>
 <section id="whats-next" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
-<p>Let’s get started! Here’s an overview of the roadmap ahead of us:</p>
+<p>For those who want a linear progression, let’s get started! Here’s a preview of the roadmap ahead of us:</p>
 <div class="column-page">
 <p><a href="../static/dev-roadmap.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="https://dvquys.com/projects/implement-recsys/static/dev-roadmap.png" class="img-fluid"></a></p>
 </div>
@@ -6098,13 +6070,7 @@ font-style: inherit;"># Start the frontend demo</span></span><div class="code-an
 
 </section>
 
-
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>Though not covered in this tutorial, there would be example UI code in the repo.↩︎</p></li>
-</ol>
-</section></div> ]]></description>
+ ]]></description>
   <category>recsys</category>
   <category>implement-recsys-series</category>
   <guid>https://dvquys.com/projects/implement-recsys/c1/</guid>
