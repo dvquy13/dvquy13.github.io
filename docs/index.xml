@@ -5164,7 +5164,7 @@ List of chapters
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In <a href="../../../projects/implement-recsys/c1/index.html">Chapter 1</a>, we set up our development environment and explored the project architecture. Now it’s time to dive into the heart of any recommendation system: <strong>data</strong>. The quality of our recommendations depends entirely on how well we understand, process, and engineer features from our data.</p>
-<p>This chapter focuses on the data pipeline from raw data to model-ready features. We’ll explore the Amazon product dataset, understand user-item interaction sequences, and build the feature engineering pipeline that will power our session-based recommender.</p>
+<p>This chapter focuses on the data pipeline from raw data to model-ready features. We’ll explore the Amazon Reviews dataset, understand user-item interaction sequences, and build the feature engineering pipeline that will power our session-based recommender.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -5255,162 +5255,346 @@ background-color: null;
 font-style: inherit;">=</span> ConfigLoader(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"cfg/common.yaml"</span>)</span></code></pre></div>
-<p>Throughout this project, we store most configuration in <code>cfg/common.yaml</code>. This design does not only make it easier for notebooks and scripts to access their inputs and outputs but also help us try different configurations quickly.</p>
+<p>Throughout this project, we store most configuration in <code>cfg/common.yaml</code>. This design does not only make it easier for notebooks and scripts to access their inputs and outputs but also help us try different configurations easily.</p>
 </div>
 </div>
 </div>
+<p>As you can see above, the train dataset has 8M ratings for us to play with. That’s not a small number. But if you’re getting excited about the perspective of using big data framework to transform those interactions, I’m sorry to let you down. The first thing I normally do with raw data is <strong>not</strong> to utilize all the data points. In fact, I even go the opposite direction. The next section provides some insights into why we may consider sampling data as the first thing to do for our project.</p>
 </section>
 <section id="data-sampling-and-filtering" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="data-sampling-and-filtering">Data Sampling and Filtering</h2>
-<p>As ML is mostly about iterative development, the main rationale of sampling and filtering is to have a small but decent enough dataset to experiment different ideas <strong>fast</strong>. The more experiments we run, the more likely we would introduce improvements to our models.</p>
-<p>What does it mean for a decent RecSys dataset? One of the key criteria is <strong>sparsity</strong>—the ratio of observed interactions to all possible user-item pairs.</p>
+<p>If you study the documentation of our Amazon Reviews dataset, you will find that there are two subsets of the data:</p>
+<blockquote class="blockquote">
+<p><strong>Pure IDs (0-Core)</strong></p>
+<ol type="1">
+<li>Pros of 0-Core: Comprehensive data, Maximum diversity, Rich context, Potential form, Generalization.</li>
+<li>Cons of 0-Core: Data noise, Large size and high resource demands, Quality variability, Imbalanced distribution.</li>
+</ol>
+<p><strong>Pure IDs (5-Core)</strong></p>
+<ol type="1">
+<li>Pros of 5-Core: <strong>Higher quality reviews, Reduced noise, Balanced distribution and Computational efficiency</strong>.</li>
+<li>Cons of 5-Core: Limited diversity, Misalignment with original data distribution, Loss of context, Generalizability and Limited data size for scaling up.</li>
+</ol>
+<p>— <a href="https://amazon-reviews-2023.github.io/data_processing/0core.html">Amazon Reviews 2023 Dataset Documentation</a></p>
+</blockquote>
+<p>Pay attention to the rationales they give for the 5-Core dataset. This resonates with my view on data sampling.</p>
+<p>The supposition is that the faster we can run operations on our data, the more progress we can make. As ML is mostly about iterative development, the main rationale of sampling and filtering is to have a small but decent enough dataset to <strong>quickly</strong> experiment different ideas.</p>
+<section id="a-note-on-sparsity" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="a-note-on-sparsity">A note on sparsity</h3>
+<p>What does it mean to have a decent RecSys dataset? One of the key criteria is <strong>sparsity</strong>—the ratio of observed interactions to all possible user-item pairs.</p>
 <p>To understand why sparsity is problematic, consider the interaction matrix where each cell represents a potential user-item interaction:</p>
-<ul>
-<li><strong>Matrix size</strong>: <code>num_users × num_items</code> (total possible interactions)</li>
-<li><strong>Actual interactions</strong>: Much smaller number of observed ratings/clicks</li>
-<li><strong>Sparsity</strong>: <code>1 - (actual_interactions / (num_users × num_items))</code></li>
-</ul>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 23%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Item 1</th>
+<th>Item 2</th>
+<th>Item 3</th>
+<th>Item 4</th>
+<th>Item 5</th>
+<th>Item 6</th>
+<th>…</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>User A</strong></td>
+<td>5</td>
+<td>-</td>
+<td>4</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td><strong>User B</strong></td>
+<td>-</td>
+<td>3</td>
+<td>-</td>
+<td>-</td>
+<td>5</td>
+<td>-</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td><strong>User C</strong></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>2</td>
+<td>-</td>
+<td>4</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td><strong>User D</strong></td>
+<td>4</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td><strong>…</strong></td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<p><em>Where numbers represent ratings (1-5) and “-” represents no interaction</em></p>
+<p>In this tiny 4×6 example, only 7 out of 24 possible interactions are observed—giving us 71% sparsity. Real-world recommendation datasets often exceed 99% sparsity.</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Ctext%7BSparsity%7D%20=%201%20-%20%5Cfrac%7B%5Ctext%7Bactual%5C_interactions%7D%7D%7B%5Ctext%7Bnum%5C_users%7D%20%5Ctimes%20%5Ctext%7Bnum%5C_items%7D%7D%0A"></p>
 <p>The sparsity problem gets <strong>quadratically worse</strong> as datasets grow:</p>
-<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Small dataset example</span></span>
-<span id="cb2-2">users <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">000</span>, items <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">000</span> → possible interactions <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="er" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">M</span></span>
-<span id="cb2-3">actual interactions <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">000</span> → sparsity <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">95</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%</span></span>
-<span id="cb2-4"></span>
-<span id="cb2-5"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Larger dataset </span></span>
-<span id="cb2-6">users <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">000</span>, items <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">000</span> → possible interactions <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span><span class="er" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">M</span>  </span>
-<span id="cb2-7">actual interactions <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">500</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">000</span> → sparsity <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">99.5</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%</span></span></code></pre></div>
+<p><strong>Small dataset example:</strong> <img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%0A%5Ctext%7Busers%7D%20&amp;=%201,000,%20%5Cquad%20%5Ctext%7Bitems%7D%20=%201,000%20%5C%5C%0A%5Ctext%7Bpossible%20interactions%7D%20&amp;=%201,000%20%5Ctimes%201,000%20=%201%5Ctext%7BM%7D%20%5C%5C%0A%5Ctext%7Bactual%20interactions%7D%20&amp;=%2050,000%20%5C%5C%0A%5Ctext%7Bsparsity%7D%20&amp;=%201%20-%20%5Cfrac%7B50,000%7D%7B1,000,000%7D%20=%2095%5C%25%0A%5Cend%7Balign%7D"></p>
+<p><strong>Larger dataset example:</strong> <img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%0A%5Ctext%7Busers%7D%20&amp;=%2010,000,%20%5Cquad%20%5Ctext%7Bitems%7D%20=%2010,000%20%5C%5C%0A%5Ctext%7Bpossible%20interactions%7D%20&amp;=%2010,000%20%5Ctimes%2010,000%20=%20100%5Ctext%7BM%7D%20%5C%5C%0A%5Ctext%7Bactual%20interactions%7D%20&amp;=%20500,000%20%5C%5C%0A%5Ctext%7Bsparsity%7D%20&amp;=%201%20-%20%5Cfrac%7B500,000%7D%7B100,000,000%7D%20=%2099.5%5C%25%0A%5Cend%7Balign%7D"></p>
 <p>Each new user adds an entire <strong>row</strong> of mostly empty interactions, and each new item adds an entire <strong>column</strong> of mostly empty interactions. Since users typically interact with only a tiny fraction of available items, the interaction matrix becomes increasingly sparse as the catalog grows.</p>
 <p>In recommendation systems, interactions follow a long-tailed distribution—many users and items have only a few interactions. So while randomly sampling may work just fine for many ML use cases, we need to apply it a bit more carefully here. Ultimately we want to have a sample dataset where each user/item has at least X interactions.</p>
 <p>The tricky part is that a basic random sampling of users and items would create <strong>sparsity cascade</strong>—a domino effect that breaks your dataset.</p>
-<p>Here’s what happens: You start with users and items that look fine on their own. User A has 10 interactions, Item X has 15 interactions. When you remove User B, you also lose all of User B’s interactions with Item X. Suddenly Item X only has 8 interactions. Oops, now it’s too sparse, so you remove it too. But removing Item X means User A loses some interactions and might become too sparse as well.</p>
+<p>Here’s what happens using our 4×6 matrix example: Let’s say User A has 2 interactions (Items 1 and 3), and Item 1 has 2 interactions (from Users A and D). Now suppose we randomly decide to remove User D during sampling. Suddenly Item 1 drops from 2 interactions to just 1 interaction from User A. If our minimum threshold is 2 interactions per item, Item 1 now becomes too sparse and gets removed. But removing Item 1 means User A loses one of their interactions and might fall below the minimum user interaction threshold as well.</p>
+<p><strong>Original Matrix</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Item 1</th>
+<th>Item 2</th>
+<th>Item 3</th>
+<th>Item 4</th>
+<th>Item 5</th>
+<th>Item 6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>User A</strong></td>
+<td>5</td>
+<td>-</td>
+<td>4</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td><strong>User B</strong></td>
+<td>-</td>
+<td>3</td>
+<td>-</td>
+<td>-</td>
+<td>5</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td><strong>User C</strong></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>2</td>
+<td>-</td>
+<td>4</td>
+</tr>
+<tr class="even">
+<td><strong>User D</strong></td>
+<td>4</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p><em>Item 1 has 2 interactions (Users A, D) ✓</em></p>
+<p><strong>Remove User D</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Item 1</th>
+<th>Item 2</th>
+<th>Item 3</th>
+<th>Item 4</th>
+<th>Item 5</th>
+<th>Item 6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>User A</strong></td>
+<td>5</td>
+<td>-</td>
+<td>4</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td><strong>User B</strong></td>
+<td>-</td>
+<td>3</td>
+<td>-</td>
+<td>-</td>
+<td>5</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td><strong>User C</strong></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>2</td>
+<td>-</td>
+<td>4</td>
+</tr>
+<tr class="even">
+<td><del><strong>User D</strong></del></td>
+<td><del>4</del></td>
+<td><del>-</del></td>
+<td><del>-</del></td>
+<td><del>-</del></td>
+<td><del>-</del></td>
+<td><del>-</del></td>
+</tr>
+</tbody>
+</table>
+<p><em>Item 1 now has only 1 interaction (User A) ✗ - Below threshold!</em></p>
+<p><strong>Remove Item 1 (below threshold)</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 23%">
+<col style="width: 17%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><del>Item 1</del></th>
+<th>Item 2</th>
+<th>Item 3</th>
+<th>Item 4</th>
+<th>Item 5</th>
+<th>Item 6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>User A</strong></td>
+<td><del>5</del></td>
+<td>-</td>
+<td>4</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td><strong>User B</strong></td>
+<td><del>-</del></td>
+<td>3</td>
+<td>-</td>
+<td>-</td>
+<td>5</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td><strong>User C</strong></td>
+<td><del>-</del></td>
+<td>-</td>
+<td>-</td>
+<td>2</td>
+<td>-</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<p><em>User A now has only 1 interaction (Item 3) ✗ - Might fall below user threshold too!</em></p>
 <p>It’s like pulling threads from a sweater—everything starts unraveling.</p>
 <p>To solve this, we take an iterative approach. We gradually drop random users from the dataset while watching our conditions and sampling targets. The trade-off is that while it’s hard to get an exact predefined number of users and items, we can control the minimum acceptable thresholds:</p>
-<div class="sourceCode" id="annotated-cell-3" style="background: #f1f3f5;"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-3-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># From cfg/common.yaml</span></span>
-<span id="annotated-cell-3-2">sample:</span>
-<span id="annotated-cell-3-3">  sample_users: <span class="dv" style="color: #AD0000;
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>cfg/common.yaml</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-2" data-filename="cfg/common.yaml" style="background: #f1f3f5;"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-2-1">sample:</span>
+<span id="annotated-cell-2-2">  sample_users: <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">10000</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1">1</button><span id="annotated-cell-3-4" class="code-annotation-target">  min_val_records: <span class="dv" style="color: #AD0000;
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-3" class="code-annotation-target">  min_val_records: <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5000</span></span>
-<span id="annotated-cell-3-5">  min_user_interactions: <span class="dv" style="color: #AD0000;
+<span id="annotated-cell-2-4">  min_user_interactions: <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span></span>
-<span id="annotated-cell-3-6">  min_item_interactions: <span class="dv" style="color: #AD0000;
+<span id="annotated-cell-2-5">  min_item_interactions: <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">10</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div>
+</div>
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-3" data-code-lines="4" data-code-annotation="1">We need to ensure sufficient validation data to evaluate our models.</span>
+<span data-code-cell="annotated-cell-2" data-code-lines="3" data-code-annotation="1">We need to ensure sufficient validation data to evaluate our models.</span>
 </dd>
 </dl>
-<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> src.sample <span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> InteractionDataSampler</span>
-<span id="cb3-2"></span>
-<span id="cb3-3">data_sampler <span class="op" style="color: #5E5E5E;
+<span id="cb2-2"></span>
+<span id="cb2-3">data_sampler <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> InteractionDataSampler(</span>
-<span id="cb3-4">    user_col<span class="op" style="color: #5E5E5E;
+<span id="cb2-4">    user_col<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>cfg.data.user_col,</span>
-<span id="cb3-5">    item_col<span class="op" style="color: #5E5E5E;
+<span id="cb2-5">    item_col<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>cfg.data.item_col,</span>
-<span id="cb3-6">    sample_users<span class="op" style="color: #5E5E5E;
+<span id="cb2-6">    sample_users<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>cfg.sample.sample_users,</span>
-<span id="cb3-7">    min_val_records<span class="op" style="color: #5E5E5E;
+<span id="cb2-7">    min_val_records<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>cfg.sample.min_val_records,</span>
-<span id="cb3-8">    random_seed<span class="op" style="color: #5E5E5E;
+<span id="cb2-8">    random_seed<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>cfg.run.random_seed,</span>
-<span id="cb3-9">    min_item_interactions<span class="op" style="color: #5E5E5E;
+<span id="cb2-9">    min_item_interactions<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>cfg.sample.min_item_interactions,</span>
-<span id="cb3-10">    min_user_interactions<span class="op" style="color: #5E5E5E;
+<span id="cb2-10">    min_user_interactions<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>cfg.sample.min_user_interactions,</span>
-<span id="cb3-11">    perc_users_removed_each_round<span class="op" style="color: #5E5E5E;
+<span id="cb2-11">    perc_users_removed_each_round<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.1</span>,</span>
-<span id="cb3-12">    debug<span class="op" style="color: #5E5E5E;
+<span id="cb2-12">    debug<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">False</span>,</span>
-<span id="cb3-13">)</span></code></pre></div>
+<span id="cb2-13">)</span></code></pre></div>
 <pre class="plaintext code-overflow-wrap"><code>...
 
 Randomly removing 2960 users - Round 18 started
@@ -5435,14 +5619,15 @@ len(sample_users)=19,734 len(sample_items)=7,388</code></pre>
 
 </div>
 </div>
-<p>In the end, we won’t have exactly 10,000 users, but the numbers will be close. The distribution of interactions is shown below:</p>
+<p>In the end, we won’t have exactly 10,000 users, but the numbers will be close. After sampling, here is the distribution of interactions:</p>
 <div class="column-page">
 <p><a href="../static/sample-interaction-dist.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://dvquys.com/projects/implement-recsys/static/sample-interaction-dist.png" class="img-fluid"></a></p>
 </div>
 </section>
+</section>
 <section id="train-test-split" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="train-test-split">Train-Test Split</h2>
-<p>After sampling our data, we need to split it into a train and validation dataset to evaluate our models. The validation dataset plays a critical role in providing an estimate of how well the model performs on unseen data.</p>
+<p>To evaluate our models, we need to split it into a train and validation dataset. The validation dataset plays a critical role in providing an estimate of how well the model performs on unseen data.</p>
 <p>There are two main types of train-test-split in RecSys:</p>
 <div class="column-page">
 <p><img src="https://dvquys.com/projects/implement-recsys/static/train-test-split.png" class="img-fluid"></p>
@@ -5453,53 +5638,53 @@ len(sample_users)=19,734 len(sample_items)=7,388</code></pre>
 <h2 class="anchored" data-anchor-id="feature-engineering">Feature Engineering</h2>
 <section id="id-mapping-from-strings-to-indices" class="level3">
 <h3 class="anchored" data-anchor-id="id-mapping-from-strings-to-indices">ID Mapping: From Strings to Indices</h3>
-<p>As discussed in Chapter 1, we’re modeling this problem with neural networks. Deep learning models work with numerical indices, not string IDs. So we use our <a href="https://github.com/dvquy13/recsys-seq-model/blob/main/src/id_mapper.py">IDMapper</a> to provide deterministic mapping from user and item IDs to indices:</p>
-<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;
+<p>As discussed in Chapter 1, we’re modeling this problem with neural networks. Deep learning models work with numerical indices, not string IDs. So we use our <a href="https://github.com/dvquy13/recsys-seq-model/blob/main/src/id_mapper.py">IDMapper</a> to provide deterministic mapping from user and item IDs to integer indices:</p>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> src.id_mapper <span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> IDMapper</span>
-<span id="cb5-2"></span>
-<span id="cb5-3">user_ids <span class="op" style="color: #5E5E5E;
+<span id="cb4-2"></span>
+<span id="cb4-3">user_ids <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> train_df[cfg.data.user_col].values</span>
-<span id="cb5-4">item_ids <span class="op" style="color: #5E5E5E;
+<span id="cb4-4">item_ids <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> train_df[cfg.data.item_col].values</span>
-<span id="cb5-5">unique_user_ids <span class="op" style="color: #5E5E5E;
+<span id="cb4-5">unique_user_ids <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">list</span>(<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">set</span>(user_ids))</span>
-<span id="cb5-6">unique_item_ids <span class="op" style="color: #5E5E5E;
+<span id="cb4-6">unique_item_ids <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">list</span>(<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">set</span>(item_ids))</span>
-<span id="cb5-7">idm <span class="op" style="color: #5E5E5E;
+<span id="cb4-7">idm <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> IDMapper()</span>
-<span id="cb5-8">idm.fit(unique_user_ids, unique_item_ids)</span>
-<span id="cb5-9"></span>
-<span id="cb5-10"><span class="co" style="color: #5E5E5E;
+<span id="cb4-8">idm.fit(unique_user_ids, unique_item_ids)</span>
+<span id="cb4-9"></span>
+<span id="cb4-10"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Save for later use in model serving</span></span>
-<span id="cb5-11">idm.save(<span class="st" style="color: #20794D;
+<span id="cb4-11">idm.save(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"data/idm.json"</span>)</span>
-<span id="cb5-12"></span>
-<span id="cb5-13"><span class="co" style="color: #5E5E5E;
+<span id="cb4-12"></span>
+<span id="cb4-13"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Below is the example output of the indice mapping for user IDs:</span></span>
-<span id="cb5-14">display(idm.user_to_index)</span></code></pre></div>
-<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb6-1"><span class="fu" style="color: #4758AB;
+<span id="cb4-14">display(idm.user_to_index)</span></code></pre></div>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb5-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">{</span></span>
-<span id="cb6-2">  <span class="dt" style="color: #AD0000;
+<span id="cb5-2">  <span class="dt" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">"AE224PFXAEAT66IXX43GRJSWHXCA"</span><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -5508,7 +5693,7 @@ background-color: null;
 font-style: inherit;">0</span><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">,</span></span>
-<span id="cb6-3">  <span class="dt" style="color: #AD0000;
+<span id="cb5-3">  <span class="dt" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">"AE225Y3KDZ44DHLUKLE4RJ63HC5Q"</span><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -5517,7 +5702,7 @@ background-color: null;
 font-style: inherit;">1</span><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">,</span></span>
-<span id="cb6-4">  <span class="dt" style="color: #AD0000;
+<span id="cb5-4">  <span class="dt" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">"AE226YVDC3MAGJZMZ4IBGE7RFJSQ"</span><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -5526,7 +5711,7 @@ background-color: null;
 font-style: inherit;">2</span><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">,</span></span>
-<span id="cb6-5">  <span class="dt" style="color: #AD0000;
+<span id="cb5-5">  <span class="dt" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">"AE22EJZ4354VB7MN4IE2CDGHA2DQ"</span><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -5535,55 +5720,103 @@ background-color: null;
 font-style: inherit;">3</span><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">,</span></span>
-<span id="cb6-6">  <span class="dt" style="color: #AD0000;
+<span id="cb5-6">  <span class="dt" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">"AE22O3TURLPFCJKL7YCX5CPF22OA"</span><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">:</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">4</span></span>
-<span id="cb6-7"><span class="fu" style="color: #4758AB;
+<span id="cb5-7"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">}</span></span></code></pre></div>
 </section>
 <section id="sequence-generation" class="level3">
 <h3 class="anchored" data-anchor-id="sequence-generation">Sequence Generation</h3>
-<p>At this point, you might wonder about the sequences I mentioned earlier. How does user-item rating data relate to sequences?</p>
+<p>After nearly two chapters, you might probably wonder about the term “sequence” I keep mentioning over and over, yet still missing an explanation. How does user-item rating data relate to sequences?</p>
 <p>Traditional collaborative filtering approaches like Matrix Factorization only use the user-item rating matrix. But one important signal gets left out: the timestamps.</p>
 <p>The key insight is simple: when a user interacts with items over time, those interactions tell a story. We group each user’s interactions chronologically to create sequences of items, with the assumption that items a user engages with have meaningful relationships to each other.</p>
-<p>Let’s trace through an example to understand how sequence generation works:</p>
-<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="co" style="color: #5E5E5E;
+<p>Let’s trace through an example to understand how sequence generation works.</p>
+<p>Suppose we have the following user interactions over time:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Time</th>
+<th>Item Purchased</th>
+<th>Item Index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Python Programming</td>
+<td>42</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Machine Learning</td>
+<td>73</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Deep Learning</td>
+<td>91</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p>This is the expected output in terms of the user-item sequence signals:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 26%">
+<col style="width: 30%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Row</th>
+<th>Target Item</th>
+<th>Item Sequence</th>
+<th>Previous Items</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>42 (Python Programming)</td>
+<td><code>[-1, -1, ..., -1]</code></td>
+<td>No previous items</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>73 (Machine Learning)</td>
+<td><code>[-1, -1, ..., 42]</code></td>
+<td>Python book</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>91 (Deep Learning)</td>
+<td><code>[-1, -1, ..., 42, 73]</code></td>
+<td>Python, ML books</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p>The function <code>generate_item_sequences</code> can be used to perform the sequence generation.</p>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;"># User interactions over time:</span></span>
-<span id="cb7-2"><span class="co" style="color: #5E5E5E;
+font-style: inherit;">from</span> src.sequence.util <span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;"># Time 1: User buys "Python Programming" (item_indice: 42)</span></span>
-<span id="cb7-3"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Time 2: User buys "Machine Learning" (item_indice: 73) </span></span>
-<span id="cb7-4"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Time 3: User buys "Deep Learning" (item_indice: 91)</span></span>
-<span id="cb7-5"></span>
-<span id="cb7-6"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Generated sequences:</span></span>
-<span id="cb7-7"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Row 1: item_sequence = [-1, -1, ..., -1]           # No previous items</span></span>
-<span id="cb7-8"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Row 2: item_sequence = [-1, -1, ..., 42]          # Previous: Python book</span></span>
-<span id="cb7-9"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Row 3: item_sequence = [-1, -1, ..., 42, 73]      # Previous: Python, ML books</span></span></code></pre></div>
-<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="co" style="color: #5E5E5E;
+font-style: inherit;">import</span> generate_item_sequences</span>
+<span id="cb6-2"></span>
+<span id="cb6-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Sample DataFrame</span></span>
-<span id="cb8-2">data <span class="op" style="color: #5E5E5E;
+<span id="cb6-4">data <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> {</span>
-<span id="cb8-3">    <span class="st" style="color: #20794D;
+<span id="cb6-5">    <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"user_indices"</span>: [<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -5596,7 +5829,7 @@ background-color: null;
 font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>],</span>
-<span id="cb8-4">    <span class="st" style="color: #20794D;
+<span id="cb6-6">    <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"item_indices"</span>: [<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -5609,7 +5842,7 @@ background-color: null;
 font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">4</span>],</span>
-<span id="cb8-5">    <span class="st" style="color: #20794D;
+<span id="cb6-7">    <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"timestamp"</span>: [<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -5622,7 +5855,7 @@ background-color: null;
 font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">4</span>],</span>
-<span id="cb8-6">    <span class="st" style="color: #20794D;
+<span id="cb6-8">    <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"ratings"</span>: [<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -5635,71 +5868,95 @@ background-color: null;
 font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>],</span>
-<span id="cb8-7">}</span>
-<span id="cb8-8"></span>
-<span id="cb8-9">df <span class="op" style="color: #5E5E5E;
+<span id="cb6-9">}</span>
+<span id="cb6-10"></span>
+<span id="cb6-11">df <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> pd.DataFrame(data)</span>
-<span id="cb8-10"></span>
-<span id="cb8-11"><span class="co" style="color: #5E5E5E;
+<span id="cb6-12"></span>
+<span id="cb6-13"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Generate the item sequences</span></span>
-<span id="cb8-12">df_with_sequences <span class="op" style="color: #5E5E5E;
+<span id="cb6-14">df_with_sequences <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> generate_item_sequences(</span>
-<span id="cb8-13">    df,</span>
-<span id="cb8-14">    user_col<span class="op" style="color: #5E5E5E;
+<span id="cb6-15">    df,</span>
+<span id="cb6-16">    user_col<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"user_indices"</span>,</span>
-<span id="cb8-15">    item_col<span class="op" style="color: #5E5E5E;
+<span id="cb6-17">    item_col<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"item_indices"</span>,</span>
-<span id="cb8-16">    timestamp_col<span class="op" style="color: #5E5E5E;
+<span id="cb6-18">    timestamp_col<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"timestamp"</span>,</span>
-<span id="cb8-17">    sequence_length<span class="op" style="color: #5E5E5E;
+<span id="cb6-19">    sequence_length<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">3</span>,</span>
-<span id="cb8-18">    padding<span class="op" style="color: #5E5E5E;
+<span id="cb6-20">    padding<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>,</span>
-<span id="cb8-19">    padding_value<span class="op" style="color: #5E5E5E;
+<span id="cb6-21">    padding_value<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=-</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>,</span>
-<span id="cb8-20">)</span>
-<span id="cb8-21"></span>
-<span id="cb8-22">display(df_with_sequences)</span></code></pre></div>
+<span id="cb6-22">)</span>
+<span id="cb6-23"></span>
+<span id="cb6-24">display(df_with_sequences)</span></code></pre></div>
 <p><a href="./sequence-gen-test.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="https://dvquys.com/projects/implement-recsys/c2/sequence-gen-test.png" class="img-fluid"></a></p>
-<p>As you can see, the above item_sequence column contains the sequence of items in chronological order which holds the context for the model to understand user preferences and make sequential predictions.</p>
+<p>As you can see, the above <code>item_sequence</code> column contains the sequence of items in chronological order which holds the context for the model to understand user preferences and make sequential predictions.</p>
 <p>In this project, we use the user’s last 10 items as the sequence length, but this is configurable. The choice depends on experimentation, but generally there’s a trade-off: longer sequences provide more context but use more memory, while shorter sequences focus on recent items and process faster.</p>
 <p>Do take note that we need to pad sequences to the same length so we can batch process them in our PyTorch model.</p>
-<div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="co" style="color: #5E5E5E;
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>cfg/common.yaml</strong></pre>
+</div>
+<div class="sourceCode" id="cb7" data-filename="cfg/common.yaml" style="background: #f1f3f5;"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb7-1"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;"># From cfg/common.yaml</span></span>
-<span id="cb9-2">train:</span>
-<span id="cb9-3">  sequence:</span>
-<span id="cb9-4">    sequence_length: <span class="dv" style="color: #AD0000;
+font-style: inherit;">train</span><span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">10</span>  <span class="co" style="color: #5E5E5E;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb7-2"><span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;"># Keep last 10 items as context</span></span></code></pre></div>
+font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sequence</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb7-3"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sequence_length</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">  # Keep last 10 items as context</span></span></code></pre></div>
+</div>
+<p>With our feature engineering pipeline complete, we now have transformed our raw Amazon Reviews data into model-ready sequences. Each user’s interaction history has been converted into numerical sequences that capture temporal patterns, while our ID mapping ensures consistent encoding across train and validation sets. These sequences will serve as the foundation for training our neural sequential recommendation model, providing the rich contextual information needed to predict what items users are likely to engage with next.</p>
 </section>
 </section>
 <section id="recap" class="level2">
 <h2 class="anchored" data-anchor-id="recap">Recap</h2>
-<p>In this chapter, we covered:</p>
+<p>In this chapter, we have covered:</p>
 <ol type="1">
 <li><strong>Data Sampling and Filtering</strong>: We discussed problems with basic random sampling of dyadic data and introduced our iterative sampling approach</li>
 <li><strong>ID Mapping</strong>: We converted string IDs to numerical indices to work with PyTorch model</li>
