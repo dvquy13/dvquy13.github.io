@@ -2,7 +2,7 @@
 .ONESHELL:
 
 run:
-	quarto preview
+	quarto preview --host 0.0.0.0 --port 8183
 
 build:
 	quarto render
