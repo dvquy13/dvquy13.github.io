@@ -326,8 +326,8 @@ List of chapters
 </div>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>In <a href="../../../projects/implement-recsys/c1/index.html">Chapter 1</a>, we set up our development environment and explored the project architecture. Now it’s time to dive into the heart of any recommendation system: <strong>data</strong>. The quality of our recommendations depends entirely on how well we understand, process, and engineer features from our data.</p>
-<p>This chapter focuses on the data pipeline from raw data to model-ready features. We’ll explore the Amazon Reviews dataset, understand user-item interaction sequences, and build the feature engineering pipeline that will power our session-based recommender.</p>
+<p>In <a href="../../../projects/implement-recsys/c1/index.html">Chapter 1</a>, we set up our development environment and explored the project architecture. Now it’s time to dive into the heart of any recommendation system: <strong>data</strong>. The quality of our recommendations depends entirely on how well we understand, process, and engineer features from our inputs.</p>
+<p>This chapter focuses on the transformation pipeline from raw data to model-ready features. We’ll explore the Amazon Reviews dataset, understand user-item interaction sequences, and build the feature engineering pipeline that powers our session-based recommender.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -350,14 +350,15 @@ Code
 <li><strong>Scale</strong>: Millions of interactions across thousands of users and items</li>
 <li><strong>Real-world patterns</strong>: Authentic user behavior with natural sparsity</li>
 </ol>
-<p>Among the well-known public datasets, I chose the <a href="https://amazon-reviews-2023.github.io/">Amazon Reviews 2023</a> dataset from the McAuley Lab, specifically the “Books” category. Beyond the characteristics above, this dataset has other useful features—like reviews for both users and items—with plenty of observations to work with.</p>
-<div class="column-page">
+<p>Among the well-known public options, I chose the <a href="https://amazon-reviews-2023.github.io/">Amazon Reviews 2023</a> collection from the McAuley Lab, specifically the “Books” category. Beyond the above characteristics, it offers other useful signals like user reviews and item descriptions.</p>
+<div class="column-page my-5">
 <p><img src="../static/dataset.png" class="img-fluid"></p>
 </div>
+<p>With <a href="https://huggingface.co/docs/datasets/en/installation#pip">HuggingFace’s dataset library</a>, we can download the data with just one line of code. The library also caches the downloaded assets by default, so subsequent runs will take almost no time.</p>
 <div class="column-page">
 <p><img src="../static/dataset-info.png" class="img-fluid"></p>
 </div>
-<p>The main schema of the dataset is as simple as follows:</p>
+<p>The main schema of the dataset is quite simple:</p>
 <div class="sourceCode" id="annotated-cell-1"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># From cfg/common.yaml</span></span>
 <span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a>data:</span>
 <button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1">1</button><span id="annotated-cell-1-3" class="code-annotation-target"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a>  user_col: <span class="st">"user_id"</span></span>
@@ -402,11 +403,11 @@ Configuration Management
 </div>
 </div>
 </div>
-<p>As you can see above, the train dataset has 8M ratings for us to play with. That’s not a small number. But if you’re getting excited about the perspective of using big data framework to transform those interactions, I’m sorry to let you down. The first thing I normally do with raw data is <strong>not</strong> to utilize all the data points. In fact, I even go the opposite direction. The next section provides some insights into why we may consider sampling data as the first thing to do for our project.</p>
+<p>As you can see above, the train dataset has 8M ratings for us to play with. That’s not small at all. However, if you think we’re going to use big data processing for those interactions, I’m sorry to let you down. The first thing I normally do with raw data is to <strong>not</strong> utilize all the data points. In fact, I even go the opposite direction. The next section provides some insights into why we may consider sampling data as the first thing to do for our project.</p>
 </section>
 <section id="data-sampling-and-filtering" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="data-sampling-and-filtering">Data Sampling and Filtering</h2>
-<p>If you study the documentation of our Amazon Reviews dataset, you will find that there are two subsets of the data:</p>
+<p>If you study the documentation of our Amazon Reviews dataset, you will find that they provide two variants:</p>
 <blockquote class="blockquote">
 <p><strong>Pure IDs (0-Core)</strong></p>
 <ol type="1">
@@ -427,16 +428,6 @@ Configuration Management
 <p>What does it mean to have a decent RecSys dataset? One of the key criteria is <strong>sparsity</strong>—the ratio of observed interactions to all possible user-item pairs.</p>
 <p>To understand why sparsity is problematic, consider the interaction matrix where each cell represents a potential user-item interaction:</p>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 23%">
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 7%">
-</colgroup>
 <thead>
 <tr class="header">
 <th></th>
@@ -446,7 +437,6 @@ Configuration Management
 <th>Item 4</th>
 <th>Item 5</th>
 <th>Item 6</th>
-<th>…</th>
 </tr>
 </thead>
 <tbody>
@@ -458,7 +448,6 @@ Configuration Management
 <td>-</td>
 <td>-</td>
 <td>-</td>
-<td>…</td>
 </tr>
 <tr class="even">
 <td><strong>User B</strong></td>
@@ -468,7 +457,6 @@ Configuration Management
 <td>-</td>
 <td>5</td>
 <td>-</td>
-<td>…</td>
 </tr>
 <tr class="odd">
 <td><strong>User C</strong></td>
@@ -478,7 +466,6 @@ Configuration Management
 <td>2</td>
 <td>-</td>
 <td>4</td>
-<td>…</td>
 </tr>
 <tr class="even">
 <td><strong>User D</strong></td>
@@ -488,17 +475,6 @@ Configuration Management
 <td>-</td>
 <td>-</td>
 <td>-</td>
-<td>…</td>
-</tr>
-<tr class="odd">
-<td><strong>…</strong></td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
 </tr>
 </tbody>
 </table>
@@ -684,7 +660,7 @@ Configuration Management
 </table>
 <p><em>User A now has only 1 interaction (Item 3) ✗ - Might fall below user threshold too!</em></p>
 <p>It’s like pulling threads from a sweater—everything starts unraveling.</p>
-<p>To solve this, we take an iterative approach. We gradually drop random users from the dataset while watching our conditions and sampling targets. The trade-off is that while it’s hard to get an exact predefined number of users and items, we can control the minimum acceptable thresholds:</p>
+<p>An <strong>iterative</strong> approach can be considered for this kind of problem. We gradually drop random users from the dataset while watching our conditions and sampling targets. The trade-off is that while it’s hard to get an exact predefined number of users and items, we can control the minimum acceptable thresholds:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>cfg/common.yaml</strong></pre>
@@ -738,9 +714,15 @@ len(sample_users)=19,734 len(sample_items)=7,388</code></pre>
 
 </div>
 </div>
-<p>In the end, we won’t have exactly 10,000 users, but the numbers will be close. After sampling, here is the distribution of interactions:</p>
-<div class="column-page">
-<p><a href="../static/sample-interaction-dist.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="../static/sample-interaction-dist.png" class="img-fluid"></a></p>
+<p>In the end, we won’t have exactly 10,000 users, but the numbers will be close.</p>
+<p>Results after sampling:</p>
+<div class="page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><a href="../static/sample-interaction-dist.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-1" title="1st: User interaction distribution 2nd: Item interaction distribution"><img src="../static/sample-interaction-dist.png" class="img-fluid figure-img column-page" alt="1st: User interaction distribution 2nd: Item interaction distribution"></a></p>
+<figcaption>1st: User interaction distribution<br>2nd: Item interaction distribution</figcaption>
+</figure>
+</div>
 </div>
 </section>
 </section>

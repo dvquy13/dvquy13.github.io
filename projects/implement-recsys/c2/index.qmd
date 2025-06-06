@@ -18,9 +18,9 @@ This is the **second chapter** of the tutorial series: Implement a RecSys.
 
 ## Introduction
 
-In [Chapter 1](../c1/index.qmd), we set up our development environment and explored the project architecture. Now it's time to dive into the heart of any recommendation system: **data**. The quality of our recommendations depends entirely on how well we understand, process, and engineer features from our data.
+In [Chapter 1](../c1/index.qmd), we set up our development environment and explored the project architecture. Now it's time to dive into the heart of any recommendation system: **data**. The quality of our recommendations depends entirely on how well we understand, process, and engineer features from our inputs.
 
-This chapter focuses on the data pipeline from raw data to model-ready features. We'll explore the Amazon Reviews dataset, understand user-item interaction sequences, and build the feature engineering pipeline that will power our session-based recommender.
+This chapter focuses on the transformation pipeline from raw data to model-ready features. We'll explore the Amazon Reviews dataset, understand user-item interaction sequences, and build the feature engineering pipeline that powers our session-based recommender.
 
 ::: {.callout-note appearance="simple"}
 ## Code
@@ -35,18 +35,19 @@ A good dataset for this kind of sequential recommendation project would typicall
 2. **Scale**: Millions of interactions across thousands of users and items
 3. **Real-world patterns**: Authentic user behavior with natural sparsity
 
-Among the well-known public datasets, I chose the [Amazon Reviews 2023](https://amazon-reviews-2023.github.io/) dataset from the McAuley Lab, specifically the "Books" category. Beyond the characteristics above, this dataset has other useful features—like reviews for both users and items—with plenty of observations to work with.
+Among the well-known public options, I chose the [Amazon Reviews 2023](https://amazon-reviews-2023.github.io/) collection from the McAuley Lab, specifically the "Books" category. Beyond the above characteristics, it offers other useful signals like user reviews and item descriptions.
 
-::: {.column-page}
+::: {.column-page .my-5}
 ![](../static/dataset.png)
 :::
+
+With [HuggingFace's dataset library](https://huggingface.co/docs/datasets/en/installation#pip), we can download the data with just one line of code. The library also caches the downloaded assets by default, so subsequent runs will take almost no time.
 
 ::: {.column-page}
 ![](../static/dataset-info.png)
 :::
 
-The main schema of the dataset is as simple as follows:
-
+The main schema of the dataset is quite simple:
 ```python
 # From cfg/common.yaml
 data:
@@ -73,11 +74,11 @@ cfg = ConfigLoader("cfg/common.yaml")
 Throughout this project, we store most configuration in `cfg/common.yaml`. This design does not only make it easier for notebooks and scripts to access their inputs and outputs but also help us try different configurations easily.
 :::
 
-As you can see above, the train dataset has 8M ratings for us to play with. That's not a small number. But if you're getting excited about the perspective of using big data framework to transform those interactions, I'm sorry to let you down. The first thing I normally do with raw data is **not** to utilize all the data points. In fact, I even go the opposite direction. The next section provides some insights into why we may consider sampling data as the first thing to do for our project.
+As you can see above, the train dataset has 8M ratings for us to play with. That's not small at all. However, if you think we're going to use big data processing for those interactions, I'm sorry to let you down. The first thing I normally do with raw data is to **not** utilize all the data points. In fact, I even go the opposite direction. The next section provides some insights into why we may consider sampling data as the first thing to do for our project.
 
 ## Data Sampling and Filtering
 
-If you study the documentation of our Amazon Reviews dataset, you will find that there are two subsets of the data:
+If you study the documentation of our Amazon Reviews dataset, you will find that they provide two variants:
 
 > **Pure IDs (0-Core)**
 >
@@ -100,13 +101,12 @@ What does it mean to have a decent RecSys dataset? One of the key criteria is **
 
 To understand why sparsity is problematic, consider the interaction matrix where each cell represents a potential user-item interaction:
 
-|                | Item 1 | Item 2 | Item 3 | Item 4 | Item 5 | Item 6 | ... |
-|----------------|--------|--------|--------|--------|--------|--------|-----|
-| **User A**     |   5    |   -    |   4    |   -    |   -    |   -    | ... |
-| **User B**     |   -    |   3    |   -    |   -    |   5    |   -    | ... |
-| **User C**     |   -    |   -    |   -    |   2    |   -    |   4    | ... |
-| **User D**     |   4    |   -    |   -    |   -    |   -    |   -    | ... |
-| **...**        |  ...   |  ...   |  ...   |  ...   |  ...   |  ...   | ... |
+|                | Item 1 | Item 2 | Item 3 | Item 4 | Item 5 | Item 6 |
+|----------------|--------|--------|--------|--------|--------|--------|
+| **User A**     |   5    |   -    |   4    |   -    |   -    |   -    |
+| **User B**     |   -    |   3    |   -    |   -    |   5    |   -    |
+| **User C**     |   -    |   -    |   -    |   2    |   -    |   4    |
+| **User D**     |   4    |   -    |   -    |   -    |   -    |   -    |
 
 *Where numbers represent ratings (1-5) and "-" represents no interaction*
 
@@ -176,7 +176,7 @@ Here's what happens using our 4×6 matrix example: Let's say User A has 2 intera
 
 It's like pulling threads from a sweater—everything starts unraveling.
 
-To solve this, we take an iterative approach. We gradually drop random users from the dataset while watching our conditions and sampling targets. The trade-off is that while it's hard to get an exact predefined number of users and items, we can control the minimum acceptable thresholds:
+An **iterative** approach can be considered for this kind of problem. We gradually drop random users from the dataset while watching our conditions and sampling targets. The trade-off is that while it's hard to get an exact predefined number of users and items, we can control the minimum acceptable thresholds:
 
 ```{.python filename="cfg/common.yaml"}
 sample:
@@ -221,10 +221,12 @@ len(sample_users)=19,734 len(sample_items)=7,388
 ## [InteractionDataSampler implementation](https://github.com/dvquy13/recsys-seq-model/blob/main/src/sample.py#L8)
 :::
 
-In the end, we won't have exactly 10,000 users, but the numbers will be close. After sampling, here is the distribution of interactions:
+In the end, we won't have exactly 10,000 users, but the numbers will be close.
+
+Results after sampling:
 
 ::: {.column-page}
-![](../static/sample-interaction-dist.png){.lightbox}
+![1st: User interaction distribution<br>2nd: Item interaction distribution](../static/sample-interaction-dist.png){.lightbox}
 :::
 
 ## Train-Test Split
