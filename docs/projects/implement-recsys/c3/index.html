@@ -248,13 +248,7 @@ cookieconsent.run({
   <li><a href="#step-1-calculate-item-popularity" id="toc-step-1-calculate-item-popularity" class="nav-link" data-scroll-target="#step-1-calculate-item-popularity">Step 1: Calculate Item Popularity</a></li>
   <li><a href="#step-2-identify-negative-candidates" id="toc-step-2-identify-negative-candidates" class="nav-link" data-scroll-target="#step-2-identify-negative-candidates">Step 2: Identify Negative Candidates</a></li>
   <li><a href="#step-3-popularity-weighted-sampling" id="toc-step-3-popularity-weighted-sampling" class="nav-link" data-scroll-target="#step-3-popularity-weighted-sampling">Step 3: Popularity-Weighted Sampling</a></li>
-  </ul></li>
-  <li><a href="#example-walkthrough" id="toc-example-walkthrough" class="nav-link" data-scroll-target="#example-walkthrough">Example Walkthrough</a>
-  <ul class="collapse">
-  <li><a href="#step-1-item-popularity-calculation" id="toc-step-1-item-popularity-calculation" class="nav-link" data-scroll-target="#step-1-item-popularity-calculation">Step 1: Item Popularity Calculation</a></li>
-  <li><a href="#step-2-negative-candidates-per-user" id="toc-step-2-negative-candidates-per-user" class="nav-link" data-scroll-target="#step-2-negative-candidates-per-user">Step 2: Negative Candidates per User</a></li>
-  <li><a href="#step-3-popularity-weighted-negative-sampling" id="toc-step-3-popularity-weighted-negative-sampling" class="nav-link" data-scroll-target="#step-3-popularity-weighted-negative-sampling">Step 3: Popularity-Weighted Negative Sampling</a></li>
-  <li><a href="#final-result-original-generated-negatives" id="toc-final-result-original-generated-negatives" class="nav-link" data-scroll-target="#final-result-original-generated-negatives">Final Result: Original + Generated Negatives</a></li>
+  <li><a href="#final-result-complete-dataset" id="toc-final-result-complete-dataset" class="nav-link" data-scroll-target="#final-result-complete-dataset">Final Result: Complete Dataset</a></li>
   </ul></li>
   <li><a href="#testing-the-implementation" id="toc-testing-the-implementation" class="nav-link" data-scroll-target="#testing-the-implementation">Testing the Implementation</a></li>
   <li><a href="#adding-features-to-the-generated-negative-samples" id="toc-adding-features-to-the-generated-negative-samples" class="nav-link" data-scroll-target="#adding-features-to-the-generated-negative-samples">Adding Features to the generated negative samples</a></li>
@@ -392,54 +386,8 @@ Code
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co">        pd.DataFrame: DataFrame containing generated negative samples.</span></span>
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="step-1-calculate-item-popularity" class="level3">
-<h3 class="anchored" data-anchor-id="step-1-calculate-item-popularity">Step 1: Calculate Item Popularity</h3>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate item popularity based on interaction frequency</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>item_popularity <span class="op">=</span> df[item_col].value_counts()</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to sampling probabilities to be used in the next step</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>popularity <span class="op">=</span> item_popularity.values.astype(np.float64)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>total_popularity <span class="op">=</span> popularity.<span class="bu">sum</span>()</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>sampling_probs <span class="op">=</span> popularity <span class="op">/</span> total_popularity</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This creates a probability distribution where more popular items have higher chances of being selected as negatives.</p>
-</section>
-<section id="step-2-identify-negative-candidates" class="level3">
-<h3 class="anchored" data-anchor-id="step-2-identify-negative-candidates">Step 2: Identify Negative Candidates</h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create user-item interaction mapping</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>user_item_dict <span class="op">=</span> df.groupby(user_col)[item_col].<span class="bu">apply</span>(<span class="bu">set</span>).to_dict()</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># For each user, find items they haven't interacted with</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> user, pos_items <span class="kw">in</span> user_item_dict.items():</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    negative_candidates <span class="op">=</span> all_items_set <span class="op">-</span> pos_items</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We make sure we only sample from items the user hasn’t already interacted with.</p>
-</section>
-<section id="step-3-popularity-weighted-sampling" class="level3">
-<h3 class="anchored" data-anchor-id="step-3-popularity-weighted-sampling">Step 3: Popularity-Weighted Sampling</h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a mapping from item to index to quickly access item-related data.</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>items <span class="op">=</span> item_popularity.index.values</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>item_to_index <span class="op">=</span> {item: idx <span class="cf">for</span> idx, item <span class="kw">in</span> <span class="bu">enumerate</span>(items)}</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample negatives proportional to popularity</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>candidate_indices <span class="op">=</span> [item_to_index[item] <span class="cf">for</span> item <span class="kw">in</span> negative_candidates_list]</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>candidate_probs <span class="op">=</span> sampling_probs[candidate_indices]</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>candidate_probs <span class="op">/=</span> candidate_probs.<span class="bu">sum</span>()  <span class="co"># Normalize</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>sampled_items <span class="op">=</span> np.random.choice(</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    negative_candidates_list, </span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    size<span class="op">=</span>num_neg, </span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    replace<span class="op">=</span><span class="va">False</span>, </span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    p<span class="op">=</span>candidate_probs</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This makes sure popular items are more likely to be selected as negatives, creating harder training examples.</p>
-<p>In our implementation, we choose to have the same number of negative samples as positive samples. This helps us avoid dealing with imbalanced training data. But feel free to experiment with different ratios (you’ll need to update the implementation).</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>num_pos <span class="op">=</span> <span class="bu">len</span>(pos_items)  <span class="co"># Number of positive interactions</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>num_neg <span class="op">=</span> <span class="bu">min</span>(num_pos, num_neg_candidates)  <span class="co"># Match positive count</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-</section>
-<section id="example-walkthrough" class="level2">
-<h2 class="anchored" data-anchor-id="example-walkthrough">Example Walkthrough</h2>
-<p>Let’s illustrate this process with a concrete example to see how popularity-based negative sampling works in practice.</p>
-<p>Starting with a simple user-item interaction dataset:</p>
+<p>Let’s walk through each step with both the code implementation and a concrete example to see how popularity-based negative sampling works in practice.</p>
+<p>We’ll start with this simple user-item interaction dataset:</p>
 <p><strong>Original User-Item Interactions</strong></p>
 <table class="caption-top table">
 <thead>
@@ -502,9 +450,17 @@ Code
 </tr>
 </tbody>
 </table>
-<section id="step-1-item-popularity-calculation" class="level3">
-<h3 class="anchored" data-anchor-id="step-1-item-popularity-calculation">Step 1: Item Popularity Calculation</h3>
-<p><strong>Item Popularity (Interaction Frequency)</strong></p>
+<section id="step-1-calculate-item-popularity" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-calculate-item-popularity">Step 1: Calculate Item Popularity</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate item popularity based on interaction frequency</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>item_popularity <span class="op">=</span> df[item_col].value_counts()</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to sampling probabilities to be used in the next step</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>popularity <span class="op">=</span> item_popularity.values.astype(np.float64)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>total_popularity <span class="op">=</span> popularity.<span class="bu">sum</span>()</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>sampling_probs <span class="op">=</span> popularity <span class="op">/</span> total_popularity</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This creates a probability distribution where more popular items have higher chances of being selected as negatives.</p>
+<p><strong>Resulting Item Popularity</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -538,8 +494,15 @@ Code
 </table>
 <p>Total interactions: 10, so item 101 (most popular) has 40% sampling probability.</p>
 </section>
-<section id="step-2-negative-candidates-per-user" class="level3">
-<h3 class="anchored" data-anchor-id="step-2-negative-candidates-per-user">Step 2: Negative Candidates per User</h3>
+<section id="step-2-identify-negative-candidates" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-identify-negative-candidates">Step 2: Identify Negative Candidates</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create user-item interaction mapping</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>user_item_dict <span class="op">=</span> df.groupby(user_col)[item_col].<span class="bu">apply</span>(<span class="bu">set</span>).to_dict()</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># For each user, find items they haven't interacted with</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> user, pos_items <span class="kw">in</span> user_item_dict.items():</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    negative_candidates <span class="op">=</span> all_items_set <span class="op">-</span> pos_items</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We make sure we only sample from items the user hasn’t already interacted with.</p>
 <p><strong>User’s Positive Items and Negative Candidates</strong></p>
 <table class="caption-top table">
 <thead>
@@ -584,8 +547,24 @@ Code
 </tbody>
 </table>
 </section>
-<section id="step-3-popularity-weighted-negative-sampling" class="level3">
-<h3 class="anchored" data-anchor-id="step-3-popularity-weighted-negative-sampling">Step 3: Popularity-Weighted Negative Sampling</h3>
+<section id="step-3-popularity-weighted-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-popularity-weighted-sampling">Step 3: Popularity-Weighted Sampling</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a mapping from item to index to quickly access item-related data.</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>items <span class="op">=</span> item_popularity.index.values</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>item_to_index <span class="op">=</span> {item: idx <span class="cf">for</span> idx, item <span class="kw">in</span> <span class="bu">enumerate</span>(items)}</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample negatives proportional to popularity</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>candidate_indices <span class="op">=</span> [item_to_index[item] <span class="cf">for</span> item <span class="kw">in</span> negative_candidates_list]</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>candidate_probs <span class="op">=</span> sampling_probs[candidate_indices]</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>candidate_probs <span class="op">/=</span> candidate_probs.<span class="bu">sum</span>()  <span class="co"># Normalize</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>sampled_items <span class="op">=</span> np.random.choice(</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    negative_candidates_list, </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    size<span class="op">=</span>num_neg, </span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    replace<span class="op">=</span><span class="va">False</span>, </span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    p<span class="op">=</span>candidate_probs</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This makes sure popular items are more likely to be selected as negatives, creating harder training examples.</p>
 <p>For each user, we sample negatives proportional to item popularity among their negative candidates:</p>
 <p><strong>User 1’s Negative Sampling</strong></p>
 <table class="caption-top table">
@@ -632,10 +611,19 @@ Code
 </tbody>
 </table>
 <p>User 4 will more likely get item 101 as a negative sample since it’s more popular.</p>
+<p>In our implementation, we choose to have the same number of negative samples as positive samples. This helps us avoid dealing with imbalanced training data. But feel free to experiment with different ratios (you’ll need to update the implementation).</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>num_pos <span class="op">=</span> <span class="bu">len</span>(pos_items)  <span class="co"># Number of positive interactions</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>num_neg <span class="op">=</span> <span class="bu">min</span>(num_pos, num_neg_candidates)  <span class="co"># Match positive count</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="final-result-original-generated-negatives" class="level3">
-<h3 class="anchored" data-anchor-id="final-result-original-generated-negatives">Final Result: Original + Generated Negatives</h3>
+<section id="final-result-complete-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="final-result-complete-dataset">Final Result: Complete Dataset</h3>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 27%">
+<col style="width: 18%">
+<col style="width: 27%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>user_indice</th>
@@ -658,16 +646,16 @@ Code
 <td>positive</td>
 </tr>
 <tr class="odd">
-<td>1</td>
-<td>103</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">1</span></td>
+<td><span style="color: #B0B0B0;">103</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="even">
-<td>1</td>
-<td>104</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">1</span></td>
+<td><span style="color: #B0B0B0;">104</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="odd">
 <td>2</td>
@@ -688,10 +676,10 @@ Code
 <td>positive</td>
 </tr>
 <tr class="even">
-<td>2</td>
-<td>102</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">2</span></td>
+<td><span style="color: #B0B0B0;">102</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="odd">
 <td>3</td>
@@ -706,16 +694,16 @@ Code
 <td>positive</td>
 </tr>
 <tr class="odd">
-<td>3</td>
-<td>102</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">3</span></td>
+<td><span style="color: #B0B0B0;">102</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="even">
-<td>3</td>
-<td>104</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">3</span></td>
+<td><span style="color: #B0B0B0;">104</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="odd">
 <td>4</td>
@@ -730,16 +718,16 @@ Code
 <td>positive</td>
 </tr>
 <tr class="odd">
-<td>4</td>
-<td>101</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">4</span></td>
+<td><span style="color: #B0B0B0;">101</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="even">
-<td>4</td>
-<td>103</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">4</span></td>
+<td><span style="color: #B0B0B0;">103</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="odd">
 <td>5</td>
@@ -748,10 +736,10 @@ Code
 <td>positive</td>
 </tr>
 <tr class="even">
-<td>5</td>
-<td>103</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">5</span></td>
+<td><span style="color: #B0B0B0;">103</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 </tbody>
 </table>
@@ -810,6 +798,7 @@ Code
 <div class="column-page">
 <p><img src="./concat-pos-neg.png" class="img-fluid"></p>
 </div>
+<p>We now have a balanced dataset of positive and negative samples, ready for the next stages in model development cycle!</p>
 </section>
 <section id="recap" class="level2">
 <h2 class="anchored" data-anchor-id="recap">Recap</h2>
@@ -837,7 +826,9 @@ Code
 </section>
 <section id="whats-next" class="level2">
 <h2 class="anchored" data-anchor-id="whats-next">What’s Next?</h2>
-<p>With our balanced dataset of positive and negative samples, we’re ready to tackle model evaluation. In <a href="../../../projects/implement-recsys/c4/index.html">Chapter 4</a>, we’ll set up our evaluation framework and experiment tracking with MLflow while implementing a baseline model along the way as an illustration. This will give us the foundation for systematic model development and comparison.</p>
+<p>We have our labeled data, great. Ready to see some model code?</p>
+<p>Not so fast, we will learn about building actual sequence models in … <a href="../../../projects/implement-recsys/c5/index.html">Chapter 5</a>.</p>
+<p>In <a href="../../../projects/implement-recsys/c4/index.html">Chapter 4</a>, we’ll set up our evaluation framework and experiment tracking with MLflow while implementing a baseline model along the way as an illustration. This will give us the foundation for systematic model development and comparison.</p>
 <p>Continue to the <a href="../../../projects/implement-recsys/c4/index.html">next chapter</a>.</p>
 <hr>
 <p><br> If you find this tutorial helpful, please cite this writeup as:</p>

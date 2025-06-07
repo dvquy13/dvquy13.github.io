@@ -104,6 +104,25 @@ def generate_negative_samples(
     """
 ```
 
+Let's walk through each step with both the code implementation and a concrete example to see how popularity-based negative sampling works in practice.
+
+We'll start with this simple user-item interaction dataset:
+
+**Original User-Item Interactions**
+
+| user_indice | item_indice | rating |
+|-------------|-------------|---------|
+| 1           | 101         | 1       |
+| 1           | 102         | 1       |
+| 2           | 101         | 1       |
+| 2           | 103         | 1       |
+| 2           | 104         | 1       |
+| 3           | 101         | 1       |
+| 3           | 103         | 1       |
+| 4           | 102         | 1       |
+| 4           | 104         | 1       |
+| 5           | 101         | 1       |
+
 ### Step 1: Calculate Item Popularity
 
 ```python
@@ -118,6 +137,17 @@ sampling_probs = popularity / total_popularity
 
 This creates a probability distribution where more popular items have higher chances of being selected as negatives.
 
+**Resulting Item Popularity**
+
+| item_indice | interaction_count | sampling_probability |
+|-------------|-------------------|---------------------|
+| 101         | 4                 | 0.40                |
+| 102         | 2                 | 0.20                |
+| 103         | 2                 | 0.20                |
+| 104         | 2                 | 0.20                |
+
+Total interactions: 10, so item 101 (most popular) has 40% sampling probability.
+
 ### Step 2: Identify Negative Candidates
 
 ```python
@@ -130,6 +160,16 @@ for user, pos_items in user_item_dict.items():
 ```
 
 We make sure we only sample from items the user hasn't already interacted with.
+
+**User's Positive Items and Negative Candidates**
+
+| user_indice | positive_items | negative_candidates | num_positives |
+|-------------|----------------|---------------------|---------------|
+| 1           | {101, 102}     | {103, 104}         | 2             |
+| 2           | {101, 103, 104}| {102}              | 3             |
+| 3           | {101, 103}     | {102, 104}         | 2             |
+| 4           | {102, 104}     | {101, 103}         | 2             |
+| 5           | {101}          | {102, 103, 104}    | 1             |
 
 ### Step 3: Popularity-Weighted Sampling
 
@@ -153,61 +193,6 @@ sampled_items = np.random.choice(
 
 This makes sure popular items are more likely to be selected as negatives, creating harder training examples.
 
-In our implementation, we choose to have the same number of negative samples as positive samples. This helps us avoid dealing with imbalanced training data. But feel free to experiment with different ratios (you'll need to update the implementation).
-
-```python
-num_pos = len(pos_items)  # Number of positive interactions
-num_neg = min(num_pos, num_neg_candidates)  # Match positive count
-```
-
-## Example Walkthrough
-
-Let's illustrate this process with a concrete example to see how popularity-based negative sampling works in practice.
-
-Starting with a simple user-item interaction dataset:
-
-**Original User-Item Interactions**
-
-| user_indice | item_indice | rating |
-|-------------|-------------|---------|
-| 1           | 101         | 1       |
-| 1           | 102         | 1       |
-| 2           | 101         | 1       |
-| 2           | 103         | 1       |
-| 2           | 104         | 1       |
-| 3           | 101         | 1       |
-| 3           | 103         | 1       |
-| 4           | 102         | 1       |
-| 4           | 104         | 1       |
-| 5           | 101         | 1       |
-
-### Step 1: Item Popularity Calculation
-
-**Item Popularity (Interaction Frequency)**
-
-| item_indice | interaction_count | sampling_probability |
-|-------------|-------------------|---------------------|
-| 101         | 4                 | 0.40                |
-| 102         | 2                 | 0.20                |
-| 103         | 2                 | 0.20                |
-| 104         | 2                 | 0.20                |
-
-Total interactions: 10, so item 101 (most popular) has 40% sampling probability.
-
-### Step 2: Negative Candidates per User
-
-**User's Positive Items and Negative Candidates**
-
-| user_indice | positive_items | negative_candidates | num_positives |
-|-------------|----------------|---------------------|---------------|
-| 1           | {101, 102}     | {103, 104}         | 2             |
-| 2           | {101, 103, 104}| {102}              | 3             |
-| 3           | {101, 103}     | {102, 104}         | 2             |
-| 4           | {102, 104}     | {101, 103}         | 2             |
-| 5           | {101}          | {102, 103, 104}    | 1             |
-
-### Step 3: Popularity-Weighted Negative Sampling
-
 For each user, we sample negatives proportional to item popularity among their negative candidates:
 
 **User 1's Negative Sampling**
@@ -226,28 +211,35 @@ For each user, we sample negatives proportional to item popularity among their n
 
 User 4 will more likely get item 101 as a negative sample since it's more popular.
 
-### Final Result: Original + Generated Negatives
+In our implementation, we choose to have the same number of negative samples as positive samples. This helps us avoid dealing with imbalanced training data. But feel free to experiment with different ratios (you'll need to update the implementation).
+
+```python
+num_pos = len(pos_items)  # Number of positive interactions
+num_neg = min(num_pos, num_neg_candidates)  # Match positive count
+```
+
+### Final Result: Complete Dataset
 
 | user_indice | item_indice | rating | sample_type |
 |-------------|-------------|---------|-------------|
 | 1           | 101         | 1       | positive    |
 | 1           | 102         | 1       | positive    |
-| 1           | 103         | 0       | negative    |
-| 1           | 104         | 0       | negative    |
+| <span style="color: #B0B0B0;">1</span> | <span style="color: #B0B0B0;">103</span> | <span style="color: #B0B0B0;">0</span> | <span style="color: #B0B0B0;">negative</span> |
+| <span style="color: #B0B0B0;">1</span> | <span style="color: #B0B0B0;">104</span> | <span style="color: #B0B0B0;">0</span> | <span style="color: #B0B0B0;">negative</span> |
 | 2           | 101         | 1       | positive    |
 | 2           | 103         | 1       | positive    |
 | 2           | 104         | 1       | positive    |
-| 2           | 102         | 0       | negative    |
+| <span style="color: #B0B0B0;">2</span> | <span style="color: #B0B0B0;">102</span> | <span style="color: #B0B0B0;">0</span> | <span style="color: #B0B0B0;">negative</span> |
 | 3           | 101         | 1       | positive    |
 | 3           | 103         | 1       | positive    |
-| 3           | 102         | 0       | negative    |
-| 3           | 104         | 0       | negative    |
+| <span style="color: #B0B0B0;">3</span> | <span style="color: #B0B0B0;">102</span> | <span style="color: #B0B0B0;">0</span> | <span style="color: #B0B0B0;">negative</span> |
+| <span style="color: #B0B0B0;">3</span> | <span style="color: #B0B0B0;">104</span> | <span style="color: #B0B0B0;">0</span> | <span style="color: #B0B0B0;">negative</span> |
 | 4           | 102         | 1       | positive    |
 | 4           | 104         | 1       | positive    |
-| 4           | 101         | 0       | negative    |
-| 4           | 103         | 0       | negative    |
+| <span style="color: #B0B0B0;">4</span> | <span style="color: #B0B0B0;">101</span> | <span style="color: #B0B0B0;">0</span> | <span style="color: #B0B0B0;">negative</span> |
+| <span style="color: #B0B0B0;">4</span> | <span style="color: #B0B0B0;">103</span> | <span style="color: #B0B0B0;">0</span> | <span style="color: #B0B0B0;">negative</span> |
 | 5           | 101         | 1       | positive    |
-| 5           | 103         | 0       | negative    |
+| <span style="color: #B0B0B0;">5</span> | <span style="color: #B0B0B0;">103</span> | <span style="color: #B0B0B0;">0</span> | <span style="color: #B0B0B0;">negative</span> |
 
 <br>
 
@@ -310,6 +302,8 @@ After adding features to the negative samples, we can combine them with the posi
 ![](./concat-pos-neg.png)
 :::
 
+We now have a balanced dataset of positive and negative samples, ready for the next stages in model development cycle!
+
 ## Recap
 
 In this chapter, we tackled the tricky problem of implicit feedback in recommendation systems. Here's what we covered:
@@ -327,7 +321,11 @@ All code for this chapter is in `notebooks/002-negative-sample.ipynb` and `src/n
 
 ## What's Next?
 
-With our balanced dataset of positive and negative samples, we're ready to tackle model evaluation. In [Chapter 4](../c4/index.qmd), we'll set up our evaluation framework and experiment tracking with MLflow while implementing a baseline model along the way as an illustration. This will give us the foundation for systematic model development and comparison.
+We have our labeled data, great. Ready to see some model code?
+
+Not so fast, we will learn about building actual sequence models in ... [Chapter 5](../c5/index.qmd).
+
+In [Chapter 4](../c4/index.qmd), we'll set up our evaluation framework and experiment tracking with MLflow while implementing a baseline model along the way as an illustration. This will give us the foundation for systematic model development and comparison.
 
 Continue to the [next chapter](../c4/index.qmd).
 

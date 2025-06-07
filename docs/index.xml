@@ -4835,144 +4835,8 @@ font-style: inherit;">        pd.DataFrame: DataFrame containing generated negat
 background-color: null;
 font-style: inherit;">    """</span></span></code></pre></div>
 </div>
-<section id="step-1-calculate-item-popularity" class="level3">
-<h3 class="anchored" data-anchor-id="step-1-calculate-item-popularity">Step 1: Calculate Item Popularity</h3>
-<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Calculate item popularity based on interaction frequency</span></span>
-<span id="cb2-2">item_popularity <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df[item_col].value_counts()</span>
-<span id="cb2-3"></span>
-<span id="cb2-4"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Convert to sampling probabilities to be used in the next step</span></span>
-<span id="cb2-5">popularity <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> item_popularity.values.astype(np.float64)</span>
-<span id="cb2-6">total_popularity <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> popularity.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>()</span>
-<span id="cb2-7">sampling_probs <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> popularity <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> total_popularity</span></code></pre></div>
-<p>This creates a probability distribution where more popular items have higher chances of being selected as negatives.</p>
-</section>
-<section id="step-2-identify-negative-candidates" class="level3">
-<h3 class="anchored" data-anchor-id="step-2-identify-negative-candidates">Step 2: Identify Negative Candidates</h3>
-<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Create user-item interaction mapping</span></span>
-<span id="cb3-2">user_item_dict <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df.groupby(user_col)[item_col].<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">apply</span>(<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">set</span>).to_dict()</span>
-<span id="cb3-3"></span>
-<span id="cb3-4"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># For each user, find items they haven't interacted with</span></span>
-<span id="cb3-5"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> user, pos_items <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> user_item_dict.items():</span>
-<span id="cb3-6">    negative_candidates <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> all_items_set <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> pos_items</span></code></pre></div>
-<p>We make sure we only sample from items the user hasn’t already interacted with.</p>
-</section>
-<section id="step-3-popularity-weighted-sampling" class="level3">
-<h3 class="anchored" data-anchor-id="step-3-popularity-weighted-sampling">Step 3: Popularity-Weighted Sampling</h3>
-<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Create a mapping from item to index to quickly access item-related data.</span></span>
-<span id="cb4-2">items <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> item_popularity.index.values</span>
-<span id="cb4-3">item_to_index <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> {item: idx <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> idx, item <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">enumerate</span>(items)}</span>
-<span id="cb4-4"></span>
-<span id="cb4-5"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Sample negatives proportional to popularity</span></span>
-<span id="cb4-6">candidate_indices <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [item_to_index[item] <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> item <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> negative_candidates_list]</span>
-<span id="cb4-7">candidate_probs <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> sampling_probs[candidate_indices]</span>
-<span id="cb4-8">candidate_probs <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/=</span> candidate_probs.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>()  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Normalize</span></span>
-<span id="cb4-9"></span>
-<span id="cb4-10">sampled_items <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.choice(</span>
-<span id="cb4-11">    negative_candidates_list, </span>
-<span id="cb4-12">    size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>num_neg, </span>
-<span id="cb4-13">    replace<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>, </span>
-<span id="cb4-14">    p<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>candidate_probs</span>
-<span id="cb4-15">)</span></code></pre></div>
-<p>This makes sure popular items are more likely to be selected as negatives, creating harder training examples.</p>
-<p>In our implementation, we choose to have the same number of negative samples as positive samples. This helps us avoid dealing with imbalanced training data. But feel free to experiment with different ratios (you’ll need to update the implementation).</p>
-<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">num_pos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(pos_items)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Number of positive interactions</span></span>
-<span id="cb5-2">num_neg <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">min</span>(num_pos, num_neg_candidates)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Match positive count</span></span></code></pre></div>
-</section>
-</section>
-<section id="example-walkthrough" class="level2">
-<h2 class="anchored" data-anchor-id="example-walkthrough">Example Walkthrough</h2>
-<p>Let’s illustrate this process with a concrete example to see how popularity-based negative sampling works in practice.</p>
-<p>Starting with a simple user-item interaction dataset:</p>
+<p>Let’s walk through each step with both the code implementation and a concrete example to see how popularity-based negative sampling works in practice.</p>
+<p>We’ll start with this simple user-item interaction dataset:</p>
 <p><strong>Original User-Item Interactions</strong></p>
 <table class="caption-top table">
 <thead>
@@ -5035,9 +4899,33 @@ font-style: inherit;"># Match positive count</span></span></code></pre></div>
 </tr>
 </tbody>
 </table>
-<section id="step-1-item-popularity-calculation" class="level3">
-<h3 class="anchored" data-anchor-id="step-1-item-popularity-calculation">Step 1: Item Popularity Calculation</h3>
-<p><strong>Item Popularity (Interaction Frequency)</strong></p>
+<section id="step-1-calculate-item-popularity" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-calculate-item-popularity">Step 1: Calculate Item Popularity</h3>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Calculate item popularity based on interaction frequency</span></span>
+<span id="cb2-2">item_popularity <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> df[item_col].value_counts()</span>
+<span id="cb2-3"></span>
+<span id="cb2-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Convert to sampling probabilities to be used in the next step</span></span>
+<span id="cb2-5">popularity <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> item_popularity.values.astype(np.float64)</span>
+<span id="cb2-6">total_popularity <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> popularity.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()</span>
+<span id="cb2-7">sampling_probs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> popularity <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> total_popularity</span></code></pre></div>
+<p>This creates a probability distribution where more popular items have higher chances of being selected as negatives.</p>
+<p><strong>Resulting Item Popularity</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -5071,8 +4959,35 @@ font-style: inherit;"># Match positive count</span></span></code></pre></div>
 </table>
 <p>Total interactions: 10, so item 101 (most popular) has 40% sampling probability.</p>
 </section>
-<section id="step-2-negative-candidates-per-user" class="level3">
-<h3 class="anchored" data-anchor-id="step-2-negative-candidates-per-user">Step 2: Negative Candidates per User</h3>
+<section id="step-2-identify-negative-candidates" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-identify-negative-candidates">Step 2: Identify Negative Candidates</h3>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Create user-item interaction mapping</span></span>
+<span id="cb3-2">user_item_dict <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> df.groupby(user_col)[item_col].<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">apply</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>).to_dict()</span>
+<span id="cb3-3"></span>
+<span id="cb3-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># For each user, find items they haven't interacted with</span></span>
+<span id="cb3-5"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> user, pos_items <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> user_item_dict.items():</span>
+<span id="cb3-6">    negative_candidates <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> all_items_set <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> pos_items</span></code></pre></div>
+<p>We make sure we only sample from items the user hasn’t already interacted with.</p>
 <p><strong>User’s Positive Items and Negative Candidates</strong></p>
 <table class="caption-top table">
 <thead>
@@ -5117,8 +5032,66 @@ font-style: inherit;"># Match positive count</span></span></code></pre></div>
 </tbody>
 </table>
 </section>
-<section id="step-3-popularity-weighted-negative-sampling" class="level3">
-<h3 class="anchored" data-anchor-id="step-3-popularity-weighted-negative-sampling">Step 3: Popularity-Weighted Negative Sampling</h3>
+<section id="step-3-popularity-weighted-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-popularity-weighted-sampling">Step 3: Popularity-Weighted Sampling</h3>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Create a mapping from item to index to quickly access item-related data.</span></span>
+<span id="cb4-2">items <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> item_popularity.index.values</span>
+<span id="cb4-3">item_to_index <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {item: idx <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> idx, item <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(items)}</span>
+<span id="cb4-4"></span>
+<span id="cb4-5"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Sample negatives proportional to popularity</span></span>
+<span id="cb4-6">candidate_indices <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [item_to_index[item] <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> item <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> negative_candidates_list]</span>
+<span id="cb4-7">candidate_probs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> sampling_probs[candidate_indices]</span>
+<span id="cb4-8">candidate_probs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/=</span> candidate_probs.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Normalize</span></span>
+<span id="cb4-9"></span>
+<span id="cb4-10">sampled_items <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.choice(</span>
+<span id="cb4-11">    negative_candidates_list, </span>
+<span id="cb4-12">    size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>num_neg, </span>
+<span id="cb4-13">    replace<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>, </span>
+<span id="cb4-14">    p<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>candidate_probs</span>
+<span id="cb4-15">)</span></code></pre></div>
+<p>This makes sure popular items are more likely to be selected as negatives, creating harder training examples.</p>
 <p>For each user, we sample negatives proportional to item popularity among their negative candidates:</p>
 <p><strong>User 1’s Negative Sampling</strong></p>
 <table class="caption-top table">
@@ -5165,10 +5138,31 @@ font-style: inherit;"># Match positive count</span></span></code></pre></div>
 </tbody>
 </table>
 <p>User 4 will more likely get item 101 as a negative sample since it’s more popular.</p>
+<p>In our implementation, we choose to have the same number of negative samples as positive samples. This helps us avoid dealing with imbalanced training data. But feel free to experiment with different ratios (you’ll need to update the implementation).</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">num_pos <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(pos_items)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Number of positive interactions</span></span>
+<span id="cb5-2">num_neg <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>(num_pos, num_neg_candidates)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Match positive count</span></span></code></pre></div>
 </section>
-<section id="final-result-original-generated-negatives" class="level3">
-<h3 class="anchored" data-anchor-id="final-result-original-generated-negatives">Final Result: Original + Generated Negatives</h3>
+<section id="final-result-complete-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="final-result-complete-dataset">Final Result: Complete Dataset</h3>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 27%">
+<col style="width: 18%">
+<col style="width: 27%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>user_indice</th>
@@ -5191,16 +5185,16 @@ font-style: inherit;"># Match positive count</span></span></code></pre></div>
 <td>positive</td>
 </tr>
 <tr class="odd">
-<td>1</td>
-<td>103</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">1</span></td>
+<td><span style="color: #B0B0B0;">103</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="even">
-<td>1</td>
-<td>104</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">1</span></td>
+<td><span style="color: #B0B0B0;">104</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="odd">
 <td>2</td>
@@ -5221,10 +5215,10 @@ font-style: inherit;"># Match positive count</span></span></code></pre></div>
 <td>positive</td>
 </tr>
 <tr class="even">
-<td>2</td>
-<td>102</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">2</span></td>
+<td><span style="color: #B0B0B0;">102</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="odd">
 <td>3</td>
@@ -5239,16 +5233,16 @@ font-style: inherit;"># Match positive count</span></span></code></pre></div>
 <td>positive</td>
 </tr>
 <tr class="odd">
-<td>3</td>
-<td>102</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">3</span></td>
+<td><span style="color: #B0B0B0;">102</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="even">
-<td>3</td>
-<td>104</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">3</span></td>
+<td><span style="color: #B0B0B0;">104</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="odd">
 <td>4</td>
@@ -5263,16 +5257,16 @@ font-style: inherit;"># Match positive count</span></span></code></pre></div>
 <td>positive</td>
 </tr>
 <tr class="odd">
-<td>4</td>
-<td>101</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">4</span></td>
+<td><span style="color: #B0B0B0;">101</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="even">
-<td>4</td>
-<td>103</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">4</span></td>
+<td><span style="color: #B0B0B0;">103</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 <tr class="odd">
 <td>5</td>
@@ -5281,10 +5275,10 @@ font-style: inherit;"># Match positive count</span></span></code></pre></div>
 <td>positive</td>
 </tr>
 <tr class="even">
-<td>5</td>
-<td>103</td>
-<td>0</td>
-<td>negative</td>
+<td><span style="color: #B0B0B0;">5</span></td>
+<td><span style="color: #B0B0B0;">103</span></td>
+<td><span style="color: #B0B0B0;">0</span></td>
+<td><span style="color: #B0B0B0;">negative</span></td>
 </tr>
 </tbody>
 </table>
@@ -5409,6 +5403,7 @@ font-style: inherit;">return</span> neg_df</span></code></pre></div>
 <div class="column-page">
 <p><img src="https://dvquys.com/projects/implement-recsys/c3/concat-pos-neg.png" class="img-fluid"></p>
 </div>
+<p>We now have a balanced dataset of positive and negative samples, ready for the next stages in model development cycle!</p>
 </section>
 <section id="recap" class="level2">
 <h2 class="anchored" data-anchor-id="recap">Recap</h2>
@@ -5436,7 +5431,9 @@ Code
 </section>
 <section id="whats-next" class="level2">
 <h2 class="anchored" data-anchor-id="whats-next">What’s Next?</h2>
-<p>With our balanced dataset of positive and negative samples, we’re ready to tackle model evaluation. In <a href="../../../projects/implement-recsys/c4/index.html">Chapter 4</a>, we’ll set up our evaluation framework and experiment tracking with MLflow while implementing a baseline model along the way as an illustration. This will give us the foundation for systematic model development and comparison.</p>
+<p>We have our labeled data, great. Ready to see some model code?</p>
+<p>Not so fast, we will learn about building actual sequence models in … <a href="../../../projects/implement-recsys/c5/index.html">Chapter 5</a>.</p>
+<p>In <a href="../../../projects/implement-recsys/c4/index.html">Chapter 4</a>, we’ll set up our evaluation framework and experiment tracking with MLflow while implementing a baseline model along the way as an illustration. This will give us the foundation for systematic model development and comparison.</p>
 <p>Continue to the <a href="../../../projects/implement-recsys/c4/index.html">next chapter</a>.</p>
 <hr>
 <p><br> If you find this tutorial helpful, please cite this writeup as:</p>
