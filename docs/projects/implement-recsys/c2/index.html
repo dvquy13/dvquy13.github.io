@@ -344,43 +344,50 @@ Code
 </section>
 <section id="dataset-overview-amazon-reviews-2023" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="dataset-overview-amazon-reviews-2023">Dataset Overview: Amazon Reviews 2023</h2>
-<p>A good dataset for this kind of sequential recommendation project would typically have the following characteristics:</p>
+<p>A good RecSys dataset typically has the following characteristics:</p>
 <ol type="1">
 <li><strong>Temporal richness</strong>: Each interaction has a timestamp, enabling sequence modeling</li>
 <li><strong>Scale</strong>: Millions of interactions across thousands of users and items</li>
 <li><strong>Real-world patterns</strong>: Authentic user behavior with natural sparsity</li>
 </ol>
-<p>Among the well-known public options, I chose the <a href="https://amazon-reviews-2023.github.io/">Amazon Reviews 2023</a> collection from the McAuley Lab, specifically the “Books” category. Beyond the above characteristics, it offers other useful signals like user reviews and item descriptions.</p>
+<p>For this tutorial, instead of using the well-known MovieLens dataset, I chose the <a href="https://amazon-reviews-2023.github.io/">Amazon Reviews 2023</a> collection from the McAuley Lab, specifically the “Books” category. Beyond the above characteristics, it offers other useful signals like user reviews and item descriptions.</p>
 <div class="column-page my-5">
 <p><img src="../static/dataset.png" class="img-fluid"></p>
 </div>
-<p>With <a href="https://huggingface.co/docs/datasets/en/installation#pip">HuggingFace’s dataset library</a>, we can download the data with just one line of code. The library also caches the downloaded assets by default, so subsequent runs will take almost no time.</p>
+<p>With <a href="https://huggingface.co/docs/datasets/en/installation#pip">HuggingFace’s dataset library</a>, we can download everything with just one line of code. The package also caches the downloaded assets by default, so subsequent runs will take almost no time.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> load_dataset(</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    cfg.data.hf_datasets.name,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"5core_timestamp_Books"</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    trust_remote_code<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="column-page">
 <p><img src="../static/dataset-info.png" class="img-fluid"></p>
 </div>
 <p>The main schema of the dataset is quite simple:</p>
-<div class="sourceCode" id="annotated-cell-1"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># From cfg/common.yaml</span></span>
-<span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a>data:</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1">1</button><span id="annotated-cell-1-3" class="code-annotation-target"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a>  user_col: <span class="st">"user_id"</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="2">2</button><span id="annotated-cell-1-4" class="code-annotation-target"><a href="#annotated-cell-1-4" aria-hidden="true" tabindex="-1"></a>  item_col: <span class="st">"parent_asin"</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="3">3</button><span id="annotated-cell-1-5" class="code-annotation-target"><a href="#annotated-cell-1-5" aria-hidden="true" tabindex="-1"></a>  rating_col: <span class="st">"rating"</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="4">4</button><span id="annotated-cell-1-6" class="code-annotation-target"><a href="#annotated-cell-1-6" aria-hidden="true" tabindex="-1"></a>  timestamp_col: <span class="st">"timestamp"</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="annotated-cell-2"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># From cfg/common.yaml</span></span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>data:</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-3" class="code-annotation-target"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>  user_col: <span class="st">"user_id"</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2">2</button><span id="annotated-cell-2-4" class="code-annotation-target"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a>  item_col: <span class="st">"parent_asin"</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="3">3</button><span id="annotated-cell-2-5" class="code-annotation-target"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>  rating_col: <span class="st">"rating"</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="4">4</button><span id="annotated-cell-2-6" class="code-annotation-target"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a>  timestamp_col: <span class="st">"timestamp"</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-1" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-1" data-code-lines="3" data-code-annotation="1">Unique user identifier</span>
+<span data-code-cell="annotated-cell-2" data-code-lines="3" data-code-annotation="1">Unique user identifier</span>
 </dd>
-<dt data-target-cell="annotated-cell-1" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-1" data-code-lines="4" data-code-annotation="2">Product identifier (in our case, the ASIN—Amazon Standard Identification Number)</span>
+<span data-code-cell="annotated-cell-2" data-code-lines="4" data-code-annotation="2">Product identifier (in our case, the ASIN—Amazon Standard Identification Number)</span>
 </dd>
-<dt data-target-cell="annotated-cell-1" data-target-annotation="3">3</dt>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-1" data-code-lines="5" data-code-annotation="3">User rating (1-5 scale)</span>
+<span data-code-cell="annotated-cell-2" data-code-lines="5" data-code-annotation="3">User rating (1-5 scale)</span>
 </dd>
-<dt data-target-cell="annotated-cell-1" data-target-annotation="4">4</dt>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="4">4</dt>
 <dd>
-<span data-code-cell="annotated-cell-1" data-code-lines="6" data-code-annotation="4">Interaction timestamp</span>
+<span data-code-cell="annotated-cell-2" data-code-lines="6" data-code-annotation="4">Interaction timestamp</span>
 </dd>
 </dl>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -395,18 +402,20 @@ Configuration Management
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.cfg <span class="im">import</span> ConfigLoader</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load configuration</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>cfg <span class="op">=</span> ConfigLoader(<span class="st">"cfg/common.yaml"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.cfg <span class="im">import</span> ConfigLoader</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load configuration</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>cfg <span class="op">=</span> ConfigLoader(<span class="st">"cfg/common.yaml"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Throughout this project, we store most configuration in <code>cfg/common.yaml</code>. This design does not only make it easier for notebooks and scripts to access their inputs and outputs but also help us try different configurations easily.</p>
 </div>
 </div>
 </div>
-<p>As you can see above, the train dataset has 8M ratings for us to play with. That’s not small at all. However, if you think we’re going to use big data processing for those interactions, I’m sorry to let you down. The first thing I normally do with raw data is to <strong>not</strong> utilize all the data points. In fact, I even go the opposite direction. The next section provides some insights into why we may consider sampling data as the first thing to do for our project.</p>
+<p>As you can see above, the train dataset has almost 9M ratings for us to play with. That’s not small at all. However, if you think we’re going to use big data processing for those interactions, this isn’t the case for our series. The first thing I normally do with raw data is to <strong>not</strong> utilize all the data points.</p>
+<p>In fact, I even go the opposite direction.</p>
 </section>
 <section id="data-sampling-and-filtering" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="data-sampling-and-filtering">Data Sampling and Filtering</h2>
+<p>Let’s discuss why we may consider sampling data as the first thing to do for our project.</p>
 <p>If you study the documentation of our Amazon Reviews dataset, you will find that they provide two variants:</p>
 <blockquote class="blockquote">
 <p><strong>Pure IDs (0-Core)</strong></p>
@@ -416,13 +425,16 @@ Configuration Management
 </ol>
 <p><strong>Pure IDs (5-Core)</strong></p>
 <ol type="1">
-<li>Pros of 5-Core: <strong>Higher quality reviews, Reduced noise, Balanced distribution and Computational efficiency</strong>.</li>
+<li>Pros of 5-Core: Higher quality reviews, Reduced noise, Balanced distribution and Computational efficiency.</li>
 <li>Cons of 5-Core: Limited diversity, Misalignment with original data distribution, Loss of context, Generalizability and Limited data size for scaling up.</li>
 </ol>
 <p>— <a href="https://amazon-reviews-2023.github.io/data_processing/0core.html">Amazon Reviews 2023 Dataset Documentation</a></p>
 </blockquote>
-<p>Pay attention to the rationales they give for the 5-Core dataset. This resonates with my view on data sampling.</p>
-<p>The supposition is that the faster we can run operations on our data, the more progress we can make. As ML is mostly about iterative development, the main rationale of sampling and filtering is to have a small but decent enough dataset to <strong>quickly</strong> experiment different ideas.</p>
+<p>Pay attention to the pros they give for the 5-Core version: “Higher quality reviews, Reduced noise, Balanced distribution and <strong>Computational efficiency</strong>”. I find myself specifically resonating with the last aspect.</p>
+<p><strong>As ML is mostly about iterative development</strong>, it’s by design that the faster we can run operations on our data, the more progress we can make. Being able to <strong>quickly</strong> experiment different ideas offline offer you a lot of advantages.</p>
+<p>For instance, you can rapidly test different feature engineering approaches—whether adding user demographics, item metadata, or temporal features actually improves model performance. You can efficiently compare multiple model architectures (neural collaborative filtering vs.&nbsp;sequential models vs.&nbsp;matrix factorization) within the hours rather than days. Additionally, quick iteration also enables you to discover data quality issues early, such as identifying that certain user segments have vastly different interaction patterns which may suggest a need for new input signals. Finally, fast experimentation saves you a lot of time searching for optimal hyperparameters (learning rates, regularization, etc.).</p>
+<p>And after being satisfied with the offline evaluations, we can always commit to train and test the model on the complete dataset.</p>
+<p>Given that being said, all sorts of things we want to do to improve our model’s capability can benefit from a small but decent dataset. Obviously the size should not be like a few dozens of observations, cause it hurts with any statistical patterns we would like to learn. In my experience, a good minimum threshold is around 10K users and 5K items, with the sparsity being less than 99.9%.</p>
 <section id="a-note-on-sparsity" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="a-note-on-sparsity">A note on sparsity</h3>
 <p>What does it mean to have a decent RecSys dataset? One of the key criteria is <strong>sparsity</strong>—the ratio of observed interactions to all possible user-item pairs.</p>
@@ -660,36 +672,36 @@ Configuration Management
 </table>
 <p><em>User A now has only 1 interaction (Item 3) ✗ - Might fall below user threshold too!</em></p>
 <p>It’s like pulling threads from a sweater—everything starts unraveling.</p>
-<p>An <strong>iterative</strong> approach can be considered for this kind of problem. We gradually drop random users from the dataset while watching our conditions and sampling targets. The trade-off is that while it’s hard to get an exact predefined number of users and items, we can control the minimum acceptable thresholds:</p>
+<p>An <strong>iterative</strong> approach can be considered to deal with this kind of problem. We gradually drop random users from the dataset while watching our conditions and sampling targets. The trade-off is that while it’s hard to get an exact predefined number of users and items, we can control the minimum acceptable thresholds:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>cfg/common.yaml</strong></pre>
 </div>
-<div class="sourceCode" id="annotated-cell-2" data-filename="cfg/common.yaml"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a>sample:</span>
-<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>  sample_users: <span class="dv">10000</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-3" class="code-annotation-target"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>  min_val_records: <span class="dv">5000</span></span>
-<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a>  min_user_interactions: <span class="dv">5</span></span>
-<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>  min_item_interactions: <span class="dv">10</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="annotated-cell-3" data-filename="cfg/common.yaml"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-3-1"><a href="#annotated-cell-3-1" aria-hidden="true" tabindex="-1"></a>sample:</span>
+<span id="annotated-cell-3-2"><a href="#annotated-cell-3-2" aria-hidden="true" tabindex="-1"></a>  sample_users: <span class="dv">10000</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1">1</button><span id="annotated-cell-3-3" class="code-annotation-target"><a href="#annotated-cell-3-3" aria-hidden="true" tabindex="-1"></a>  min_val_records: <span class="dv">5000</span></span>
+<span id="annotated-cell-3-4"><a href="#annotated-cell-3-4" aria-hidden="true" tabindex="-1"></a>  min_user_interactions: <span class="dv">5</span></span>
+<span id="annotated-cell-3-5"><a href="#annotated-cell-3-5" aria-hidden="true" tabindex="-1"></a>  min_item_interactions: <span class="dv">10</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="3" data-code-annotation="1">We need to ensure sufficient validation data to evaluate our models.</span>
+<span data-code-cell="annotated-cell-3" data-code-lines="3" data-code-annotation="1">We need to ensure sufficient validation data to evaluate our models.</span>
 </dd>
 </dl>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.sample <span class="im">import</span> InteractionDataSampler</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>data_sampler <span class="op">=</span> InteractionDataSampler(</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    user_col<span class="op">=</span>cfg.data.user_col,</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    item_col<span class="op">=</span>cfg.data.item_col,</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    sample_users<span class="op">=</span>cfg.sample.sample_users,</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    min_val_records<span class="op">=</span>cfg.sample.min_val_records,</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    random_seed<span class="op">=</span>cfg.run.random_seed,</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    min_item_interactions<span class="op">=</span>cfg.sample.min_item_interactions,</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    min_user_interactions<span class="op">=</span>cfg.sample.min_user_interactions,</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    perc_users_removed_each_round<span class="op">=</span><span class="fl">0.1</span>,</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    debug<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.sample <span class="im">import</span> InteractionDataSampler</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>data_sampler <span class="op">=</span> InteractionDataSampler(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    user_col<span class="op">=</span>cfg.data.user_col,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    item_col<span class="op">=</span>cfg.data.item_col,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    sample_users<span class="op">=</span>cfg.sample.sample_users,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    min_val_records<span class="op">=</span>cfg.sample.min_val_records,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    random_seed<span class="op">=</span>cfg.run.random_seed,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    min_item_interactions<span class="op">=</span>cfg.sample.min_item_interactions,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    min_user_interactions<span class="op">=</span>cfg.sample.min_user_interactions,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    perc_users_removed_each_round<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    debug<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <pre class="plaintext code-overflow-wrap"><code>...
 
 Randomly removing 2960 users - Round 18 started
@@ -700,6 +712,7 @@ Randomly removing 2413 users - Round 19 started
 After randomly removing users - round 19: num_users=24,137
 Number of users 24,137 are still greater than expected, keep removing...
 Number of val_df records 4,282 are falling below expected threshold, stop and use `sample_df` as final output...
+
 len(sample_users)=19,734 len(sample_items)=7,388</code></pre>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -714,15 +727,9 @@ len(sample_users)=19,734 len(sample_items)=7,388</code></pre>
 
 </div>
 </div>
-<p>In the end, we won’t have exactly 10,000 users, but the numbers will be close.</p>
-<p>Results after sampling:</p>
-<div class="page-columns page-full">
-<div class="quarto-figure quarto-figure-center page-columns page-full">
-<figure class="figure page-columns page-full">
-<p class="page-columns page-full"><a href="../static/sample-interaction-dist.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-1" title="1st: User interaction distribution 2nd: Item interaction distribution"><img src="../static/sample-interaction-dist.png" class="img-fluid figure-img column-page" alt="1st: User interaction distribution 2nd: Item interaction distribution"></a></p>
-<figcaption>1st: User interaction distribution<br>2nd: Item interaction distribution</figcaption>
-</figure>
-</div>
+<p>After sampling, we end up with 19,734 users and 7,388 items. The sample dataset has 99.8666% sparsity compared to 99.9976% sparsity from the original dataset.</p>
+<div class="column-page">
+<p><a href="./sample-user-interaction-distribution.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="./sample-user-interaction-distribution.png" class="img-fluid"></a> <a href="./sample-item-interaction-distribution.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="./sample-item-interaction-distribution.png" class="img-fluid"></a></p>
 </div>
 </section>
 </section>
@@ -740,27 +747,27 @@ len(sample_users)=19,734 len(sample_items)=7,388</code></pre>
 <section id="id-mapping-from-strings-to-indices" class="level3">
 <h3 class="anchored" data-anchor-id="id-mapping-from-strings-to-indices">ID Mapping: From Strings to Indices</h3>
 <p>As discussed in Chapter 1, we’re modeling this problem with neural networks. Deep learning models work with numerical indices, not string IDs. So we use our <a href="https://github.com/dvquy13/recsys-seq-model/blob/main/src/id_mapper.py">IDMapper</a> to provide deterministic mapping from user and item IDs to integer indices:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.id_mapper <span class="im">import</span> IDMapper</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>user_ids <span class="op">=</span> train_df[cfg.data.user_col].values</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>item_ids <span class="op">=</span> train_df[cfg.data.item_col].values</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>unique_user_ids <span class="op">=</span> <span class="bu">list</span>(<span class="bu">set</span>(user_ids))</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>unique_item_ids <span class="op">=</span> <span class="bu">list</span>(<span class="bu">set</span>(item_ids))</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>idm <span class="op">=</span> IDMapper()</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>idm.fit(unique_user_ids, unique_item_ids)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Save for later use in model serving</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>idm.save(<span class="st">"data/idm.json"</span>)</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Below is the example output of the indice mapping for user IDs:</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>display(idm.user_to_index)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"AE224PFXAEAT66IXX43GRJSWHXCA"</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"AE225Y3KDZ44DHLUKLE4RJ63HC5Q"</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"AE226YVDC3MAGJZMZ4IBGE7RFJSQ"</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"AE22EJZ4354VB7MN4IE2CDGHA2DQ"</span><span class="fu">:</span> <span class="dv">3</span><span class="fu">,</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"AE22O3TURLPFCJKL7YCX5CPF22OA"</span><span class="fu">:</span> <span class="dv">4</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.id_mapper <span class="im">import</span> IDMapper</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>user_ids <span class="op">=</span> train_df[cfg.data.user_col].values</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>item_ids <span class="op">=</span> train_df[cfg.data.item_col].values</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>unique_user_ids <span class="op">=</span> <span class="bu">list</span>(<span class="bu">set</span>(user_ids))</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>unique_item_ids <span class="op">=</span> <span class="bu">list</span>(<span class="bu">set</span>(item_ids))</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>idm <span class="op">=</span> IDMapper()</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>idm.fit(unique_user_ids, unique_item_ids)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Save for later use in model serving</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>idm.save(<span class="st">"data/idm.json"</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Below is the example output of the indice mapping for user IDs:</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>display(idm.user_to_index)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"AE224PFXAEAT66IXX43GRJSWHXCA"</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"AE225Y3KDZ44DHLUKLE4RJ63HC5Q"</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"AE226YVDC3MAGJZMZ4IBGE7RFJSQ"</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"AE22EJZ4354VB7MN4IE2CDGHA2DQ"</span><span class="fu">:</span> <span class="dv">3</span><span class="fu">,</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"AE22O3TURLPFCJKL7YCX5CPF22OA"</span><span class="fu">:</span> <span class="dv">4</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="sequence-generation" class="level3">
 <h3 class="anchored" data-anchor-id="sequence-generation">Sequence Generation</h3>
@@ -835,42 +842,42 @@ len(sample_users)=19,734 len(sample_items)=7,388</code></pre>
 </table>
 <p><br></p>
 <p>The function <code>generate_item_sequences</code> can be used to perform the sequence generation.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.sequence.util <span class="im">import</span> generate_item_sequences</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample DataFrame</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"user_indices"</span>: [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>],</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"item_indices"</span>: [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>],</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"timestamp"</span>: [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>],</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ratings"</span>: [<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">2</span>],</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(data)</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate the item sequences</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>df_with_sequences <span class="op">=</span> generate_item_sequences(</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    df,</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    user_col<span class="op">=</span><span class="st">"user_indices"</span>,</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    item_col<span class="op">=</span><span class="st">"item_indices"</span>,</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    timestamp_col<span class="op">=</span><span class="st">"timestamp"</span>,</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    sequence_length<span class="op">=</span><span class="dv">3</span>,</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    padding<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    padding_value<span class="op">=-</span><span class="dv">1</span>,</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>display(df_with_sequences)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><a href="./sequence-gen-test.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="./sequence-gen-test.png" class="img-fluid"></a></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.sequence.util <span class="im">import</span> generate_item_sequences</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample DataFrame</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"user_indices"</span>: [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>],</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"item_indices"</span>: [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>],</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"timestamp"</span>: [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>],</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ratings"</span>: [<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">2</span>],</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(data)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate the item sequences</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>df_with_sequences <span class="op">=</span> generate_item_sequences(</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    df,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    user_col<span class="op">=</span><span class="st">"user_indices"</span>,</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    item_col<span class="op">=</span><span class="st">"item_indices"</span>,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    timestamp_col<span class="op">=</span><span class="st">"timestamp"</span>,</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    sequence_length<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    padding<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    padding_value<span class="op">=-</span><span class="dv">1</span>,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>display(df_with_sequences)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><a href="./sequence-gen-test.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="./sequence-gen-test.png" class="img-fluid"></a></p>
 <p>As you can see, the above <code>item_sequence</code> column contains the sequence of items in chronological order which holds the context for the model to understand user preferences and make sequential predictions.</p>
 <p>In this project, we use the user’s last 10 items as the sequence length, but this is configurable. The choice depends on experimentation, but generally there’s a trade-off: longer sequences provide more context but use more memory, while shorter sequences focus on recent items and process faster.</p>
-<p>Do take note that we need to pad sequences to the same length so we can batch process them in our PyTorch model.</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>cfg/common.yaml</strong></pre>
 </div>
-<div class="sourceCode" id="cb7" data-filename="cfg/common.yaml"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">train</span><span class="kw">:</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">sequence</span><span class="kw">:</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">sequence_length</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span><span class="co">  # Keep last 10 items as context</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb8" data-filename="cfg/common.yaml"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">train</span><span class="kw">:</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">sequence</span><span class="kw">:</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">sequence_length</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span><span class="co">  # Keep last 10 items as context</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Do take note that we need to pad sequences to the same length so we can batch process them in our PyTorch model.</p>
 <p>With our feature engineering pipeline complete, we now have transformed our raw Amazon Reviews data into model-ready sequences. Each user’s interaction history has been converted into numerical sequences that capture temporal patterns, while our ID mapping ensures consistent encoding across train and validation sets. These sequences will serve as the foundation for training our neural sequential recommendation model, providing the rich contextual information needed to predict what items users are likely to engage with next.</p>
 </section>
 </section>
