@@ -249,6 +249,14 @@ cookieconsent.run({
   <li><a href="#step-2-identify-negative-candidates" id="toc-step-2-identify-negative-candidates" class="nav-link" data-scroll-target="#step-2-identify-negative-candidates">Step 2: Identify Negative Candidates</a></li>
   <li><a href="#step-3-popularity-weighted-sampling" id="toc-step-3-popularity-weighted-sampling" class="nav-link" data-scroll-target="#step-3-popularity-weighted-sampling">Step 3: Popularity-Weighted Sampling</a></li>
   </ul></li>
+  <li><a href="#example-walkthrough" id="toc-example-walkthrough" class="nav-link" data-scroll-target="#example-walkthrough">Example Walkthrough</a>
+  <ul class="collapse">
+  <li><a href="#step-1-item-popularity-calculation" id="toc-step-1-item-popularity-calculation" class="nav-link" data-scroll-target="#step-1-item-popularity-calculation">Step 1: Item Popularity Calculation</a></li>
+  <li><a href="#step-2-negative-candidates-per-user" id="toc-step-2-negative-candidates-per-user" class="nav-link" data-scroll-target="#step-2-negative-candidates-per-user">Step 2: Negative Candidates per User</a></li>
+  <li><a href="#step-3-popularity-weighted-negative-sampling" id="toc-step-3-popularity-weighted-negative-sampling" class="nav-link" data-scroll-target="#step-3-popularity-weighted-negative-sampling">Step 3: Popularity-Weighted Negative Sampling</a></li>
+  <li><a href="#final-result-original-generated-negatives" id="toc-final-result-original-generated-negatives" class="nav-link" data-scroll-target="#final-result-original-generated-negatives">Final Result: Original + Generated Negatives</a></li>
+  </ul></li>
+  <li><a href="#testing-the-implementation" id="toc-testing-the-implementation" class="nav-link" data-scroll-target="#testing-the-implementation">Testing the Implementation</a></li>
   <li><a href="#adding-features-to-the-generated-negative-samples" id="toc-adding-features-to-the-generated-negative-samples" class="nav-link" data-scroll-target="#adding-features-to-the-generated-negative-samples">Adding Features to the generated negative samples</a></li>
   <li><a href="#concat-and-re-split-train-test" id="toc-concat-and-re-split-train-test" class="nav-link" data-scroll-target="#concat-and-re-split-train-test">Concat and re-split train-test</a></li>
   <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap">Recap</a></li>
@@ -297,18 +305,22 @@ List of chapters
 </div>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>In <a href="../../../projects/implement-recsys/c2/index.html">Chapter 2</a>, we dug into our Amazon dataset and built a solid feature preprocessing pipeline. But we’re not ready to train any models yet. We’re missing something crucial: the labels that will teach our model the difference between what users want and what they don’t.</p>
-<p>We already know which items users bought. So here’s a natural idea: let’s turn this into a sequence prediction problem. Show the model a user’s past actions, then ask it to predict what comes next.</p>
-<p>If this idea of predicting next thing based on a sequence of things sounds familiar, then it’s expected. This is exactly what researchers in natural language processing figured out years ago. Take Word2Vec. It’s a simple but brilliant model that learns word relationships by studying which words hang out together. Word2Vec breaks a sentence into input-output pairs where the surrounding words are the input and the hidden target word is what you’re trying to predict.</p>
+<p>In <a href="../../../projects/implement-recsys/c2/index.html">Chapter 2</a>, we dug into our Amazon dataset and built a solid feature preprocessing pipeline. But we’re not ready to train any models yet. We’re missing something crucial: the <strong>labels</strong> that will teach our model the difference between what users want and what they don’t.</p>
+<p>We already know which books users bought and when. Here comes a natural way to frame ours as a Machine Learning problem: Show the model a user’s past actions, then ask it to predict he’s going to read next.</p>
+<p>If you keep an eye on the progress of ML in the last 15 years, you should find this idea of predicting next item based on a sequence of items familiar. This is how Tomas Mikolov and his colleagues at Google developed their influential <a href="https://arxiv.org/abs/1301.3781">Word2Vec model</a>. Word2Vec is a simple but brilliant architecture that learns word relationships by studying which words hang out together. It breaks a sentence into input-output pairs where the surrounding words are the input and the hidden target word is what you’re trying to predict.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="./skipgram.webp" class="img-fluid figure-img"></p>
 <figcaption>Source: <a href="https://medium.com/@zafaralibagh6/a-simple-word2vec-tutorial-61e64e38a6a1">A simple Word2Vec tutorial</a></figcaption>
 </figure>
 </div>
-<p>At each step, we pick a target word along with its neighboring context to form a positive training example. How about the negatives? That’s where negative sampling comes in. Rather than letting the model see only context words that belong together, we throw in some randomly selected words from outside the context. This mix challenges the model, teaching it to learn the patterns of words that appear in similar contexts.</p>
-<p>Now let’s apply this to our book dataset. When a user clicks, views, or buys something, that’s a clear positive signal. But what about the millions of items they never touch? Are these items bad, or did the user just never discover them? Negative sampling helps us figure this out. It gives the model examples of what a user probably won’t pick.</p>
-<p>I personally find this analogy helpful: Training a recommendation model without negative samples is like teaching someone to recognize cats by only showing them cat pictures. They might think everything is a cat!</p>
+<p>At each step, we pick a target word along with its neighboring context to form a <strong>positive</strong> training example.</p>
+<p>How about the negatives?</p>
+<p>If positives are observed from the surrounding context of a target word X, negatives are sampled by throwing in some <strong>randomly selected</strong> words which we haven’t found appear close to X. This mix challenges the model, teaching it to learn the patterns of words that appear in similar contexts.</p>
+<p>Take an e-commerce business as an example. When a user clicks, views, or buys something, that’s a clear positive signal. But what about the millions of items they never touch? Are these items bad, or did the user just never discover them? These are the sorts of “negative” examples—where we assume that most of which he probably won’t pick.</p>
+<p>When thinking about the importance of negative sampling, I personally find this analogy helpful: Training a recommendation model without negative samples is like teaching someone to recognize cats by only showing them cat pictures. They might think everything is a cat!</p>
+<p><img src="./cat-learn.png" class="img-fluid"></p>
+<p>Given that, let’s put some thoughts into different ways we can actually generate negative samples.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -333,10 +345,9 @@ Code
 </section>
 <section id="popularity-based-sampling" class="level3">
 <h3 class="anchored" data-anchor-id="popularity-based-sampling">Popularity-Based Sampling</h3>
-<p>To deal with the above popularity biase, instead of picking negatives randomly, we sample them based on how popular they are in the dataset. This makes popular items get chosen as negatives more often.</p>
-<p>Why does this work better? A popular item has a higher chance of being liked by any user than a random item. So when we use popular items as negatives, we’re creating harder training examples. We’re forcing the model to learn why this specific user didn’t interact with this popular item, even though lots of other people did.</p>
-<p>This has a nice side effect. It helps the model learn beyond simple popularity bias. Instead of just recommending whatever’s trending, it has to figure out what makes items relevant for specific users.</p>
-<p>The downside? It’s more work to implement. You need to track popularity statistics. And there’s a catch: popular items aren’t always bad choices for a user. Sometimes they’re popular because they’re actually good. So when we force a negative for a user-item pair, it might confuse the model.</p>
+<p>To deal with the above popularity bias, instead of picking negatives randomly, we sample them based on how popular they are in the dataset. This makes popular items get chosen as negatives more often.</p>
+<p>How does this help? A popular item has a higher chance of being liked by any user than a random item. So when we use popular items as negatives, we’re creating harder training examples. We’re forcing the model to learn why this specific user didn’t interact with this popular item, even though lots of other people did.</p>
+<p>The downside? It requires more effort to implement, like tracking popularity statistics when doing sampling. And sometimes it’s true that popular items aren’t always bad choices for a user. They are often top-selling because they’re actually good.</p>
 </section>
 <section id="hard-negative-mining" class="level3">
 <h3 class="anchored" data-anchor-id="hard-negative-mining">Hard Negative Mining</h3>
@@ -346,9 +357,9 @@ Code
 <p>For this project, we’ll use <strong>popularity-based negative sampling</strong>. It strikes a good balance between effectiveness and simplicity.</p>
 </section>
 </section>
-<section id="lets-implement" class="level2 page-columns page-full">
+<section id="lets-implement" class="level2">
 <h2 class="anchored" data-anchor-id="lets-implement">Let’s implement</h2>
-<p>The full implementation is <a href="https://github.com/dvquy13/recsys-seq-model/blob/main/src/negative_sampling.py">here</a>.</p>
+<p>The full implementation of our negative sampler can be found <a href="https://github.com/dvquy13/recsys-seq-model/blob/main/src/negative_sampling.py">here</a>.</p>
 <p>Function signature:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
@@ -402,7 +413,7 @@ Code
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    negative_candidates <span class="op">=</span> all_items_set <span class="op">-</span> pos_items</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>We make sure we only sample from items the user hasn’t already interacted with.</p>
 </section>
-<section id="step-3-popularity-weighted-sampling" class="level3 page-columns page-full">
+<section id="step-3-popularity-weighted-sampling" class="level3">
 <h3 class="anchored" data-anchor-id="step-3-popularity-weighted-sampling">Step 3: Popularity-Weighted Sampling</h3>
 <div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a mapping from item to index to quickly access item-related data.</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>items <span class="op">=</span> item_popularity.index.values</span>
@@ -423,16 +434,347 @@ Code
 <p>In our implementation, we choose to have the same number of negative samples as positive samples. This helps us avoid dealing with imbalanced training data. But feel free to experiment with different ratios (you’ll need to update the implementation).</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>num_pos <span class="op">=</span> <span class="bu">len</span>(pos_items)  <span class="co"># Number of positive interactions</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>num_neg <span class="op">=</span> <span class="bu">min</span>(num_pos, num_neg_candidates)  <span class="co"># Match positive count</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="example-walkthrough" class="level2">
+<h2 class="anchored" data-anchor-id="example-walkthrough">Example Walkthrough</h2>
+<p>Let’s illustrate this process with a concrete example to see how popularity-based negative sampling works in practice.</p>
+<p>Starting with a simple user-item interaction dataset:</p>
+<p><strong>Original User-Item Interactions</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>user_indice</th>
+<th>item_indice</th>
+<th>rating</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>101</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>102</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>101</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>103</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>104</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>101</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>103</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>102</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>104</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>101</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<section id="step-1-item-popularity-calculation" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-item-popularity-calculation">Step 1: Item Popularity Calculation</h3>
+<p><strong>Item Popularity (Interaction Frequency)</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>item_indice</th>
+<th>interaction_count</th>
+<th>sampling_probability</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>101</td>
+<td>4</td>
+<td>0.40</td>
+</tr>
+<tr class="even">
+<td>102</td>
+<td>2</td>
+<td>0.20</td>
+</tr>
+<tr class="odd">
+<td>103</td>
+<td>2</td>
+<td>0.20</td>
+</tr>
+<tr class="even">
+<td>104</td>
+<td>2</td>
+<td>0.20</td>
+</tr>
+</tbody>
+</table>
+<p>Total interactions: 10, so item 101 (most popular) has 40% sampling probability.</p>
+</section>
+<section id="step-2-negative-candidates-per-user" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-negative-candidates-per-user">Step 2: Negative Candidates per User</h3>
+<p><strong>User’s Positive Items and Negative Candidates</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>user_indice</th>
+<th>positive_items</th>
+<th>negative_candidates</th>
+<th>num_positives</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>{101, 102}</td>
+<td>{103, 104}</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>{101, 103, 104}</td>
+<td>{102}</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>{101, 103}</td>
+<td>{102, 104}</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>{102, 104}</td>
+<td>{101, 103}</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>{101}</td>
+<td>{102, 103, 104}</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="step-3-popularity-weighted-negative-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-popularity-weighted-negative-sampling">Step 3: Popularity-Weighted Negative Sampling</h3>
+<p>For each user, we sample negatives proportional to item popularity among their negative candidates:</p>
+<p><strong>User 1’s Negative Sampling</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>negative_candidate</th>
+<th>original_probability</th>
+<th>normalized_probability</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>103</td>
+<td>0.20</td>
+<td>0.50</td>
+</tr>
+<tr class="even">
+<td>104</td>
+<td>0.20</td>
+<td>0.50</td>
+</tr>
+</tbody>
+</table>
+<p><strong>User 4’s Negative Sampling</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>negative_candidate</th>
+<th>original_probability</th>
+<th>normalized_probability</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>101</td>
+<td>0.40</td>
+<td>0.67</td>
+</tr>
+<tr class="even">
+<td>103</td>
+<td>0.20</td>
+<td>0.33</td>
+</tr>
+</tbody>
+</table>
+<p>User 4 will more likely get item 101 as a negative sample since it’s more popular.</p>
+</section>
+<section id="final-result-original-generated-negatives" class="level3">
+<h3 class="anchored" data-anchor-id="final-result-original-generated-negatives">Final Result: Original + Generated Negatives</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>user_indice</th>
+<th>item_indice</th>
+<th>rating</th>
+<th>sample_type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>101</td>
+<td>1</td>
+<td>positive</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>102</td>
+<td>1</td>
+<td>positive</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>103</td>
+<td>0</td>
+<td>negative</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>104</td>
+<td>0</td>
+<td>negative</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>101</td>
+<td>1</td>
+<td>positive</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>103</td>
+<td>1</td>
+<td>positive</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>104</td>
+<td>1</td>
+<td>positive</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>102</td>
+<td>0</td>
+<td>negative</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>101</td>
+<td>1</td>
+<td>positive</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>103</td>
+<td>1</td>
+<td>positive</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>102</td>
+<td>0</td>
+<td>negative</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>104</td>
+<td>0</td>
+<td>negative</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>102</td>
+<td>1</td>
+<td>positive</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>104</td>
+<td>1</td>
+<td>positive</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>101</td>
+<td>0</td>
+<td>negative</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>103</td>
+<td>0</td>
+<td>negative</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>101</td>
+<td>1</td>
+<td>positive</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>103</td>
+<td>0</td>
+<td>negative</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p>Key Insights:</p>
+<ol type="1">
+<li><strong>Popularity Bias</strong>: Item 101 (most popular) appears more frequently as a negative sample</li>
+<li><strong>Balanced Sampling</strong>: Each user gets the same number of negatives as positives</li>
+<li><strong>No Self-Contradiction</strong>: Users never get negatives for items they already interacted with</li>
+<li><strong>Harder Training</strong>: Popular items as negatives create more challenging learning scenarios</li>
+</ol>
+</section>
+</section>
+<section id="testing-the-implementation" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="testing-the-implementation">Testing the Implementation</h2>
 <p>Like other crucial parts of our pipeline, let’s test this with some mock data to make sure it works.</p>
 <div class="column-page">
 <p><img src="./gen-negative-samples-test.png" class="img-fluid"></p>
 </div>
 </section>
-</section>
 <section id="adding-features-to-the-generated-negative-samples" class="level2">
 <h2 class="anchored" data-anchor-id="adding-features-to-the-generated-negative-samples">Adding Features to the generated negative samples</h2>
-<p>As you can see from the above output, we only have the item indice and the label. We also need to populate the new negative observations with the same features as the positive ones, i.e.&nbsp;the sequence of previously interacted items.</p>
-<p>Since these negative samples come from the same user, we can use the same features as the positive ones. We just need to use the timestamp of the corresponding positive interaction.</p>
+<p>As you can see from the above output, we only have the item indice and the label. We also need to populate the new negative samples with the same features as the positive ones, i.e.&nbsp;the sequence of previously interacted items. For this we just need to use the timestamp of the corresponding positive interaction.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> add_features_to_neg_df(pos_df, neg_df, user_col, timestamp_col, feature_cols<span class="op">=</span>[]):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Add features from positive samples to negative samples DataFrame.</span></span>
@@ -464,7 +806,7 @@ Code
 </section>
 <section id="concat-and-re-split-train-test" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="concat-and-re-split-train-test">Concat and re-split train-test</h2>
-<p>After adding features to the negative samples, we can combine them with the positive samples. Then we re-split the dataset based on the timestamp milestone we used in our original train-test split.</p>
+<p>After adding features to the negative samples, we can combine them with the positives. Then we re-split the dataset based on the timestamp milestone we used in our original train-test split.</p>
 <div class="column-page">
 <p><img src="./concat-pos-neg.png" class="img-fluid"></p>
 </div>

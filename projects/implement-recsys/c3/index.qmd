@@ -18,19 +18,27 @@ This is the **third chapter** of the tutorial series: Implement a RecSys.
 
 ## Introduction
 
-In [Chapter 2](../c2/index.qmd), we dug into our Amazon dataset and built a solid feature preprocessing pipeline. But we're not ready to train any models yet. We're missing something crucial: the labels that will teach our model the difference between what users want and what they don't.
+In [Chapter 2](../c2/index.qmd), we dug into our Amazon dataset and built a solid feature preprocessing pipeline. But we're not ready to train any models yet. We're missing something crucial: the **labels** that will teach our model the difference between what users want and what they don't.
 
-We already know which items users bought. So here's a natural idea: let's turn this into a sequence prediction problem. Show the model a user's past actions, then ask it to predict what comes next.
+We already know which books users bought and when. Here comes a natural way to frame ours as a Machine Learning problem: Show the model a user's past actions, then ask it to predict he's going to read next.
 
-If this idea of predicting next thing based on a sequence of things sounds familiar, then it's expected. This is exactly what researchers in natural language processing figured out years ago. Take Word2Vec. It's a simple but brilliant model that learns word relationships by studying which words hang out together. Word2Vec breaks a sentence into input-output pairs where the surrounding words are the input and the hidden target word is what you're trying to predict.
+If you keep an eye on the progress of ML in the last 15 years, you should find this idea of predicting next item based on a sequence of items familiar. This is how Tomas Mikolov and his colleagues at Google developed their influential [Word2Vec model](https://arxiv.org/abs/1301.3781). Word2Vec is a simple but brilliant architecture that learns word relationships by studying which words hang out together. It breaks a sentence into input-output pairs where the surrounding words are the input and the hidden target word is what you're trying to predict.
 
 ![Source: [A simple Word2Vec tutorial](https://medium.com/@zafaralibagh6/a-simple-word2vec-tutorial-61e64e38a6a1)](./skipgram.webp)
 
-At each step, we pick a target word along with its neighboring context to form a positive training example. How about the negatives? That's where negative sampling comes in. Rather than letting the model see only context words that belong together, we throw in some randomly selected words from outside the context. This mix challenges the model, teaching it to learn the patterns of words that appear in similar contexts.
+At each step, we pick a target word along with its neighboring context to form a **positive** training example.
 
-Now let's apply this to our book dataset. When a user clicks, views, or buys something, that's a clear positive signal. But what about the millions of items they never touch? Are these items bad, or did the user just never discover them? Negative sampling helps us figure this out. It gives the model examples of what a user probably won't pick.
+How about the negatives? 
 
-I personally find this analogy helpful: Training a recommendation model without negative samples is like teaching someone to recognize cats by only showing them cat pictures. They might think everything is a cat!
+If positives are observed from the surrounding context of a target word X, negatives are sampled by throwing in some **randomly selected** words which we haven't found appear close to X. This mix challenges the model, teaching it to learn the patterns of words that appear in similar contexts.
+
+Take an e-commerce business as an example. When a user clicks, views, or buys something, that's a clear positive signal. But what about the millions of items they never touch? Are these items bad, or did the user just never discover them? These are the sorts of "negative" examples—where we assume that most of which he probably won't pick.
+
+When thinking about the importance of negative sampling, I personally find this analogy helpful: Training a recommendation model without negative samples is like teaching someone to recognize cats by only showing them cat pictures. They might think everything is a cat!
+
+![](./cat-learn.png)
+
+Given that, let's put some thoughts into different ways we can actually generate negative samples.
 
 ::: {.callout-note appearance="simple"}
 ## Code
@@ -47,13 +55,11 @@ This is faily straightforward to code up. You grab all the items a user hasn't i
 But there's a problem. Some of those "random" negatives might actually be items the user would love if they found them. There's also another issue: the model might get biased toward popular items, since they show up in lots of positive pairs.
 
 ### Popularity-Based Sampling
-To deal with the above popularity biase, instead of picking negatives randomly, we sample them based on how popular they are in the dataset. This makes popular items get chosen as negatives more often.
+To deal with the above popularity bias, instead of picking negatives randomly, we sample them based on how popular they are in the dataset. This makes popular items get chosen as negatives more often.
 
-Why does this work better? A popular item has a higher chance of being liked by any user than a random item. So when we use popular items as negatives, we're creating harder training examples. We're forcing the model to learn why this specific user didn't interact with this popular item, even though lots of other people did.
+How does this help? A popular item has a higher chance of being liked by any user than a random item. So when we use popular items as negatives, we're creating harder training examples. We're forcing the model to learn why this specific user didn't interact with this popular item, even though lots of other people did.
 
-This has a nice side effect. It helps the model learn beyond simple popularity bias. Instead of just recommending whatever's trending, it has to figure out what makes items relevant for specific users.
-
-The downside? It's more work to implement. You need to track popularity statistics. And there's a catch: popular items aren't always bad choices for a user. Sometimes they're popular because they're actually good. So when we force a negative for a user-item pair, it might confuse the model.
+The downside? It requires more effort to implement, like tracking popularity statistics when doing sampling. And sometimes it's true that popular items aren't always bad choices for a user. They are often top-selling because they're actually good.
 
 ### Hard Negative Mining
 This is the fancy approach. You need a model that's already somewhat trained, and you use it to find items it thinks a user would like—but shouldn't. These become your negative samples.
@@ -66,7 +72,7 @@ For this project, we'll use **popularity-based negative sampling**. It strikes a
 
 ## Let's implement
 
-The full implementation is [here](https://github.com/dvquy13/recsys-seq-model/blob/main/src/negative_sampling.py).
+The full implementation of our negative sampler can be found [here](https://github.com/dvquy13/recsys-seq-model/blob/main/src/negative_sampling.py).
 
 Function signature:
 ```{.python filename="src/negative_sampling.py"}
@@ -154,6 +160,107 @@ num_pos = len(pos_items)  # Number of positive interactions
 num_neg = min(num_pos, num_neg_candidates)  # Match positive count
 ```
 
+## Example Walkthrough
+
+Let's illustrate this process with a concrete example to see how popularity-based negative sampling works in practice.
+
+Starting with a simple user-item interaction dataset:
+
+**Original User-Item Interactions**
+
+| user_indice | item_indice | rating |
+|-------------|-------------|---------|
+| 1           | 101         | 1       |
+| 1           | 102         | 1       |
+| 2           | 101         | 1       |
+| 2           | 103         | 1       |
+| 2           | 104         | 1       |
+| 3           | 101         | 1       |
+| 3           | 103         | 1       |
+| 4           | 102         | 1       |
+| 4           | 104         | 1       |
+| 5           | 101         | 1       |
+
+### Step 1: Item Popularity Calculation
+
+**Item Popularity (Interaction Frequency)**
+
+| item_indice | interaction_count | sampling_probability |
+|-------------|-------------------|---------------------|
+| 101         | 4                 | 0.40                |
+| 102         | 2                 | 0.20                |
+| 103         | 2                 | 0.20                |
+| 104         | 2                 | 0.20                |
+
+Total interactions: 10, so item 101 (most popular) has 40% sampling probability.
+
+### Step 2: Negative Candidates per User
+
+**User's Positive Items and Negative Candidates**
+
+| user_indice | positive_items | negative_candidates | num_positives |
+|-------------|----------------|---------------------|---------------|
+| 1           | {101, 102}     | {103, 104}         | 2             |
+| 2           | {101, 103, 104}| {102}              | 3             |
+| 3           | {101, 103}     | {102, 104}         | 2             |
+| 4           | {102, 104}     | {101, 103}         | 2             |
+| 5           | {101}          | {102, 103, 104}    | 1             |
+
+### Step 3: Popularity-Weighted Negative Sampling
+
+For each user, we sample negatives proportional to item popularity among their negative candidates:
+
+**User 1's Negative Sampling**
+
+| negative_candidate | original_probability | normalized_probability |
+|--------------------|---------------------|----------------------|
+| 103                | 0.20                | 0.50                 |
+| 104                | 0.20                | 0.50                 |
+
+**User 4's Negative Sampling**
+
+| negative_candidate | original_probability | normalized_probability |
+|--------------------|---------------------|----------------------|
+| 101                | 0.40                | 0.67                 |
+| 103                | 0.20                | 0.33                 |
+
+User 4 will more likely get item 101 as a negative sample since it's more popular.
+
+### Final Result: Original + Generated Negatives
+
+| user_indice | item_indice | rating | sample_type |
+|-------------|-------------|---------|-------------|
+| 1           | 101         | 1       | positive    |
+| 1           | 102         | 1       | positive    |
+| 1           | 103         | 0       | negative    |
+| 1           | 104         | 0       | negative    |
+| 2           | 101         | 1       | positive    |
+| 2           | 103         | 1       | positive    |
+| 2           | 104         | 1       | positive    |
+| 2           | 102         | 0       | negative    |
+| 3           | 101         | 1       | positive    |
+| 3           | 103         | 1       | positive    |
+| 3           | 102         | 0       | negative    |
+| 3           | 104         | 0       | negative    |
+| 4           | 102         | 1       | positive    |
+| 4           | 104         | 1       | positive    |
+| 4           | 101         | 0       | negative    |
+| 4           | 103         | 0       | negative    |
+| 5           | 101         | 1       | positive    |
+| 5           | 103         | 0       | negative    |
+
+<br>
+
+Key Insights:
+
+1. **Popularity Bias**: Item 101 (most popular) appears more frequently as a negative sample
+2. **Balanced Sampling**: Each user gets the same number of negatives as positives
+3. **No Self-Contradiction**: Users never get negatives for items they already interacted with
+4. **Harder Training**: Popular items as negatives create more challenging learning scenarios
+
+
+## Testing the Implementation
+
 Like other crucial parts of our pipeline, let's test this with some mock data to make sure it works.
 
 ::: {.column-page}
@@ -162,9 +269,7 @@ Like other crucial parts of our pipeline, let's test this with some mock data to
 
 ## Adding Features to the generated negative samples
 
-As you can see from the above output, we only have the item indice and the label. We also need to populate the new negative observations with the same features as the positive ones, i.e. the sequence of previously interacted items.
-
-Since these negative samples come from the same user, we can use the same features as the positive ones. We just need to use the timestamp of the corresponding positive interaction.
+As you can see from the above output, we only have the item indice and the label. We also need to populate the new negative samples with the same features as the positive ones, i.e. the sequence of previously interacted items. For this we just need to use the timestamp of the corresponding positive interaction.
 
 ```python
 def add_features_to_neg_df(pos_df, neg_df, user_col, timestamp_col, feature_cols=[]):
@@ -199,7 +304,7 @@ def add_features_to_neg_df(pos_df, neg_df, user_col, timestamp_col, feature_cols
 
 ## Concat and re-split train-test
 
-After adding features to the negative samples, we can combine them with the positive samples. Then we re-split the dataset based on the timestamp milestone we used in our original train-test split.
+After adding features to the negative samples, we can combine them with the positives. Then we re-split the dataset based on the timestamp milestone we used in our original train-test split.
 
 ::: {.column-page}
 ![](./concat-pos-neg.png)
