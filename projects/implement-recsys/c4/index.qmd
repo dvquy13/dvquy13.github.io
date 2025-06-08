@@ -20,7 +20,9 @@ This is the **fourth chapter** of the tutorial series: Implement a RecSys.
 
 In [Chapter 3](../c3/index.qmd), inspired by how Word2Vec cleverly samples out-of-context words to train its language model, we implemented our own popularity-based sampling strategy to generate negative samples for our training dataset. Now we're ready to tackle one of the most critical aspects of any ML project: **evaluation**.
 
-We will discuss building our evaluation framework, setting up MLflow for experiment tracking, and implementing a popularity-based baseline model to illustrate the end-to-end process. A solid measuring foundation provides the groundwork for systematic model development—you'll use these tools throughout all your different attempts at improving the model performance.
+We will discuss building our evaluation framework, setting up MLflow for experiment tracking, and implementing a popularity-based baseline model to illustrate the end-to-end process.
+
+Keep in mind that a solid measuring foundation provides the groundwork for systematic model development—you'll use these tools throughout all your different attempts at improving the model performance.
 
 ::: {.callout-note appearance="simple"}
 ## Code
@@ -29,23 +31,27 @@ All code for this chapter is available in the `notebooks/010-baseline-popular.ip
 
 ## The Challenges of Evaluation in Recommendation Systems
 
-Recommendation systems are notoriously tricky to evaluate. Unlike classification problems where accuracy is straightforward, the most significant challenge originates from the fact that RecSys has its root from information retrieval—where we essentially try to rank items. The issue comes when your new model produces a new ranking, but we don't really know how users would react to this alternative ranking unless we deploy it in production. This makes offline evaluation feel quite limited for gauging real-world performance.
+Recommendation systems are often regarded as being tricky to model and evaluate. Unlike in problems where ground truth is straightforward, in RecSys there is often a difference between what we call "labels" and the target user behavior. Eventually our goal is to find relevant items that user likes at any given time. But not always in our historical data we can observe that "like" behavior. Noises like misclick, another person borrowing the user's device, or robot browsing can make it harder for the model to learn and for us to understand its true performance.
 
-You may ask: Why don't just run online experiment for any idea we have? Because they are typically expensive and slow. Methods like A/B tests in general require real users, real traffic, and real time to see if your changes work. So to iterate quickly on your backlog of a hundred different ideas, we don't really have any other choices rather than resorting to offline evaluation as our development tool. That assumes, of course, that getting scores on old data actually points you towards better real-world models.
+You train a model and have it produce a new set of item suggestions for a particular user. In the ideal scenario we want to collect that user's actual behavior when he sees this list **at the current moment**. The right context is important because it affects your intentions and interests. In general I'm interested in gaming videos on Youtube, but during bed time I often want to watch people telling stories about lives of the wild animals.
 
-If you ask me how I navigate through all these sorts of uncertainties, here's my take: if your offline metrics show clear improvements, that's a good sign to move forward. If they show no change but you have strong reasons to believe your improvements are effective, don't let that stop you from running an online experiment. Sometimes the best ideas don't show up in offline metrics until they meet real users. Just make sure you can roll back quickly if you see significant drops in the early days.
+This kind of messing with time is common when doing science. There are controlled experiments, right? Why don't just run online experiment for any idea we have?
 
-Beyond this counterfactual challenge, recommendation systems must also struggle with implicit feedback where users rarely provide explicit ratings, ranking quality where the order of recommendations matters as much as the items themselves, personalization where a perfect recommendation for one user might be terrible for another, and temporal dynamics where user preferences evolve over time. In short, recommendations involve nuanced concepts of relevance, satisfaction, and utility that resist simple measurement.
+IMHO, it's not feasible to do so, because they are typically expensive and slow. Methods like A/B tests in general require real users, real traffic, and real time to see if your changes work. So to iterate quickly on your backlog of a dozen of different ideas, we don't really have any other choices rather than resorting to offline evaluation as our development tool. That assumes, of course, that getting scores on old data actually points you towards better real-world models.
 
-To address these challenges, we need a comprehensive evaluation framework that can measure multiple aspects of recommendation quality. For the scope of this tutorial, we would be focusing on measuring both the ranking quality and the classification quality of the recommendations, while leaving the problem of counterfactual evaluation for a future post perhaps[^1].
+Beyond this counterfactual challenge, recommendation systems need to provide answers for (1) implicit feedback where users **rarely** provide explicit ratings, (2) ranking quality as user may only see **a few items up top**, (3) **personalization** where a perfect recommendation for one user might be terrible for another, and (4) **temporal** dynamics where user preferences evolve over time. In short, recommendations involve nuanced concepts of relevance, satisfaction, and utility that resist simple measurement.
+
+To address these challenges, we need a comprehensive evaluation framework that can measure multiple aspects of recommendation quality. For the scope of this tutorial, we would be focusing on measuring both the ranking and the classification effectiveness of the recommendations, while leaving the problem of counterfactual evaluation for a future post perhaps[^1].
 
 [^1]: You may take a look at this writing [Counterfactual Evaluation for Recommendation Systems](https://eugeneyan.com/writing/counterfactual-evaluation/) to learn more.
 
-All in all, we'll focus on offline evaluation because it lets us iterate fast and learn the fundamentals. But important message worths repeating—the real test happens when your recommendations meet actual users.
+All in all, we'll focus on offline evaluation because it lets us iterate fast. But the important message worths repeating—the real test happens when your recommendations meet actual users.
 
 ## Evaluation Metrics for Recommendation Systems
 
-There are plenty of great posts diving into the details of these metrics so I would just briefly mention them here. Our evaluation framework implements several key metrics:
+When deploying a new recommendation model, we often want to see how many **more** clicks and purchases we get. In business terms, we formally define them as Click-Through Rate (CTR) and Conversion Rate (CVR). As discussed above, offline evaluation does not have access to those metrics, but somehow they need to perform well on these matters online. Therefore, we use "proxy" metrics to evaluate the effectiveness of our model when it's still in development.
+
+There are plenty of great posts diving into the details of these proxies so I would just briefly mention some of them here.
 
 ### Ranking Metrics
 - **Precision@K**: What fraction of top-K recommendations are relevant?
@@ -65,7 +71,7 @@ If you wish to learn more, I suggest checking out [this post by Amit Chaudhary](
 
 ## The baseline recommender system
 
-To demonstrate how we evaluate a model, let's first build a baseline one for easier illustration. This will serve as a sanity check for our evaluation framework and provide a performance benchmark for more complex models to beat.
+To demonstrate how we evaluate a model, let's first build a basic one as a baseline. This will serve as a sanity check for our evaluation framework and provide a performance benchmark for more complex models to beat.
 
 ::: {.callout-note appearance="simple"}
 ## Start MLflow
@@ -80,14 +86,14 @@ In the world of RecSys, the most popular base line is "popular" recommender (pun
 To get the most popular items, we only need a few lines of Pandas code to group by item and count the number of interactions:
 ![](pop-impl-1.png)
 
-Then, for each of the user in our validation set, we can simply assign the most popular items to them:
+Then, for each of the user in our validation set, we can simply "recommend" them the most popular items:
 ![](pop-impl-2.png)
 
 That's it. We now have recommendations provided for our users. Now we can move to the actual evaluation part.
 
 ## How We Set Up Evaluation for our Project
 
-We need to align the recommendations with the ground truth labels. The `src/eval/utils.py` module provides two functions for this purpose:
+We need to align the recommendations with the holdout labels—the user interactions in our validation set. The `src/eval/utils.py` module provides two functions for this purpose:
 
 ```{.python filename="src/eval/utils.py"}
 from src.eval import (
@@ -172,15 +178,23 @@ def log_ranking_metrics(cfg: Config, eval_df):
     return report
 ```
 
-There is also a `log_classification_metrics` function that follows the similar pattern, but for the task of evaluation classification accuracy.
-
-The output is we have HTML report like this:
-
 ::: {.column-page}
-![](./evidently-classification.png)
+![](./popular-recall.png){.lightbox}
 :::
 
-Do you notice that those report files are available in a nice web-based UI? If you are not familiar with MLflow, the next section will explain.
+Our baseline popular recommender is able to achieve a Recall@100 of 0.06. This indicates that roughly 6% of the time users would interact with the top 100 books in the training data. Remember that there is no personalization here, so every user gets recommended the exact list.
+
+We can also find that the curve is steep in the range between top 13 and top 20, suggesting our top 5 or top 10 suggestions are not performing well. My hypothesis is that they are the items that have existed longer and maybe popular in the past but not now, while the top 13 and above contains recent and still trending books.
+
+There is also a `log_classification_metrics` function that follows the similar pattern, but for the task of evaluation classification accuracy.
+
+The output is we have reports like this:
+
+::: {.column-page}
+![](./evidently-classification.png){.lightbox}
+:::
+
+Do you notice that the report files can be accessed from a nice web-based UI?
 
 ## Experiment Tracking with MLflow
 
@@ -258,8 +272,8 @@ At this point, you've got a working popularity-based recommender, a full offline
 
 In this chapter, we established the critical evaluation infrastructure that will power your recommendation system development. Here's what we covered:
 
-- **The fundamental evaluation challenges**: We explored why recommendation systems are uniquely difficult to evaluate, mostly from the angle of counterfactual problem (we only see what users actually encountered) which makes simple accuracy metrics inadequate.
-- **Online vs offline evaluation strategy**: We established the principle that while online metrics are the ultimate business goal, offline evaluation serves as our rapid iteration tool. The key insight: offline improvements don't always translate to online wins, but they provide essential guidance for systematic development.
+- **The fundamental evaluation challenges**: We explored why recommendation systems are uniquely difficult to evaluate, mostly from the angle of counterfactual problem (we only see what users actually encountered).
+- **Online vs offline evaluation strategy**: We established the principle that while online metrics are the ultimate business goal, offline evaluation serves as our rapid iteration tool. The key assumption: offline improvements don't always translate to online wins, but they provide essential guidance for systematic development.
 - **Comprehensive evaluation metrics**: We implemented a multi-dimensional framework using Evidently that captures ranking quality (Precision@K, Recall@K, NDCG@K), diversity (Personalization), and classification performance (ROC-AUC, Precision-Recall curves). We also justified why classification metrics make sense for recommendation systems when framed as binary relevance prediction.
 - **Popularity-based baseline implementation**: We built our first recommender system—a simple but effective popularity-based model that assigns the most frequently interacted items to all users. This baseline serves as our performance benchmark and validates that our evaluation pipeline works correctly.
 - **MLflow experiment tracking integration**: We created a configuration-driven system that automatically handles experiment setup, parameter logging, and artifact storage. This infrastructure encourages bold experimentation by providing the safety net of full reproducibility.
@@ -271,7 +285,7 @@ All code for this chapter is available in the `notebooks/010-baseline-popular.ip
 
 ## What's Next
 
-In [Chapter 5](../c5/index.qmd), we'll build on this foundation to implement session-based recommendation models that can capture temporal patterns in user behavior. The evaluation framework you've built here will be essential for measuring whether these more complex models actually improve upon our simple baseline. And if the our evaluation setup does a good job, the results would be hard to miss:
+In [Chapter 5](../c5/index.qmd), we'll finally start building our session-based recommendation models. The evaluation framework you've built here will be essential for measuring whether this more complex model actually improve compared to our simple baseline. If it does a good job, the results would be hard to miss:
 
 ::: {.column-page}
 ![](../static/model-compare.png)
