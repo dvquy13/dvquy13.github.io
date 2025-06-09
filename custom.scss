@@ -131,3 +131,24 @@ div.quarto-post a {
 .quarto-title-block {
   margin-bottom: 0.1rem !important;
 }
+
+/* Mermaid diagram styling - simple black and white */
+:root {
+  /* Simple black and white color scheme */
+  --mermaid-bg-color: white;
+  --mermaid-label-bg-color: white;
+  --mermaid-node-bg-color: white;
+  
+  /* All text in black */
+  --mermaid-fg-color: black;
+  --mermaid-node-fg-color: black;
+  --mermaid-label-fg-color: black;
+  --mermaid-fg-color--lighter: black;
+  --mermaid-fg-color--lightest: black;
+  
+  /* Edges and borders in black */
+  --mermaid-edge-color: black;
+  
+  /* Use Inter Variable font family */
+  --mermaid-font-family: InterVariable, Inter, sans-serif;
+}

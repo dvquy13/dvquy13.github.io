@@ -1,8 +1,8 @@
 ---
 title: |
     Implement a RecSys, Chapter 5:<br>
-    Session-based Recommendation Model
-subtitle: "Design and build sequence models that capture temporal patterns in user behavior"
+    Design Session-based Recommendation System
+subtitle: "Design and implement a two-tower retrieval system that capture temporal patterns in user behavior"
 date: "2025-05-31"
 categories: [recsys, implement-recsys-series]
 image: "../static/two-tower-architecture.png"
@@ -55,27 +55,46 @@ Think about what happens in static recommendation systems when new users sign up
 
 Our sequence model flips this on its head. The moment a new user clicks on their first book, the model springs into action. They browse "Python Programming," then click on "Machine Learning Basics"—the model immediately understands they're on a learning journey. The system starts personalizing from interaction number one, like having a shop assistant who gets better at helping you the longer you browse.
 
-And all of this happens without retraining the model or updating any databases, dealing with one of the biggest problems in recommendation systems: how do you stay relevant when user interests change quickly? Traditional collaborative filtering models need to be retrained to pick up new patterns. Our sequence model adapts immediately. If thriller readers suddenly start buying romance novels (maybe it's Valentine's Day), the model notices the shift in the very next recommendation request.
+And all of this happens without retraining the model or updating any databases as is required from the traditional collaborative filtering approaches, dealing with one of the biggest problems in recommendation systems: how do you stay relevant when user interests change quickly? If thriller readers suddenly start buying romance novels (maybe it's Valentine's Day), the model notices the shift in the very next recommendation request.
 
-Now that we understand why sequence modeling is crucial, let's explore how to actually design it.
+I hope that now we all understand why sequence modeling is useful. Let's explore how to actually design it.
 
 ## Sequence Modeling Approaches
 
-The central challenge in sequence modeling boils down to one question: how do you take a bunch of user interactions and turn them into something useful for predictions? You have a sequence like "Book A → Book B → Book C" and somehow need to compress all that information into a representation that captures what the user is really interested in.
+The central challenge in sequence modeling boils down to one question: how do you take a bunch of user interactions and turn them into something expressive for predictions? You have a sequence like "Book A → Book B → Book C" and somehow need to compress all that information into a representation that captures what the user is really interested in.
 
 I like to think of this as a "pooling" problem. You're pooling information from multiple items into a single representation. It's like trying to summarize a conversation—you want to keep the important bits and throw away the noise.
 
 The simplest pooling method is **averaging**. But wait, you might think, average what exactly? We're talking about sequences of item IDs that users clicked on. You can't just average "book_123" and "book_456" like they're numbers, right?
 
-This is where embeddings become your best friend. Here's the key insight: every item in your catalog gets converted into a vector of numbers before any learning happens. Instead of working with raw item IDs, your model works with these dense numerical representations. It's the same trick that made Word2Vec so powerful—remember from Chapter 3 how it could tell you that "king" minus "man" plus "woman" equals "queen"[^2]? That magic happens because words become vectors, and vectors can be manipulated mathematically.
+This is where you would want to know about the method of embedding. It converts every item in your catalog into a vector of numbers. Instead of working with raw item IDs, your model works with these dense numerical representations. It's the same trick that made Word2Vec so powerful—remember from Chapter 3 how it could tell you that "king" minus "man" plus "woman" equals "queen"[^2]? That magic happens because words become vectors, and vectors can be manipulated mathematically.
 
 [^2]: If you don't recall anything about king and queen... Well, yeah, cause I didn't say anything about that (LOL). But I would assume if you read any random article about Word2Vec, you would run into this famous analogy.
 
-So when we talk about averaging a sequence, we're actually averaging the embedding vectors of the items in that sequence. Book A becomes a 128-dimensional vector, Book B becomes another 128-dimensional vector, and averaging them gives you a single 128-dimensional vector that somehow captures the essence of "someone who reads both Book A and Book B."
+So when we talk about averaging a book sequence, we're actually averaging the its corresponding item embeddings. Both Book A and Book B become 128-dimensional vectors, and averaging them gives you a single 128-dimensional output that somehow captures the essence of "someone who reads both Book A and Book B."
+
+::: {.column-page .mb-5}
+```{mermaid}
+flowchart TD
+    A["User Sequence:<br/>book_123 → book_456 → book_789"] --> B["Item Embedding Layer"]
+    
+    B --> C["book_123<br/>[0.2, -0.1, 0.8, 0.3, ...]<br/>(128-dimensional vector)"]
+    B --> D["book_456<br/>[-0.3, 0.5, 0.1, -0.2, ...]<br/>(128-dimensional vector)"]
+    B --> E["book_789<br/>[0.1, 0.3, -0.4, 0.6, ...]<br/>(128-dimensional vector)"]
+    
+    C --> F["Average Pooling"]
+    D --> F
+    E --> F
+    
+    F --> G["Sequence Representation<br/>[-0.03, 0.23, 0.17, 0.23, ...]<br/>(128-dimensional vector)"]
+```
+:::
 
 The beautiful thing about embeddings, just like in ML in general, is that they can start random but learn to be meaningful. During training, the model adjusts these vectors so that similar items end up close together in the embedding space. Books about Python programming cluster together, romance novels form their own neighborhood, and so on.
 
-Now, averaging is wonderfully simple, and sometimes simplicity wins. I've seen myself trying other pooling methods only to discover that good old averaging works just as well. But that doesn't mean you shouldn't experiment. Some sequences have patterns that averaging destroys—like the difference between reading "Beginner Python → Advanced Python" versus "Advanced Python → Beginner Python".
+It worths mentioning that averaging[^3] is wonderfully simple, and sometimes simplicity wins. I've seen myself trying other pooling methods only to discover that good old averaging works just as well. But that doesn't mean you shouldn't experiment. Some sequences have patterns that averaging destroys—like the difference between reading "Beginner Python → Advanced Python" versus "Advanced Python → Beginner Python".
+
+[^3]: Other similarly simple pooling methods are: min, max, sum.
 
 This is where more sophisticated pooling methods come in. The field of sequence modeling offers several architectural choices, each with its own strengths and trade-offs. The simplest approach uses Recurrent Neural Networks (RNNs), which process sequences step by step, maintaining a hidden state that captures information from previous steps. Think of an RNN as reading a book one page at a time, trying to remember everything important from earlier pages. While this sounds intuitive, vanilla RNNs have a memory problem—they forget important details from way back in the sequence, what researchers call the vanishing gradient problem.
 
@@ -87,11 +106,11 @@ Now that we've explored different sequence modeling approaches—from simple ave
 
 ## Retrieval vs Ranking
 
-While the main task is still to rank the most relevant and likely-to-be-interacted items on top, in reality it's not uncommon that we need to deal with ranking for millions of items. Training a scoring model that takes into account each instance of `<user, context, item>` and uses it from the start is not feasible because of latency constraints. Calling that model to give fine-grained scores to all millions of items would take forever, and neither our users have that kind of patience nor do we as engineers find that idea sane.
+Intuitively, we need to score all items before being able to rank the most relevant and likely-to-be-interacted items on top. But training a scoring model that takes into account each instance of `<user, context, item>` and serving it for every online request is not feasible because of latency constraints. This act of calculating the scores for millions of items would take forever, and neither our users have that kind of patience nor do we as engineers find that idea sane.
 
 ### The Two-Phase Architecture
 
-To deal with this problem, we break the whole ranking process into two phases: first we quickly retrieve a shortlist of candidates from millions of items, then we use a fine-grained ranker to give the final ranking on the shortlist.
+To deal with this problem, we break the whole ranking process into two phases: first we quickly retrieve a candidate shortlist, then we ask a fine-grained ranker to give the final ranking.
 
 The difference in naming between these two phases already reveals their distinct characteristics. The retrieval phase needs to quickly scan millions of items to find about 1,000 potential candidates in milliseconds. This speed requirement means it cannot use complex computations and often needs to leverage indexing structures like vector databases for fast similarity search. The focus here is on **recall**—ensuring that relevant items make it into the candidate set, even if the initial scoring isn't perfect.
 
@@ -103,23 +122,55 @@ The ranking phase operates under very different constraints. With bandwidth and 
 
 ### Retrieval as a Standalone System
 
-One important thing to note: most of the time the retrieval phase provides scores together with the candidates, which indicates to some extent how well they match the query. We can already use this signal to rank the candidates and provide recommendations to users.
+One important thing to note: apart from returning the candidates, most of the time the retrieval phase can provide **scores** to indicate how well they match the query. This in fact leads us to an interesting question: Why don't we just use this signal as a final ranking to show to users?
 
-It also allows us to approach building recommendation systems in an incremental manner. In most of my RecSys projects, I start with building and deploying the retrieval model as the first version. The idea is to get both early impact and actual feedback from users interacting with our recommendations. This user feedback becomes a much better source of labeling signals to train our later ranking model on.
+One obvious argument is that this approach allows us to go to production earlier. Instead of taking months to build a more complete multi-stage system, we get to deploy a working version early, and hence enable early impacts.
 
-The benefits are twofold. First, you get a working system deployed quickly, enabling faster time to impact rather than waiting months to build a complex multi-stage system. More importantly, you start collecting actual interaction data from users engaging with your recommendations, rather than relying solely on historical patterns[^1]. This real user feedback becomes invaluable—it's a much richer source of labeling signals for training your later ranking model than any offline evaluation could provide.
+More importantly, after the retrieval model is deployed, you start collecting actual interaction data from users engaging with your recommendations. Compare to the  historical transaction data, this is a much more valuable feedback to help us further tune the rankings, in both quality and quantity. We have user's direct feedback to our recommendations by observing which items get clicked/purchased and which ones don't. And there are just much more data points.
 
-[^1]: The sequence itself can also serves as a long-term historical signal, like containing the interactions from two months ago. Just that in this case we would want to couple those interactions with their timestamps to help the model differentiate.
+Consider this example of the rich feedback data we can gather:
 
-Finally, it allows you to build the serving and monitoring infrastructure in phases, learning how to handle recommendation traffic, monitor model performance, and debug issues at a manageable scale before introducing the additional complexity of a ranking layer.
+::: {.column-page}
+| rec_id | user_id | timestamp | recommended_items | viewed | clicked | converted |
+|:-------|:--------|:----------|:------------------|:-------|:--------|:----------|
+| rec_001 | user_123 | 2025-05-31 10:30 | [Python_Basics, ML_Intro, Data_Analysis] | Python_Basics, ML_Intro | Python_Basics | Python_Basics |
+| rec_002 | user_456 | 2025-05-31 11:45 | [Romance_Novel, Thriller, Biography] | Romance_Novel, Thriller | Romance_Novel | - |
+| rec_004 | user_123 | 2025-05-31 16:00 | [Advanced_Python, Deep_Learning, Statistics] | Advanced_Python, Deep_Learning | Advanced_Python, Deep_Learning | Deep_Learning |
+
+: User-Recommendation interaction logs {.mb-5 .striped .hover .responsive-lg tbl-colwidths="[8,10,18,30,20,12,12]"}
+:::
+
+For user_123, we see a clear learning progression—they converted on both Python_Basics and Deep_Learning, suggesting our sequence modeling is capturing meaningful patterns. User_456 clicked on Romance_Novel but didn't convert, giving us valuable signal about engagement without satisfaction.
+
+To train a ranking model, we'd explode this data into item-level training examples with binary labels:
+
+::: {.column-page}
+| rec_id | user_id | timestamp | item | viewed | clicked | converted |
+|:-------|:--------|:----------|:-----|:------:|:-------:|:---------:|
+| rec_001 | user_123 | 2025-05-31 10:30 | Python_Basics | 1 | 1 | 1 |
+| rec_001 | user_123 | 2025-05-31 10:30 | ML_Intro | 1 | 0 | 0 |
+| rec_001 | user_123 | 2025-05-31 10:30 | Data_Analysis | 0 | 0 | 0 |
+| rec_002 | user_456 | 2025-05-31 11:45 | Romance_Novel | 1 | 1 | 0 |
+| rec_002 | user_456 | 2025-05-31 11:45 | Thriller | 1 | 0 | 0 |
+| rec_002 | user_456 | 2025-05-31 11:45 | Biography | 0 | 0 | 0 |
+| rec_004 | user_123 | 2025-05-31 16:00 | Advanced_Python | 1 | 1 | 0 |
+| rec_004 | user_123 | 2025-05-31 16:00 | Deep_Learning | 1 | 1 | 1 |
+| rec_004 | user_123 | 2025-05-31 16:00 | Statistics | 0 | 0 | 0 |
+
+: Item-level training data for ranking models {.mb-5 .striped .hover tbl-colwidths="[8,10,20,25,10,10,12]"}
+:::
+
+Each row represents a `<user, context, item>` tuple with explicit binary labels. This format captures the full engagement funnel—some items aren't even viewed (viewed=0), others are seen but not clicked, and a few drive conversions. This multi-level feedback is crucial for training ranking models that understand both what catches users' attention and what actually satisfies their needs. And the best part is that we don't have to worry about negative sampling!
+
+Finally, by starting with retrieval alone, we can build our serving and monitoring infrastructure incrementally—learning to handle recommendation traffic, monitor model performance, and debug issues at manageable scale before adding the complexity of a ranking layer.
 
 ### Our Two-Tower Retriever
 
 In that spirit, the implementation of our sequential recommendation model in this series is a **retrieval-based one**. It follows a typical **Two Tower architecture**, where the query tower embeds information about the user and context—in our case, the user's sequence of interactions—while the candidate tower represents the candidate items.
 
-This separation is crucial for efficient serving. The candidate tower can precompute embeddings for all items and store them in a vector index. The query tower only needs to run at request time to generate the user's current context embedding.
+This separation is necessary for efficient serving. The candidate tower can precompute embeddings for all items and store them in a vector index. The query tower only needs to run at request time to generate the user's current context embedding.
 
-![](../static/two-tower-architecture.png)
+![](../static/two-tower-architecture.png){.lightbox}
 
 ### Training Setup
 
@@ -129,9 +180,13 @@ The labels for training come from our preparation in previous chapters. We creat
 
 For serving, our retrieval system works in two phases. First, in an offline process, we index all candidate item embeddings in a nearest neighbor vector search system. Then, during online serving, we send the `<user, context>` as input to the query tower to get a query embedding vector, use similarity lookup to search for the nearest candidate neighbors in the index, and return the corresponding items with their similarity scores.
 
+::: {.column-page}
+![Retrieval-only system](./retrieval-design.png)
+:::
+
 This architecture enables low-latency response times even when searching through millions of items, making it practical for recommendation serving.
 
-Again, the beauty of this approach is that it's both a complete recommendation system on its own and a foundation for more sophisticated ranking models. You can deploy it immediately to start serving personalized recommendations, then later add a ranking layer on top without changing the underlying retrieval infrastructure.
+Again, the beauty of this approach is that it's both a complete recommendation system on its own and a foundation for the more fine-grained ranking models. You can deploy it immediately to start serving personalized recommendations, then later add a ranking layer on top without changing the underlying retrieval infrastructure.
 
 ## Model Implementation
 
@@ -141,15 +196,15 @@ Now let's translate the two-tower architecture into concrete code. But first, le
 
 Traditional two-tower retrievers include both user embeddings and sequence representations in the query tower. But I've chosen to build what I call a "SoleSequenceRetriever"—a model that relies entirely on the sequence of interactions, without any user-specific embeddings.
 
-This isn't just a technical choice; it's a strategic one[^4] that fundamentally changes how the model behaves. By removing user embeddings, we're making a bet that the sequence itself contains enough signal to make good recommendations. A user browsing "Python Programming → Machine Learning → Data Analysis" tells us more about their immediate intent than knowing they're "User #47832" with some historical preference profile.
+This isn't just a technical choice; it's a strategic one[^1] that fundamentally changes how the model behaves. By removing user embeddings, we're making a bet that the sequence itself contains enough signal to make good recommendations. A user browsing "Python Programming → Machine Learning → Data Analysis" tells us more about their immediate intent than knowing they're "User #47832" with some historical preference profile.
 
-[^4]: Or... it's not entirely wrong if you think I'm just a lazy guy who doesn't want to deal with the missing of user embedding for new users 😅.
+[^1]: Or... it's not entirely wrong if you think I'm just a lazy guy who doesn't want to deal with the missing of user embedding for new users 😅.
 
 This approach solves several practical problems. New users get meaningful recommendations from their very first interaction—no cold start period where they see generic popular items. Operationally, serving becomes a bit simpler since we don't need to manage user embedding lookups or worry about user ID mapping issues.
 
 ### Core Architecture
 
-With that context, let's look at our implementation. The core is simple and straightforward.
+With that context, let's look at our implementation.
 
 ```{.python filename="src/sequence/model.py"}
 class SoleSequenceRetriever(BaseSequenceRetriever):
@@ -254,13 +309,13 @@ class SoleSequenceRetriever(BaseSequenceRetriever):
                 return sum_embeds / count
 ```
 
-As with other ideas, feel free to experiment with using masked pooling or not. It may seem sound but not always lead to noticeable improvements according to my experience.
+As with other ideas, feel free to experiment with using masked pooling or not. It may sound like a good idea but not always lead to noticeable improvements according to my experience.
 
 ### Training Loop
 
-The training function uses binary cross-entropy loss against our positive/negative samples. We use PyTorch Lightning to leverage its built-in training loop, logging capabilities and integration with MLflow instead of implementing ourselves[^3].
+The training function uses binary cross-entropy loss against our positive/negative samples. We use PyTorch Lightning to leverage its built-in training loop, logging capabilities and integration with MLflow instead of implementing ourselves[^4].
 
-[^3]: I still remember how frustrating it was trying to implement DDP (Distributed Data Parallel) training loop with pure PyTorch. After figuring out that Lightning does not only handle that elegently but also has a lot of other features that I would have to implement myself, I never looked back.
+[^4]: I still remember how frustrating it was trying to implement DDP (Distributed Data Parallel) training loop with pure PyTorch. After figuring out that Lightning does not only handle that elegently but also has a lot of other features that I would have to implement myself, I never looked back.
 
 ```{.python filename="src/sequence/trainer.py"}
 class LitSequenceRetriever(L.LightningModule):
@@ -333,7 +388,7 @@ We customzize our Lightning trainer module to help us automatically log:
 While the model is training, we can observe how it converges and how it performs on the validation set in real-time on MLflow Web UI:
 
 :::{.column-page}
-![](./mlflow-training.png)
+![](./mlflow-training.png){.lightbox}
 :::
 
 ## Model Comparison
@@ -341,12 +396,12 @@ While the model is training, we can observe how it converges and how it performs
 After training, we can compare the performance of our model with the popularity baseline:
 
 :::{.column-page}
-![](../static/model-compare.png)
+![](../static/model-compare.png){.lightbox}
 :::
 
 The results validate our sequence-based approach with substantial improvements across all metrics. Let's break down what these numbers tell us about our retrieval system's effectiveness.
 
-### Recall: The Heart of Retrieval Performance
+### Recall
 
 Since we're building a retrieval system, **recall is chosen to be our north-star metric**. Recall measures what fraction of relevant items we successfully include in our candidate set. In the two-stage retrieval-ranking framework, if our retrieval system misses a relevant item, no amount of sophisticated ranking can fix that—the item is gone forever from the user's recommendations.
 
@@ -375,7 +430,7 @@ These metric improvements translate to concrete user experience benefits:
 
 The results demonstrate that sequence modeling captures meaningful patterns in user behavior that static approaches miss entirely.
 
-That said, while the uplifts are strong, the absolute numbers are still low. This is expected since we haven't really optimized the model, so keep in mind that this is just the beginning. But if you ask me what high or good numbers look like, I would say this kind of improvement is already sufficient for us to deploy in production, given that we have no other models and are currently using the popularity baseline.
+That said, while the uplifts are strong, the absolute numbers are still low. This is expected since we haven't really optimized the model, so keep in mind that this is just the beginning. But if you ask me what high or good numbers look like, I would say this kind of improvement is already sufficient for us to deploy in production, given that this is the starting point.
 
 ## Model Registry and Versioning
 
@@ -409,7 +464,7 @@ In this chapter, we achieved a major milestone in our recommendation system jour
 
 **From Theory to Practice:**
 
-- **Why sequence modeling matters**: We established that traditional collaborative filtering misses the crucial story hidden in the order and timing of user interactions. By modeling sequences, we can distinguish between users who follow structured learning paths versus those who jump between topics randomly.
+- **Why sequence modeling matters**: We established that traditional collaborative filtering misses the story hidden in the order and timing of user interactions. By modeling sequences, we can distinguish between users who follow structured learning paths versus those who jump between topics randomly.
 - **Real-time adaptation and cold start solutions**: We demonstrated how sequence-based models solve two critical RecSys challenges. New users get personalized recommendations from their very first interaction, and the model adapts immediately to changing user interests without requiring retraining.
 
 **Architectural Decisions:**
@@ -426,9 +481,9 @@ In this chapter, we achieved a major milestone in our recommendation system jour
 **Validation and Results:**
 
 - **Substantial performance improvements**: Our sequence-based retriever achieved 197% improvement in Recall@100 and 280% improvement in Recall@10 compared to the popularity baseline, demonstrating that temporal patterns contain meaningful signals for recommendations.
-- **MLflow model registry**: We established automated model versioning with quality gates, ensuring only models exceeding minimum performance thresholds get registered for potential deployment.
+- **MLflow model registry**: We established automated model versioning with **quality gates**, ensuring only models exceeding minimum performance thresholds get registered for potential deployment.
 
-This sequence-based retriever represents a complete, deployable recommendation system that can serve personalized suggestions in real-time. More importantly, it provides a solid foundation for future enhancements—whether adding a downstream ranking layer or incorporating additional features like item content or user demographics.
+**Last but not least**, we spent an entire section discussing why whis sequence-based retriever represents a complete, deployable recommendation system that can serve personalized suggestions in real-time. More importantly, it provides a solid foundation for future enhancements—whether adding a downstream ranking layer or incorporating additional features like item content or user demographics.
 
 ::: {.callout-note appearance="simple"}
 ## Code
@@ -437,11 +492,9 @@ All code for this chapter is available in the `notebooks/011-sequence-modeling.i
 
 ## What's Next?
 
-With our sequence-based retrieval model performing strongly, we have several exciting directions for future development:
+With our sequence-based retrieval model providing significant uplifts compared to the popularity baseline, we have several exciting directions for future development.
 
-**Short-term enhancements** could include experimenting with Transformer-based pooling for better long-range dependency modeling or implementing more sophisticated negative sampling strategies like hard negative mining. Most importantly though, as long as request-level latency is still kept in check, we can always experiment with adding more input features to our towers.
-
-Examples:
+**Short-term enhancements** could include experimenting with adding more input features to our towers, for example:
 
 - Incorporating item content features to improve cold-start item recommendations
 - Provide query tower with user profile features, focusing on the information that we may be able to extract even for new users

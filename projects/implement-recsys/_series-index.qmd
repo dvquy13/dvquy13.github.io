@@ -4,7 +4,7 @@
 - [Chapter 2: Understanding the Data and Feature Engineering](../c2/index.html)  
 - [Chapter 3: Negative Sampling](../c3/index.html)  
 - [Chapter 4: Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation](../c4/index.html)  
-- [Chapter 5: Session-based Recommendation Model](../c5/index.html)  
+- [Chapter 5: Design Session-based Recommendation System](../c5/index.html)  
 - [Chapter 6: Preparing for Serving](../c6/index.html)  
 - [Chapter 7: Building the API Layer](../c7/index.html)  
 :::
