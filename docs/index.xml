@@ -54,7 +54,7 @@ List of chapters
 </div>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>In <a href="../../../projects/implement-recsys/c6/index.html">Chapter 6</a>, we successfully prepared our serving infrastructure with MLflow model registry, Qdrant vector database, and Redis cache. We’ve also populated these systems with our trained model artifacts, item embeddings, and user sequence data. We have come to the end of the journey! What’s left is to build the actual API layer that brings everything together and serves real-time recommendations to users.</p>
+<p>In <a href="../../../projects/implement-recsys/c6/index.html">Chapter 6</a>, we successfully prepared our serving infrastructure with MLflow model registry, Qdrant vector database, and Redis Key-value store. We’ve also populated these systems with our trained model artifacts, item embeddings, and user sequence data. We have come near the end of the journey! What’s left is to build the actual API layer that brings everything together and serves real-time recommendations to users.</p>
 <p>This chapter explores how to package our trained models for serving using BentoML, and how to orchestrate the complete recommendation pipeline using FastAPI. By the end of this chapter, you’ll have a fully functional recommendation API running on your local machine that can adapt to user interests in real-time.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -72,8 +72,13 @@ Code
 </section>
 <section id="the-serving-logic" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="the-serving-logic">The Serving Logic</h2>
-<div class="column-page my-5">
-<p><a href="../static/Model Serving.drawio.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://dvquys.com/projects/implement-recsys/static/Model Serving.drawio.png" class="img-fluid"></a></p>
+<div class="my-5 page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><a href="../static/Model Serving.drawio.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-1" title="A reminder of the overall serving architecture"><img src="https://dvquys.com/projects/implement-recsys/static/Model Serving.drawio.png" class="img-fluid figure-img column-page" alt="A reminder of the overall serving architecture"></a></p>
+<figcaption>A reminder of the overall serving architecture</figcaption>
+</figure>
+</div>
 </div>
 <div class="page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
@@ -92,19 +97,21 @@ When a recommendation request arrives at our FastAPI orchestrator, it contains t
 <p><strong>User Feature Retrieval </strong><br>
 The system immediately attempts to fetch the user’s historical interaction data from Redis. When user context is successfully retrieved and contains meaningful interaction data, the system proceeds with the full personalization pipeline:</p>
 <ol type="1">
-<li><p><strong>Query Embedding Generation</strong>: The enriched user context (historical + current session) is sent to our BentoML model server, which generates the dense representation of the user’s preferences and current intent.</p></li>
+<li><p><strong>Query Embedding Generation</strong>: The enriched user context (historical + current session) is sent to our <strong>BentoML model server</strong>, which generates the dense representation of the user’s preferences and current intent.</p></li>
 <li><p><strong>Vector Similarity Search</strong>: This query embedding is used to search Qdrant’s vector database, finding items most similar to the user’s demonstrated preferences.</p></li>
 <li><p><strong>Filtering and Ranking</strong>: Results are filtered to remove items the user has already interacted with and ranked by relevance score.</p></li>
 </ol>
-<p>But wait. What is model server? What is the difference between BentoML and FastAPI?</p>
+<p>But wait. What is BentoML model server? What is the difference between BentoML and FastAPI?</p>
 </section>
 </section>
 <section id="model-server-vs-orchestrator" class="level2">
 <h2 class="anchored" data-anchor-id="model-server-vs-orchestrator">Model Server vs Orchestrator</h2>
-<p>As can be seen above, serving recommendations typically requires two kinds of logic: <strong>model inference</strong> and <strong>business rules</strong>. While business rules are operations often found in a backend system, model inference is a specialized task that has a different set of characteristics:</p>
-<p><strong>Independent Scaling</strong>: Model servers sometimes require GPU resources for inference and benefit from batch processing to maximize throughput. The orchestrator, conversely, handles lightweight business logic and can run efficiently on CPU-only instances.</p>
-<p><strong>Version Management</strong>: We should expect ourselves to experiment with new models frequently. Having a dedicated model server means we can deploy new model versions, conduct A/B tests, or rollback problematic releases without touching the orchestrator logic. This reduces the blast radius of model-related issues.</p>
-<p><strong>Technology Flexibility</strong>: The model server can use specialized ML serving frameworks (like BentoML, TorchServe, or TensorFlow Serving) optimized for inference performance, while the orchestrator can use general-purpose web frameworks (like FastAPI, Flask, or Django) optimized for API development productivity.</p>
+<p>As mentioned above, serving recommendations typically requires two kinds of logic: <strong>model inference</strong> and <strong>business rules</strong>. While business rules are operations often found in a backend system, model inference is a specialized task that has a different set of characteristics:</p>
+<ul>
+<li><strong>Independent Scaling</strong>: Model servers sometimes require GPU resources for inference and benefit from batch processing to maximize throughput. The orchestrator, conversely, handles lightweight business logic and can run efficiently on CPU-only instances.</li>
+<li><strong>Version Management</strong>: We should expect ourselves to experiment with new models frequently. Having a dedicated model server means we can deploy new model versions, conduct A/B tests, or rollback problematic releases without touching the orchestrator logic. This reduces the blast radius of model-related issues.</li>
+<li><strong>Technology Flexibility</strong>: The model server can use specialized ML serving frameworks (like BentoML, TorchServe, TensorFlow Serving, or Triton) optimized for inference performance, while the orchestrator can use general-purpose web frameworks (like FastAPI, Flask, or Django) optimized for API development productivity.</li>
+</ul>
 <p>A clear separation ensures that each component can be optimized for its specific responsibilities while maintaining clean interfaces between them.</p>
 <p>For our implementation, we chose FastAPI for the orchestrator due to its popularity and developer-friendly async capabilities, while BentoML serves as our model server with its robust MLflow integration and specialized ML serving features.</p>
 <p>While there’s not much to discuss about FastAPI, there are some specific elaborations needed on the side of BentoML regarding how I use it in this project.</p>
@@ -176,7 +183,7 @@ font-style: inherit;">True</span>},</span>
 </div>
 <section id="custom-inference-logic-integration" class="level3">
 <h3 class="anchored" data-anchor-id="custom-inference-logic-integration">Custom Inference Logic Integration</h3>
-<p>Here’s where the design decision from our training phase pays off. In the previous chapters we didn’t talk about the <code>src/sequence/inference.py</code> file that exists in the <code>src/sequence</code> module, but if you pay attention in the training notebook, here’s what you would find:</p>
+<p>In the previous chapters we didn’t talk about the <code>src/sequence/inference.py</code> file that exists in the <code>src/sequence</code> module, but if you pay attention in the training notebook, here’s what you would find:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>notebooks/011-sequence-modeling.ipynb</strong></pre>
@@ -845,8 +852,8 @@ font-style: inherit;">=</span>ctx.model_dump(),</span>
 <p>The system also implements graceful degradation by falling back to popular recommendations when no meaningful sequence data is available. This ensures that new users or those with insufficient interaction history still receive valuable recommendations rather than empty results.</p>
 <p>To improve user experience, the pipeline implements a business rule-based filtering that excludes items the user has already interacted with, preventing redundant recommendations. Finally, the buffer strategy retrieves more results than actually needed to account for this filtering process, ensuring we can always return the requested number of fresh recommendations even after removing items the user has already seen.</p>
 </section>
-<section id="asynchronous-processing-why-async-and-await" class="level3">
-<h3 class="anchored" data-anchor-id="asynchronous-processing-why-async-and-await">Asynchronous Processing: Why <code>async</code> and <code>await</code></h3>
+<section id="asynchronous-processing" class="level3">
+<h3 class="anchored" data-anchor-id="asynchronous-processing">Asynchronous Processing</h3>
 <p>You’ll notice extensive use of <code>async</code> and <code>await</code> throughout our orchestrator code. This isn’t just a modern Python practice—it’s essential for building responsive APIs that handle multiple concurrent requests efficiently.</p>
 <p>Our recommendation pipeline involves multiple I/O operations including Redis lookups, HTTP calls to the model server, and Qdrant queries. Traditional synchronous code would block the entire process during each operation, severely limiting concurrency and creating bottlenecks that degrade user experience. With async/await, Python can handle hundreds of concurrent requests with a single thread, switching between requests during I/O waits. This dramatically reduces memory usage compared to thread-per-request models while ensuring that users don’t have to wait for other users’ requests to complete—each request is processed as quickly as possible without blocking others.</p>
 <div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="co" style="color: #5E5E5E;
@@ -1004,7 +1011,7 @@ font-style: inherit;">&lt;/features&gt;"</span></span>
 </div>
 </div>
 <p>The API payload demonstrates the core implementation of this approach—recent user interactions are included directly in each recommendation request through the <code>item_seq_raw</code> field, which contains items the user has interacted with in their current session. Our orchestrator then merges this real-time session data with historical user data retrieved from Redis, creating a comprehensive view of user intent that spans both immediate behavior and long-term preferences.</p>
-<p>This implementation delivers the advantages we outlined in Chapter 1, starting with minimal signal delay since user interactions are captured client-side and sent immediately with recommendation requests, eliminating the latency of updating server-side state. The stateless nature of each request makes the system easier to scale and debug, as all necessary context is self-contained within the request payload. Additionally, users can continue browsing and building session context even when temporarily disconnected, as the frontend maintains the interaction history locally until the next API call.</p>
+<p>This implementation delivers the advantages we outlined in Chapter 1, starting with minimal signal delay since user interactions are captured client-side and sent immediately with recommendation requests, eliminating the latency of updating server-side state. The stateless nature of each request makes the system easier to scale and debug, as all necessary context is self-contained within the request payload. Additionally, users can continue browsing and building session context even when temporarily disconnected, as the frontend maintains the interaction history locally until the next API call. Finally, users do not really need to refresh the view to get updated recommendations.</p>
 </section>
 </section>
 <section id="a-new-docker-compose-file" class="level2">
@@ -1604,7 +1611,7 @@ font-style: inherit;">}</span></span></code></pre></div>
 <h2 class="anchored" data-anchor-id="recap">Recap</h2>
 <p>In this chapter, we completed the journey from model training to model serving by building the API layer that transforms our sequence-based recommendation model into a system that can respond to real user requests in real-time.</p>
 <p>We implemented a two-layer architecture that separates model inference concerns from business logic orchestration. The BentoML model server handles the computationally intensive neural network inference and seamless MLflow integration, while the FastAPI orchestrator coordinates the complete recommendation pipeline including user context retrieval, fallback logic, and result filtering. This separation enables independent scaling, version management, and technology optimization for each layer.</p>
-<p>The serving pipeline successfully implements the simplified payload approach for real-time context integration that we outlined in Chapter 1, where user interactions are captured client-side and included directly in API requests. Combined with the three-pillar infrastructure from Chapter 6, our system can now fetch user sequences from Redis, generate query embeddings through the model server, perform vector similarity search in Qdrant, and gracefully fall back to popular recommendations when personalization isn’t possible—all within the response time requirements for production recommendation systems.</p>
+<p>The serving pipeline implements the simplified payload approach for real-time context integration that we outlined in Chapter 1, where user interactions are captured client-side and included directly in API requests. Combined with the three-pillar infrastructure from Chapter 6, our system can now fetch user sequences from Redis, generate query embeddings through the model server, perform vector similarity search in Qdrant, and gracefully fall back to popular recommendations when personalization isn’t possible—all within the response time requirements for production recommendation systems.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
