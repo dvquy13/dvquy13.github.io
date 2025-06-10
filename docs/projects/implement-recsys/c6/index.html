@@ -77,6 +77,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../../../site_libs/bootstrap/bootstrap-b6cf9ba9972a06bdad931cf83a4d9d4a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -247,7 +250,7 @@ cookieconsent.run({
   <ul class="collapse">
   <li><a href="#pillar-1-model-registry-mlflow" id="toc-pillar-1-model-registry-mlflow" class="nav-link" data-scroll-target="#pillar-1-model-registry-mlflow">Pillar 1: Model Registry (MLflow)</a></li>
   <li><a href="#pillar-2-vector-store-qdrant" id="toc-pillar-2-vector-store-qdrant" class="nav-link" data-scroll-target="#pillar-2-vector-store-qdrant">Pillar 2: Vector Store (Qdrant)</a></li>
-  <li><a href="#pillar-3-key-value-cache-redis" id="toc-pillar-3-key-value-cache-redis" class="nav-link" data-scroll-target="#pillar-3-key-value-cache-redis">Pillar 3: Key-Value Cache (Redis)</a></li>
+  <li><a href="#pillar-3-key-value-store-redis" id="toc-pillar-3-key-value-store-redis" class="nav-link" data-scroll-target="#pillar-3-key-value-store-redis">Pillar 3: Key-Value Store (Redis)</a></li>
   </ul></li>
   <li><a href="#docker-compose-configuration" id="toc-docker-compose-configuration" class="nav-link" data-scroll-target="#docker-compose-configuration">Docker Compose Configuration</a>
   <ul class="collapse">
@@ -306,8 +309,9 @@ List of chapters
 </div>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>In <a href="../../../projects/implement-recsys/c5/index.html">Chapter 5</a>, we have come a long way to build our sequence-based recommendation model which demonstrates significant metric uplifts over the popularity baseline. It can capture temporal patterns in user behavior and personalize recommendations based on interaction sequences. We’re finally ready to tell the world about our exciting new model! To do that, we need to package our work in a way that end-users can benefit from.</p>
-<p>This chapter aims to provide a transition ground from model development to deployment readiness. The challenge isn’t just loading a model and calling <code>predict()</code>—it’s building a proper system that can respond in milliseconds.</p>
+<p>In <a href="../../../projects/implement-recsys/c5/index.html">Chapter 5</a>, we have come a long way to build our sequence-based recommendation model which demonstrates significant metric uplifts over the popularity baseline. We also discuss some design decisions regarding the retrieval architecture and how to make it efficient at serving time.</p>
+<p>We’re finally ready to tell the world about our exciting new model! To do that, we need to package our work in a way that end-users can benefit from.</p>
+<p>This chapter aims to provide a transition ground from model development to deployment readiness. The goal is for us to understand what’s required from model serving point of view, as well as the set ups needed to get it ready.</p>
 <p>Deploying ML models in production is actually a very huge area and deserves a series of its own. Within the scope of this tutorial, we will discuss the topic from the angle of an end-to-end data scientist—whose job is to design the complete pipeline from training to serving.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -326,17 +330,22 @@ Code
 <section id="serving-paradigms-from-model-to-user-experience" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="serving-paradigms-from-model-to-user-experience">Serving Paradigms: From Model to User Experience</h2>
 <p>I have been always thinking that building a recommendation model is like crafting a perfect recipe for a gourmet dish. You might have the most sophisticated ingredients, precise measurements, and innovative techniques, but until that dish reaches hungry customers, it’s just potential sitting in the kitchen. The recipe itself doesn’t feed anyone—it’s the execution, plating, and delivery that creates value. Similarly, our sequence-based recommendation model, no matter how accurate its predictions, remains useless until it can respond to real user requests in real-time.</p>
-<p>This analogy extends further when we consider the restaurant’s serving strategy. A high-end restaurant doesn’t prepare each dish from scratch when a customer orders. Instead, they use a combination of pre-preparation (mise en place) and real-time cooking. Some components are prepped in batches during quiet hours, while others must be prepared fresh to order. Recommendation systems follow the same principle: we balance pre-computed results with real-time inference based on the specific requirements of each use case.</p>
+<p>This analogy extends further when we consider the restaurant’s serving strategy. A restaurant doesn’t prepare each dish from scratch when a customer orders. Instead, they use a combination of pre-preparation (mise en place) and real-time cooking. Some components are prepped in batches during quiet hours, while others must be prepared fresh to order. Recommendation systems follow the same principle: we balance pre-computed results with real-time inference based on the specific requirements of each use case.</p>
 <section id="how-recommendations-reach-users" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="how-recommendations-reach-users">How Recommendations Reach Users</h3>
-<div class="column-page my-5">
-<p><img src="../static/Model Serving.drawio.png" class="img-fluid"></p>
+<div class="my-5 page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><a href="../static/Model Serving.drawio.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-1" title="An overview of the serving pipeline"><img src="../static/Model Serving.drawio.png" class="img-fluid figure-img column-page" alt="An overview of the serving pipeline"></a></p>
+<figcaption>An overview of the serving pipeline</figcaption>
+</figure>
+</div>
 </div>
 <p>Understanding serving paradigms starts with tracing the journey from user action to displayed recommendations. When a user opens your app, a carefully orchestrated process begins:</p>
 <ol type="1">
 <li><strong>Frontend Request</strong>: The mobile app or web interface detects the user’s need for recommendations (homepage load, category browse, search query)</li>
 <li><strong>API Call</strong>: The frontend makes a REST API call to the backend, passing user context (user ID, current page, device info)</li>
-<li><strong>Backend Processing</strong>: The recommendation service processes this request, either by looking up pre-computed results or triggering real-time model inference</li>
+<li><strong>Backend Processing</strong>: The recommendation service processes this request, either by looking up pre-computed results or fetching the other features necessary for the model to make inference</li>
 <li><strong>Response Assembly</strong>: Results are ranked, filtered for business rules, and formatted for display</li>
 <li><strong>Frontend Rendering</strong>: The app receives the recommendations and renders them in the user interface</li>
 </ol>
@@ -377,12 +386,13 @@ Code
 </section>
 <section id="three-pillar-serving-architecture" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="three-pillar-serving-architecture">Three-Pillar Serving Architecture</h2>
-<p>We’ll set up three main components that form the backbone of serving recommendation systems: <strong>MLflow</strong> for model registry and deployment, <strong>Qdrant</strong> for vector similarity search, and <strong>Redis</strong> as KV store for user sequences and metadata. Each addresses a specific aspect of the real-time recommendation challenge.</p>
+<p>How to implement this hybrid serving strategy?</p>
+<p>We’ll set up three main components that form the backbone of serving our retrieval model: <strong>MLflow</strong> for model registry and deployment, <strong>Qdrant</strong> for vector similarity search, and <strong>Redis</strong> as KV store for user sequences and metadata.</p>
 <div class="page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
 <p class="page-columns page-full"><img src="../static/Model Serving.drawio.png" class="img-fluid figure-img column-page"></p>
-<figcaption>Three-pillar serving architecture with Model Registry, Vector Store, and Key-Value Cache</figcaption>
+<figcaption>Three-pillar serving architecture with Model Registry, Vector Store, and Key-Value Store</figcaption>
 </figure>
 </div>
 </div>
@@ -402,10 +412,10 @@ Code
 <p>In our case, our sequence model’s candidate tower generates embeddings for all items in the catalog. These embeddings are indexed in Qdrant, enabling fast retrieval of the most relevant candidates based on a user’s current sequence.</p>
 <p>The choice of using Qdrant here is nothing too special rather than personal, as I happen to find myself comfortable with it.</p>
 </section>
-<section id="pillar-3-key-value-cache-redis" class="level3">
-<h3 class="anchored" data-anchor-id="pillar-3-key-value-cache-redis">Pillar 3: Key-Value Cache (Redis)</h3>
-<p>The <strong>Key-Value Cache</strong> serves as the system’s memory for frequently accessed data and computational shortcuts. In recommendation systems, this typically includes user sequences, popular items, and pre-computed features that would be expensive to generate on-the-fly.</p>
-<p>For our recommender system, Redis stores each user’s recent interaction history, enabling the query tower to generate contextual embeddings without expensive database lookups. It also contains the popular items as a form of pre-computed recommendations.</p>
+<section id="pillar-3-key-value-store-redis" class="level3">
+<h3 class="anchored" data-anchor-id="pillar-3-key-value-store-redis">Pillar 3: Key-Value Store (Redis)</h3>
+<p>The <strong>Key-Value Store</strong> serves as the system’s memory for frequently accessed data and computational shortcuts. In recommendation systems, this typically includes user sequences, popular items, and pre-computed features that would be expensive to generate on-the-fly.</p>
+<p>For our recommender system, here Redis plays the role of a feature store where our back-end can retrieve each user’s recent interaction history. On the other hand, it also contains the popular items as a form of pre-computed recommendations.</p>
 <p>When thinking about which open source tool to use for the key-value store, I must admit that Redis is so widely used that I don’t really consider other options, especially for a tutorial project like this.</p>
 <p>After understanding those three pillars, let’s take a closer look at how we configure them running on our local environment.</p>
 </section>
@@ -561,7 +571,7 @@ Code
 </section>
 <section id="batch-indexing" class="level3">
 <h3 class="anchored" data-anchor-id="batch-indexing">Batch Indexing</h3>
-<p>We do not only upload the embeddings to Qdrant but also their metadata. This becomes quite handy later when preparing the demo as we can get the item metadata by ID from Qdrant without the need to set up new database.</p>
+<p>We do not only upload the embeddings to Qdrant but also their metadata. This becomes quite handy later when preparing the UI demo as we can get the item metadata by ID from Qdrant without the need to store them in Redis.</p>
 <div class="sourceCode" id="annotated-cell-8"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a>points <span class="op">=</span> []</span>
 <span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, vector <span class="kw">in</span> <span class="bu">enumerate</span>(candidate_embeddings):</span>
 <span id="annotated-cell-8-3"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a>    id_ <span class="op">=</span> id_mapping.get_item_id(idx)</span>
@@ -682,7 +692,7 @@ Code
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>display(result)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Example output:</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">'B078GWN38X__B078JJFFGK__B07ZDG34ZC__B079QG6L98__B00M9GZTXG__B07CWSSFL3__B0031W1E86__B07LF2YL9S__B07BJZJ34M__B077XVF99N__B07F668MBT'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>In a technically similar way, we can populate the popular items in Redis. I will skip the details here, as you can easily find it from <a href="https://github.com/dvquy13/recsys-seq-model/blob/main/notebooks/021-store-user-item-sequence.ipynb">the notebook</a>.</p>
+<p>In a basically similar way, we can populate the popular items in Redis. I will skip the details here, as you can easily find it from <a href="https://github.com/dvquy13/recsys-seq-model/blob/main/notebooks/021-store-user-item-sequence.ipynb">the notebook</a>.</p>
 </section>
 <section id="recap" class="level2">
 <h2 class="anchored" data-anchor-id="recap">Recap</h2>
@@ -692,7 +702,7 @@ Code
 <section id="next-steps" class="level2">
 <h2 class="anchored" data-anchor-id="next-steps">Next Steps</h2>
 <p>With our serving infrastructure ready and populated with data, we’re prepared for the final step: building the API layer that will expose our recommendation system to users. In <a href="../../../projects/implement-recsys/c7/index.html">Chapter 7</a>, we’ll learn how to use BentoML to host our model as an API endpoint and develop a FastAPI orchestrator to serve our recommendations.</p>
-<p>Continue to the <a href="../../../projects/implement-recsys/c7/index.html">next chapter</a>.</p>
+<p>Continue to the <a href="../../../projects/implement-recsys/c7/index.html">next and final chapter</a>.</p>
 <hr>
 <p><br> If you find this tutorial helpful, please cite this writeup as:</p>
 <blockquote class="blockquote">
@@ -1188,6 +1198,38 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>
   </div>
 </footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 

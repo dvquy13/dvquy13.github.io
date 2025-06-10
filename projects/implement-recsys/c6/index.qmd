@@ -18,9 +18,11 @@ This is the **sixth chapter** of the tutorial series: Implement a RecSys.
 
 ## Introduction
 
-In [Chapter 5](../c5/index.qmd), we have come a long way to build our sequence-based recommendation model which demonstrates significant metric uplifts over the popularity baseline. It can capture temporal patterns in user behavior and personalize recommendations based on interaction sequences. We're finally ready to tell the world about our exciting new model! To do that, we need to package our work in a way that end-users can benefit from.
+In [Chapter 5](../c5/index.qmd), we have come a long way to build our sequence-based recommendation model which demonstrates significant metric uplifts over the popularity baseline. We also discuss some design decisions regarding the retrieval architecture and how to make it efficient at serving time.
 
-This chapter aims to provide a transition ground from model development to deployment readiness. The challenge isn't just loading a model and calling `predict()`—it's building a proper system that can respond in milliseconds.
+We're finally ready to tell the world about our exciting new model! To do that, we need to package our work in a way that end-users can benefit from.
+
+This chapter aims to provide a transition ground from model development to deployment readiness. The goal is for us to understand what's required from model serving point of view, as well as the set ups needed to get it ready.
 
 Deploying ML models in production is actually a very huge area and deserves a series of its own. Within the scope of this tutorial, we will discuss the topic from the angle of an end-to-end data scientist—whose job is to design the complete pipeline from training to serving.
 
@@ -33,19 +35,19 @@ All code for this chapter is available in the `notebooks/020-ann-index.ipynb` an
 
 I have been always thinking that building a recommendation model is like crafting a perfect recipe for a gourmet dish. You might have the most sophisticated ingredients, precise measurements, and innovative techniques, but until that dish reaches hungry customers, it's just potential sitting in the kitchen. The recipe itself doesn't feed anyone—it's the execution, plating, and delivery that creates value. Similarly, our sequence-based recommendation model, no matter how accurate its predictions, remains useless until it can respond to real user requests in real-time.
 
-This analogy extends further when we consider the restaurant's serving strategy. A high-end restaurant doesn't prepare each dish from scratch when a customer orders. Instead, they use a combination of pre-preparation (mise en place) and real-time cooking. Some components are prepped in batches during quiet hours, while others must be prepared fresh to order. Recommendation systems follow the same principle: we balance pre-computed results with real-time inference based on the specific requirements of each use case.
+This analogy extends further when we consider the restaurant's serving strategy. A restaurant doesn't prepare each dish from scratch when a customer orders. Instead, they use a combination of pre-preparation (mise en place) and real-time cooking. Some components are prepped in batches during quiet hours, while others must be prepared fresh to order. Recommendation systems follow the same principle: we balance pre-computed results with real-time inference based on the specific requirements of each use case.
 
 ### How Recommendations Reach Users
 
 ::: {.column-page .my-5}
-![](../static/Model Serving.drawio.png)
+![An overview of the serving pipeline](../static/Model Serving.drawio.png){.lightbox}
 :::
 
 Understanding serving paradigms starts with tracing the journey from user action to displayed recommendations. When a user opens your app, a carefully orchestrated process begins:
 
 1. **Frontend Request**: The mobile app or web interface detects the user's need for recommendations (homepage load, category browse, search query)
 2. **API Call**: The frontend makes a REST API call to the backend, passing user context (user ID, current page, device info)
-3. **Backend Processing**: The recommendation service processes this request, either by looking up pre-computed results or triggering real-time model inference
+3. **Backend Processing**: The recommendation service processes this request, either by looking up pre-computed results or fetching the other features necessary for the model to make inference
 4. **Response Assembly**: Results are ranked, filtered for business rules, and formatted for display
 5. **Frontend Rendering**: The app receives the recommendations and renders them in the user interface
 
@@ -97,10 +99,12 @@ As you can see, the UI demo for our project also starts by showing the popular r
 
 ## Three-Pillar Serving Architecture
 
-We'll set up three main components that form the backbone of serving recommendation systems: **MLflow** for model registry and deployment, **Qdrant** for vector similarity search, and **Redis** as KV store for user sequences and metadata. Each addresses a specific aspect of the real-time recommendation challenge.
+How to implement this hybrid serving strategy?
+
+We'll set up three main components that form the backbone of serving our retrieval model: **MLflow** for model registry and deployment, **Qdrant** for vector similarity search, and **Redis** as KV store for user sequences and metadata.
 
 ::: {.column-page}
-![Three-pillar serving architecture with Model Registry, Vector Store, and Key-Value Cache](../static/Model Serving.drawio.png)
+![Three-pillar serving architecture with Model Registry, Vector Store, and Key-Value Store](../static/Model Serving.drawio.png)
 :::
 
 ### Pillar 1: Model Registry (MLflow)
@@ -121,11 +125,11 @@ In our case, our sequence model's candidate tower generates embeddings for all i
 
 The choice of using Qdrant here is nothing too special rather than personal, as I happen to find myself comfortable with it.
 
-### Pillar 3: Key-Value Cache (Redis)
+### Pillar 3: Key-Value Store (Redis)
 
-The **Key-Value Cache** serves as the system's memory for frequently accessed data and computational shortcuts. In recommendation systems, this typically includes user sequences, popular items, and pre-computed features that would be expensive to generate on-the-fly.
+The **Key-Value Store** serves as the system's memory for frequently accessed data and computational shortcuts. In recommendation systems, this typically includes user sequences, popular items, and pre-computed features that would be expensive to generate on-the-fly.
 
-For our recommender system, Redis stores each user's recent interaction history, enabling the query tower to generate contextual embeddings without expensive database lookups. It also contains the popular items as a form of pre-computed recommendations.
+For our recommender system, here Redis plays the role of a feature store where our back-end can retrieve each user's recent interaction history. On the other hand, it also contains the popular items as a form of pre-computed recommendations.
 
 When thinking about which open source tool to use for the key-value store, I must admit that Redis is so widely used that I don't really consider other options, especially for a tutorial project like this.
 
@@ -272,7 +276,7 @@ client.create_collection(
 
 ### Batch Indexing
 
-We do not only upload the embeddings to Qdrant but also their metadata. This becomes quite handy later when preparing the demo as we can get the item metadata by ID from Qdrant without the need to set up new database.
+We do not only upload the embeddings to Qdrant but also their metadata. This becomes quite handy later when preparing the UI demo as we can get the item metadata by ID from Qdrant without the need to store them in Redis.
 
 ```python
 points = []
@@ -403,7 +407,7 @@ Example output:
 'B078GWN38X__B078JJFFGK__B07ZDG34ZC__B079QG6L98__B00M9GZTXG__B07CWSSFL3__B0031W1E86__B07LF2YL9S__B07BJZJ34M__B077XVF99N__B07F668MBT'
 ```
 
-In a technically similar way, we can populate the popular items in Redis. I will skip the details here, as you can easily find it from [the notebook](https://github.com/dvquy13/recsys-seq-model/blob/main/notebooks/021-store-user-item-sequence.ipynb).
+In a basically similar way, we can populate the popular items in Redis. I will skip the details here, as you can easily find it from [the notebook](https://github.com/dvquy13/recsys-seq-model/blob/main/notebooks/021-store-user-item-sequence.ipynb).
 
 ## Recap
 
@@ -415,7 +419,7 @@ We use Docker Compose to set up our stack of MLflow for model registry and versi
 
 With our serving infrastructure ready and populated with data, we're prepared for the final step: building the API layer that will expose our recommendation system to users. In [Chapter 7](../c7/index.qmd), we'll learn how to use BentoML to host our model as an API endpoint and develop a FastAPI orchestrator to serve our recommendations.
 
-Continue to the [next chapter](../c7/index.qmd).
+Continue to the [next and final chapter](../c7/index.qmd).
 
 ---
 
