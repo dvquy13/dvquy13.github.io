@@ -1,4 +1,8 @@
-# Instructions
+# DvQ's Personal Blog Site
+
+This repo hosts the source code for DvQ's personal blog site, built using Quarto and deployed via GitHub Pages.
+
+## Instructions
 
 To render preview at local:
 - Install QuartoCLI
