@@ -20,3 +20,13 @@ Those people enjoy their work. Every hour feeds them rather than drains them. Yo
 I've been on both sides. I know what it feels like to dread the work session you planned for yourself. I also know what it feels like to look up at the clock and realize three hours vanished while you were deep in something you cared about.
 
 The difference came down to one thing: how I structured those sessions. Not how long, but how I started them.
+
+## The Monkey Problem
+
+If you've read Tim Urban's [Why Procrastinators Procrastinate](https://waitbutwhy.com/2013/10/why-procrastinators-procrastinate.html), you know about the instant gratification monkey. It's that part of your brain that hijacks control and steers you toward whatever feels good right now.
+
+The monkey doesn't care about your goals. It doesn't care that you promised yourself you'd study machine learning this weekend. It only sees the immediate: this task requires effort, that YouTube video doesn't.
+
+Here's the thing about the monkey: it's short-sighted. It can't see past the first few minutes of any task. All it knows is that getting started is boring. Building momentum feels like work. So it resists.
+
+The trick isn't to defeat the monkey. You can't. It's to work with it. You need to make starting so easy, so unthreatening, that the monkey doesn't bother putting up a fight.

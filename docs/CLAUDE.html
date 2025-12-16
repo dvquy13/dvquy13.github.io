@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Blog – DvQ</title>
+<title>claude – DvQ</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -31,8 +31,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
 <link href="./avatar.png" rel="icon" type="image/png">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="site_libs/cookie-consent/cookie-consent.js"></script>
 <link href="site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
 <script src="site_libs/quarto-html/quarto.js"></script>
@@ -71,35 +69,6 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
-
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
-
-    const options = {
-      valueNames: ['listing-title','listing-subtitle','listing-date','listing-reading-time','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
-      searchColumns: ["listing-date","listing-title","listing-author","listing-subtitle","listing-image","listing-description","listing-categories"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-NH6GYY9FZV"></script>
 
 <script type="text/plain" cookie-consent="tracking">
@@ -136,43 +105,14 @@ cookieconsent.run({
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&amp;display=swap" rel="stylesheet">
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="styles.css">
-<link rel="alternate" type="application/rss+xml" title="DvQ" href="index.xml" data-external="1"></head>
+</head>
 
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+  <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
@@ -191,7 +131,7 @@ window.Quarto = {
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="./index.html"> 
 <span class="menu-text">Blog</span></a>
   </li>  
   <li class="nav-item">
@@ -226,461 +166,26 @@ window.Quarto = {
     </nav>
 </header>
 <!-- content -->
-<header id="title-block-header" class="quarto-title-block default page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-page-left">
-      <h1 class="title">Blog</h1>
-                      </div>
-  </div>
-    
-  
-  <div class="quarto-title-meta column-page-left">
-
-      
-    
-      
-    </div>
-    
-  
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(15)</span></div><div class="category" data-category="Y2FyZWVy">career <span class="quarto-category-count">(2)</span></div><div class="category" data-category="aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=">implement-recsys-series <span class="quarto-category-count">(7)</span></div><div class="category" data-category="bGlmZQ==">life <span class="quarto-category-count">(3)</span></div><div class="category" data-category="bGxt">llm <span class="quarto-category-count">(1)</span></div><div class="category" data-category="bWFjaGluZSUyMGxlYXJuaW5n">machine learning <span class="quarto-category-count">(2)</span></div><div class="category" data-category="cHJvZHVjdGl2aXR5">productivity <span class="quarto-category-count">(1)</span></div><div class="category" data-category="cmVjc3lz">recsys <span class="quarto-category-count">(7)</span></div><div class="category" data-category="c2VhcmNo">search <span class="quarto-category-count">(1)</span></div><div class="category" data-category="dGVjaA==">tech <span class="quarto-category-count">(4)</span></div></div></div>
-<!-- main -->
-<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
-
-
-
-
-
-
-
-
-
-<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
-<div class="listing-actions-group">
-    <div class="input-group input-group-sm quarto-listing-filter">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input type="text" class="search form-control" placeholder="Filter">
     </div>
-</div>
-<div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-listing-file-modified-sort="1765887462281" data-listing-reading-time-sort="9" data-listing-word-count-sort="1673">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/the-30m-timebox/plan.html" class="no-external">Internal</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./posts/the-30m-timebox/plan.html" class="no-external"></a>
-</div>
-</div>
-<div class="metadata">
-<p><a href="./posts/the-30m-timebox/plan.html" class="no-external"></a></p><a href="./posts/the-30m-timebox/plan.html" class="no-external">
-<div class="listing-reading-time">
-9 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="1" data-categories="bGlmZSUyQ3Byb2R1Y3Rpdml0eQ==" data-listing-date-sort="1765814400000" data-listing-file-modified-sort="1765890720583" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="260">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/the-30m-timebox/index.html" class="no-external">The 30-Minute Timebox</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./posts/the-30m-timebox/index.html" class="no-external">A system for spending more time on what you actually care about</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('bGlmZQ=='); return false;">
-life
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('cHJvZHVjdGl2aXR5'); return false;">
-productivity
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./posts/the-30m-timebox/index.html" class="no-external">
-<div class="listing-date">
-Dec 16, 2025
-</div>
-<div class="listing-reading-time">
-2 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="2" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748793600000" data-listing-file-modified-sort="1749559543430" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="21" data-listing-word-count-sort="4030">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c7/index.html" class="no-external">Implement a RecSys, Chapter 7:<br> Building the API Layer</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c7/index.html" class="no-external">From trained models to production-ready APIs with BentoML and FastAPI</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c7/index.html" class="no-external">
-<div class="listing-date">
-Jun 2, 2025
-</div>
-<div class="listing-reading-time">
-21 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="3" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748707200000" data-listing-file-modified-sort="1749558535016" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3311">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c6/index.html" class="no-external">Implement a RecSys, Chapter 6:<br> Preparing for Serving</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c6/index.html" class="no-external">Build the foundation that bridges model training to serving</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c6/index.html" class="no-external">
-<div class="listing-date">
-Jun 1, 2025
-</div>
-<div class="listing-reading-time">
-17 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="4" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748620800000" data-listing-file-modified-sort="1749478375738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="29" data-listing-word-count-sort="5800">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c5/index.html" class="no-external">Implement a RecSys, Chapter 5:<br> Design Session-based Recommendation System</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c5/index.html" class="no-external">Design and implement a two-tower retrieval system that capture temporal patterns in user behavior</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c5/index.html" class="no-external">
-<div class="listing-date">
-May 31, 2025
-</div>
-<div class="listing-reading-time">
-29 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="5" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748534400000" data-listing-file-modified-sort="1749359952550" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2845">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c4/index.html" class="no-external">Implement a RecSys, Chapter 4:<br> Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c4/index.html" class="no-external">Establishing the evaluation foundation and implementing your baseline</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c4/index.html" class="no-external">
-<div class="listing-date">
-May 30, 2025
-</div>
-<div class="listing-reading-time">
-15 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="6" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748188800000" data-listing-file-modified-sort="1749274661961" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3388">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c3/index.html" class="no-external">Implement a RecSys, Chapter 3:<br> Negative Sampling</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c3/index.html" class="no-external">Why your model needs to see what users don’t want—and how to generate those examples</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c3/index.html" class="no-external">
-<div class="listing-date">
-May 26, 2025
-</div>
-<div class="listing-reading-time">
-17 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="7" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748102400000" data-listing-file-modified-sort="1749267130115" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3085">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c2/index.html" class="no-external">Implement a RecSys, Chapter 2:<br> Understanding the Data and Feature Engineering</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c2/index.html" class="no-external">Exploring Amazon product dataset and building features for sequence models</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c2/index.html" class="no-external">
-<div class="listing-date">
-May 25, 2025
-</div>
-<div class="listing-reading-time">
-16 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="8" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748016000000" data-listing-file-modified-sort="1748962983673" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2091">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c1/index.html" class="no-external">Implement a RecSys, Chapter 1:<br> Introduction and Project Overview</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c1/index.html" class="no-external">Understanding session-based recommendations and setting up your development environment</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c1/index.html" class="no-external">
-<div class="listing-date">
-May 24, 2025
-</div>
-<div class="listing-reading-time">
-11 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="9" data-categories="bGlmZSUyQ2NhcmVlcg==" data-listing-date-sort="1729785600000" data-listing-file-modified-sort="1739535257265" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="45">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/choose-profession/index.html" class="no-external">How to choose your profession?</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./posts/choose-profession/index.html" class="no-external">to live your life</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('bGlmZQ=='); return false;">
-life
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('Y2FyZWVy'); return false;">
-career
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./posts/choose-profession/index.html" class="no-external">
-<div class="listing-date">
-Oct 25, 2024
-</div>
-<div class="listing-reading-time">
-1 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="10" data-categories="bGlmZSUyQ2NhcmVlcg==" data-listing-date-sort="1729785600000" data-listing-file-modified-sort="1748061614935" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="539">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/career-switch/index.html" class="no-external">Career Switch</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./posts/career-switch/index.html" class="no-external">How to make a career switch into a technical field?</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('bGlmZQ=='); return false;">
-life
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('Y2FyZWVy'); return false;">
-career
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./posts/career-switch/index.html" class="no-external">
-<div class="listing-date">
-Oct 25, 2024
-</div>
-<div class="listing-reading-time">
-3 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="11" data-categories="dGVjaCUyQ2xsbQ==" data-listing-date-sort="1726934400000" data-listing-file-modified-sort="1739535257266" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="714">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/review-rec-bot/index.html" class="no-external">Building a Conversational Assistant for Restaurant Discovery and Booking</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/review-rec-bot/index.html" class="no-external">Lessons from Creating a Chatbot Using RAG, LLMs, and Advanced Retrieval Techniques</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('dGVjaA=='); return false;">
-tech
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('bGxt'); return false;">
-llm
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/review-rec-bot/index.html" class="no-external">
-<div class="listing-date">
-Sep 22, 2024
-</div>
-<div class="listing-reading-time">
-4 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="12" data-categories="dGVjaCUyQ21hY2hpbmUlMjBsZWFybmluZw==" data-listing-date-sort="1718899200000" data-listing-file-modified-sort="1739535257271" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="54">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/reviews-parsing-mlsys/index.html" class="no-external">Let’s build an ML system</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/reviews-parsing-mlsys/index.html" class="no-external">End-to-end set up and deploy on Kubernetes</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('dGVjaA=='); return false;">
-tech
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('bWFjaGluZSUyMGxlYXJuaW5n'); return false;">
-machine learning
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/reviews-parsing-mlsys/index.html" class="no-external">
-<div class="listing-date">
-Jun 21, 2024
-</div>
-<div class="listing-reading-time">
-1 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="13" data-categories="dGVjaCUyQ3NlYXJjaA==" data-listing-date-sort="1685548800000" data-listing-file-modified-sort="1739535257266" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="57" data-listing-word-count-sort="11257">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/site-search-elasticsearch/index.html" class="no-external">A Hierarchical approach with Elasticsearch: Lessons from 22 Months of Iteration</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./posts/site-search-elasticsearch/index.html" class="no-external">A Practical Guide to Designing Query Templates, Boosting Relevance, and Addressing Site-Search Challenges</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('dGVjaA=='); return false;">
-tech
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('c2VhcmNo'); return false;">
-search
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./posts/site-search-elasticsearch/index.html" class="no-external">
-<div class="listing-date">
-Jun 1, 2023
-</div>
-<div class="listing-reading-time">
-57 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="14" data-categories="dGVjaCUyQ21hY2hpbmUlMjBsZWFybmluZw==" data-listing-date-sort="1581868800000" data-listing-file-modified-sort="1740074003965" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2721">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/deploy-ml-gcp/index.html" class="no-external">From Model to Production: Deploying Your Machine Learning Solution on Google Cloud</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./posts/deploy-ml-gcp/index.html" class="no-external">Transforming a Laptop-Trained ML Model into a Scalable Batch Processing Pipeline using GCP’s Dataproc</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('dGVjaA=='); return false;">
-tech
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('bWFjaGluZSUyMGxlYXJuaW5n'); return false;">
-machine learning
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./posts/deploy-ml-gcp/index.html" class="no-external">
-<div class="listing-date">
-Feb 17, 2020
-</div>
-<div class="listing-reading-time">
-14 min
-</div>
-</a>
-</div>
-</div>
-</div>
-<div class="listing-no-matching d-none">
-No matching items
-</div>
-</div></main> <!-- /main -->
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+
+
+
+
+<p>This is personal blog site.</p>
+<p>Refer to README.md for information on how to use this repository.</p>
+<p>Refer to posts/ and project/ *.qmd files for my blog posts and especially for my writing style.</p>
+<p>In general I admire and want to follow Paul Graham’s writing style in his essays and Tim Urban’s style in his blog Wait But Why.</p>
+
+
+
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
