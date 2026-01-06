@@ -30,3 +30,21 @@ The monkey doesn't care about your goals. It doesn't care that you promised your
 Here's the thing about the monkey: it's short-sighted. It can't see past the first few minutes of any task. All it knows is that getting started is boring. Building momentum feels like work. So it resists.
 
 The trick isn't to defeat the monkey. You can't. It's to work with it. You need to make starting so easy, so unthreatening, that the monkey doesn't bother putting up a fight.
+
+## First Attempt: Time-Based Goals
+
+My first attempt at taming the monkey was simple: set a weekly time goal. Ten hours a week for studying and side projects. Track it in a spreadsheet. Hit the target.
+
+There's real merit to this approach. Time spent is a leading metric—you can't control outcomes, but you can control inputs. Put in enough hours and good things tend to happen. It's also useful when you don't know exactly what to work on. "Good times come when you're prepared," as they say. Just show up consistently and opportunities find you.
+
+For the first two months, it worked. I'd check off my hours, feel accomplished, and see genuine progress. The spreadsheet filled up with green cells. I was winning.
+
+Then month three came. And by month four, the whole thing collapsed.
+
+In hindsight I don't think the problem was about discipline. Slowly but more noticeably I started to notice that every session felt like an obligation. I'd look at my calendar and see "Study ML - 2 hours" and feel the same dread you feel before a Monday morning meeting. The monkey didn't just resist—it *rebelled*.
+
+Setting time as the goal made time the enemy. Instead of asking "what interesting problem should I explore today?", I was asking "how do I survive the next two hours?" The quality of my thinking tanked. I was physically present but mentally checked out, waiting for the clock to release me.
+
+Even worse, when I missed a day, the guilt compounded. Now I owed the spreadsheet extra hours. The deficit grew. Eventually I just stopped looking at the tracker altogether.
+
+Time-based goals had given me a system, but they'd killed the very thing that makes work sustainable: actually wanting to do it.
