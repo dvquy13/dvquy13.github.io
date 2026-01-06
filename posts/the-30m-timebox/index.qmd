@@ -48,3 +48,33 @@ Setting time as the goal made time the enemy. Instead of asking "what interestin
 Even worse, when I missed a day, the guilt compounded. Now I owed the spreadsheet extra hours. The deficit grew. Eventually I just stopped looking at the tracker altogether.
 
 Time-based goals had given me a system, but they'd killed the very thing that makes work sustainable: actually wanting to do it.
+
+## The 30-Minute Timebox
+
+After my time-tracking system fell apart, I tried something different. Instead of committing to hours, I made myself a smaller promise: just 30 minutes.
+
+Here's the deal I made with myself: commit to 30 minutes, and after that, I've earned the right to stop. No guilt. No "just a little more." If I want to walk away at minute 31, I can.
+
+Thirty minutes is nothing. It's one episode of a sitcom. It's the time you spend scrolling through your phone before bed. The thought of sitting down to work for two hours is frightening. But 30 minutes? The monkey doesn't even bother resisting something that small.
+
+That's the trick. The promise itself is what disarms the monkey. You're not lying to yourself about "just getting started" while secretly planning a marathon session. You genuinely mean it: 30 minutes, then you're free.
+
+But here's what actually happens once you sit down.
+
+You pick a specific question to work on—not "study machine learning," but something concrete like "how would I implement a recommendation system for this dataset?" You start typing out your thoughts, poking at the problem. And somewhere around minute 20, something shifts. You're not watching the clock anymore. You're actually curious about the answer.
+
+By minute 30, you're in the middle of something. The question isn't fully resolved. And now you face a choice: stop as promised, or keep going because you *want* to.
+
+More often than not, you keep going. Not because you forced yourself, but because stopping feels harder than continuing. The momentum has built up. What started as a reluctant 30-minute session stretches to an hour. Sometimes two. Sometimes you look up and three hours have vanished.
+
+This is the real magic of the timebox: it's not about the 30 minutes. It's about what happens after.
+
+The promise gets you through the door. The momentum keeps you inside. And over time, something else develops—trust. When you consistently honor the 30-minute promise (yes, sometimes you actually do stop at 30), your brain starts believing you. The next time you say "just 30 minutes," there's no internal negotiation, no suspicion that you're lying to yourself. You said 30 minutes, you meant it. This trust compounds.
+
+Now, about those questions. They matter more than I initially realized.
+
+The quality of your session depends heavily on what question you're chasing. "Work on side project" is too vague—your mind has nothing to grab onto. But "why does this algorithm converge faster than that one?" gives you something specific to sink your teeth into. Good questions pique your curiosity. They make the momentum build faster and last longer.
+
+The best sessions I've had started with questions I genuinely cared about. Sometimes the question came from something I read the night before. Sometimes it was a problem that had been nagging at me for days. The common thread was that the question itself pulled me forward. I wasn't pushing myself to work—I was being pulled toward an answer.
+
+But the timebox alone has an obvious weakness: without some baseline discipline, it's easy to skip entirely. The solution is equally obvious—commit to at least one 30-minute session every day.
