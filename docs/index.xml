@@ -10,7 +10,16 @@
 <atom:link href="https://dvquys.com/index.xml" rel="self" type="application/rss+xml"/>
 <description>DvQ Personal Website</description>
 <generator>quarto-1.6.40</generator>
-<lastBuildDate>Sun, 01 Jun 2025 16:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 15 Dec 2025 16:00:00 GMT</lastBuildDate>
+<item>
+  <title></title>
+  <link>https://dvquys.com/posts/the-30m-timebox/</link>
+  <description><![CDATA[ undefined ]]></description>
+  <category>life</category>
+  <category>productivity</category>
+  <guid>https://dvquys.com/posts/the-30m-timebox/</guid>
+  <pubDate>Mon, 15 Dec 2025 16:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Implement a RecSys, Chapter 7: Building the API Layer</title>
   <link>https://dvquys.com/projects/implement-recsys/c7/</link>
@@ -6889,6 +6898,24 @@ font-style: inherit;">make</span> down</span></code></pre></div>
   <media:content url="https://dvquys.com/projects/implement-recsys/static/recommender%20system.png" medium="image" type="image/png"/>
 </item>
 <item>
+  <title></title>
+  <link>https://dvquys.com/posts/choose-profession/</link>
+  <description><![CDATA[ undefined ]]></description>
+  <category>life</category>
+  <category>career</category>
+  <guid>https://dvquys.com/posts/choose-profession/</guid>
+  <pubDate>Thu, 24 Oct 2024 16:00:00 GMT</pubDate>
+</item>
+<item>
+  <title></title>
+  <link>https://dvquys.com/posts/career-switch/</link>
+  <description><![CDATA[ undefined ]]></description>
+  <category>life</category>
+  <category>career</category>
+  <guid>https://dvquys.com/posts/career-switch/</guid>
+  <pubDate>Thu, 24 Oct 2024 16:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Building a Conversational Assistant for Restaurant Discovery and Booking</title>
   <link>https://dvquys.com/projects/review-rec-bot/</link>
   <description><![CDATA[ 
@@ -13037,7 +13064,7 @@ font-style: inherit;">self</span>._persist_pipeline()</span></code></pre></div>
 
  ]]></description>
   <guid>https://dvquys.com/posts/the-30m-timebox/plan.html</guid>
-  <pubDate>Tue, 06 Jan 2026 12:38:22 GMT</pubDate>
+  <pubDate>Tue, 06 Jan 2026 13:10:45 GMT</pubDate>
 </item>
 </channel>
 </rss>
