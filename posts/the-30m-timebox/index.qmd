@@ -9,17 +9,16 @@ keywords: time management, motivation, productivity
 draft: true
 ---
 
-Some days I sit down to work on something I care about, and three hours vanish.
 
-Other days, I stare at my calendar and feel dread. I know what I should be doing. I've blocked time for it. But when the slot arrives, I'd rather do almost anything else.
+Some days I was surprised to realize that the last time I stood up from my work desk was like two hours ago. Other days, I stare at my calendar and feel dread. It's not that I don't know what I should be doing. Quite the opposite, as I actually blocked my time for it. However, when it comes to actually sit down and start working, I'd rather do almost anything else.
 
-What separates these two states? And can I create the first one on demand?
+For years I have been contemplating what separates these two states. Are there ways to create the first one on demand?
 
-I've spent years trying to answer this question. I've tried time tracking, weekly goals, accountability systems. Most of them worked for a while, then collapsed. But eventually I found something that sticks: a simple trick involving a 30-minute promise that consistently turns dread into momentum.
+As you probably suspect, I've tried pomodoro, weekly goals, gamifications, etc. Most of them were helpful for a while until they just... stopped working. Nonetheless, each has provided me a hint of what works for me and what doesn't.
 
-In this blog I will try pack my lessons into a framework that I can share with you guys.
+Over time, with the accumulation of "time-management" lessons I learned on my own, I am now trying to pack them into something more generalized and helpful for more than just me (hopefully).
 
-But first, we gotta meet our good old friend.
+But before jumping into the actual insight, we gotta meet a good old friend.
 
 ## The Monkey Problem
 
@@ -33,7 +32,7 @@ The trick isn't to defeat the monkey, but rather to work with it. You need to ma
 
 ## First Attempt: Time-Based Goals
 
-My first attempt at taming the monkey was simple: set a weekly time goal. Ten hours a week for studying and side projects. Track it in a spreadsheet. Hit the target.
+My first attempt at taming the monkey was simple: plan and track a weekly time goal—ten hours a week for studying and side projects in a spreadsheet, then try to hit the target.
 
 There's real merit to this approach. Time spent is a leading metric—you can't control outcomes, but you can control inputs. Put in enough hours and good things tend to happen. It's also useful when you don't know exactly what to work on. "Good times come when you're prepared," as they say. Just show up consistently and opportunities find you.
 
@@ -45,7 +44,7 @@ In hindsight I don't think the problem was about discipline. Slowly but unmistak
 
 Setting time as the goal made time the enemy. Instead of asking "what interesting problem should I explore today?", I was asking "how do I survive the next two hours?" The quality of my thinking tanked. I was physically present but mentally checked out, waiting for the clock to release me.
 
-Even worse, when I missed a day, the guilt compounded. Now I owed the spreadsheet extra hours. The deficit grew. Eventually I just stopped looking at the tracker altogether.
+Even worse, when I missed a day, the guilt compounded—now I owed the spreadsheet extra hours, the deficit grew, and eventually I just stopped looking at the tracker altogether.
 
 Time-based goals had given me a system, but they'd killed the very thing that makes work sustainable: actually wanting to do it.
 
