@@ -27,9 +27,9 @@ If you've read Tim Urban's [Why Procrastinators Procrastinate](https://waitbutwh
 
 The monkey doesn't care about your goals. It doesn't care that you promised yourself you'd study machine learning this weekend. It only sees the immediate: this task requires effort, that YouTube video doesn't.
 
-Here's the thing about the monkey: it's short-sighted. It can't see past the first few minutes of any task. All it knows is that getting started is boring. Building momentum feels like work. So it resists.
+Here's the thing about the monkey: it's short-sighted. It can't see past the first few minutes of any task. All it knows is that getting started is boring, while building momentum feels like work. And so it resists.
 
-The trick isn't to defeat the monkey. It's to work with it. You need to make starting so easy, so unthreatening, that the monkey doesn't bother putting up a fight.
+The trick isn't to defeat the monkey, but rather to work with it. You need to make starting so easy, so unthreatening, that the monkey doesn't bother putting up a fight.
 
 ## First Attempt: Time-Based Goals
 
