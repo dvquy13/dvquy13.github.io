@@ -10,19 +10,19 @@ draft: true
 ---
 
 
-Some days I was surprised to realize that the last time I stood up from my work desk was two hours ago. Other days, I stare at my calendar and feel dread. It's not that I don't know what I should be doing. Quite the opposite, as I actually blocked my time for it. However, when it comes to actually sit down and start working, I'd rather do almost anything else.
+Some days I was surprised to realize that the last time I stood up from my work desk was two hours ago. Other days, I stare at my calendar and feel dread.
+
+It's not that I don't know what I should be doing. Quite the opposite, as I actually blocked my time for it. However, when it comes to actually sit down and start working, I'd rather do almost anything else.
 
 For years I have been contemplating what separates these two states. Are there ways to create the first one on demand?
 
 As you probably suspect, I've tried pomodoro, weekly goals, gamifications, etc. Most of them were helpful for a while until they just... stopped working. Nonetheless, each has provided me a hint of what works for me and what doesn't.
 
-Over time, with the accumulation of "time-management" lessons I learned on my own, I am now trying to pack them into something more generalized and helpful for more than just me (hopefully).
-
-But before jumping into the actual insight, we gotta meet a good old friend.
-
 ## The Monkey Problem
 
-If you've read Tim Urban's [Why Procrastinators Procrastinate](https://waitbutwhy.com/2013/10/why-procrastinators-procrastinate.html), you know about the instant gratification monkey. It's that part of your brain that hijacks control and steers you toward whatever feels good right now.
+If you've read Tim Urban's [Why Procrastinators Procrastinate](https://waitbutwhy.com/2013/10/why-procrastinators-procrastinate.html), you know about the instant gratification monkey.
+
+It's that part of your brain that hijacks control and steers you toward whatever feels good right now.
 
 The monkey doesn't care about your goals. It doesn't care that you promised yourself you'd study machine learning this weekend. It only sees the immediate: this task requires effort, that YouTube video doesn't.
 
@@ -34,7 +34,7 @@ The trick isn't to defeat the monkey, but rather to work with it. You need to ma
 
 My first attempt at taming the monkey was simple: plan and track a weekly time goal—ten hours a week for studying and side projects in a spreadsheet, then try to hit the target.
 
-There's real merit to this approach. Time spent is a leading metric—you can't control outcomes, but you can control inputs. Put in enough hours and good things tend to happen. It's also useful when you don't know exactly what to work on. "Good times come when you're prepared," as they say. Just show up consistently and opportunities find you.
+There's real merit to this approach. Time spent is a leading metric—you can't control outcomes, but you can control inputs. Put in enough hours and good things tend to happen. Bonus you don't need to know exactly what to work on to get start. Having time spent is a win already.
 
 For the first two months, it worked. I'd check off my hours, feel accomplished, and see genuine progress. The spreadsheet filled up with green cells. I felt proud of myself.
 
@@ -48,11 +48,9 @@ Time-based goals had given me a system, but they'd killed the very thing that ma
 
 ## The 30-Minute Timebox
 
-After my time-tracking system fell apart, I tried something different. Instead of committing to hours, I made a smaller promise: just 30 minutes, and after that, I've earned the right to stop. No guilt. No "just a little more." If I want to walk away at minute 31, I can.
+After being tired of chasing the big amount of hours which makes me don't really want to even look at my calendar, I tried something different. Instead of committing to hours, I made a smaller promise: just 30 minutes each time, and after that, I've earned the right to stop. No guilt. No "just a little more." If I want to walk away at minute 31, I can do that without shame.
 
-Thirty minutes is nothing. It's one episode of a sitcom. It's the time you spend scrolling through your phone before bed, convinced you'll sleep "in just a minute".
-
-The thought of sitting down to work for two hours is frightening. But 30 minutes? The monkey doesn't even bother resisting something that small.
+Thirty minutes is nothing. It's one episode of a sitcom. It's the time you spend scrolling through your phone before bed, convinced you'll sleep "in just a minute". The monkey doesn't even bother resisting something that small.
 
 That's the trick. The promise itself is what disarms the monkey. You're not lying to yourself about "just getting started" while secretly planning a marathon session. You genuinely mean it: 30 minutes, then you're free.
 
@@ -66,13 +64,17 @@ More often than not, you keep going. Not because you forced yourself, but becaus
 
 This is the real magic of the timebox: it's not about the 30 minutes. It's about what happens after.
 
-The promise gets you through the door. The momentum keeps you inside. And over time, something else develops—trust. When you consistently honor the 30-minute promise (yes, sometimes you actually do stop at 30), your brain starts believing you. The next time you say "just 30 minutes," there's no internal negotiation, no suspicion that you're lying to yourself. You said 30 minutes, you meant it. This trust compounds.
+And over time, something else develops—trust. When you consistently honor the 30-minute promise (yes, sometimes you actually do stop at 30), your brain starts believing you. The next time you say "just 30 minutes," there's no internal negotiation, no suspicion that you're lying to yourself. You said 30 minutes, you meant it. This trust compounds.
 
-Now, about those questions. They matter more than I initially realized.
+## About the questions
+
+The questions matter more than I initially realized.
 
 The quality of your session depends heavily on what question you're chasing. "Work on side project" is too vague—your mind has nothing to grab onto. But "why does this algorithm converge faster than that one?" gives you something specific to sink your teeth into. Good questions pique your curiosity. They make the momentum build faster and last longer.
 
 The best sessions I've had started with questions I genuinely cared about. Sometimes the question came from something I read the night before. Sometimes it was a problem that had been nagging at me for days. The common thread was that the question itself pulled me forward. I wasn't pushing myself to work—I was being pulled toward an answer.
+
+## Everyday promise
 
 But the timebox alone has an obvious weakness: without some baseline discipline, it's easy to skip entirely. The solution is equally obvious—commit to at least one 30-minute session every day.
 
@@ -94,6 +96,8 @@ The floor keeps you consistent. The stretch keeps you engaged. Together, they cr
 
 ## Wrap up
 
-When you pay attention to your own questions—questions you genuinely care about—something happens beyond productivity. You stop following someone else's curriculum. You stop optimizing for metrics that don't matter to you. You start walking your own path.
+This system won't transform your life overnight. Some days you'll stop at exactly 30 minutes. Other days you won't start at all.
 
-This is the real compound effect. Curiosity pulls you forward. Discipline keeps you showing up. And over time, the questions you chase shape who you become, forging the path of life you want to live.
+But small things that actually work beat grand systems that don't.
+
+Show up for 30 minutes. Chase a question you care about. Let momentum do the rest.
