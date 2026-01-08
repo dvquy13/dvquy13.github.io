@@ -1,6 +1,6 @@
 ---
-title: The 30-Minute Timebox
-subtitle: A system for spending more time on what you actually care about
+title: The 30-Minute Promise
+subtitle: A technique for spending more time on what you actually care about
 date: 2026-01-08
 categories:
   - life
@@ -10,9 +10,9 @@ draft: true
 ---
 
 
-Some days I was surprised to realize that the last time I stood up from my work desk was two hours ago. Other days, I stare at my calendar and feel dread.
+Some days I was surprised to realize that the last time I stood up from my work desk was two hours ago.
 
-It's not that I don't know what I should be doing. Quite the opposite, as I actually blocked my time for it. However, when it comes to actually sit down and start working, I'd rather do almost anything else.
+Other days, I stare at my calendar and feel dread. But it's not that I don't know what I should be doing. Indeed it's quite the opposite, as I actually blocked my time for work in advance. However, when it comes to actually sit down and start working, I'd rather do almost anything else.
 
 For years I have been contemplating what separates these two states. Are there ways to create the first one on demand?
 
@@ -28,17 +28,19 @@ The monkey doesn't care about your goals. It doesn't care that you promised your
 
 But here's the thing about the monkey: it's short-sighted. It can't see past the first few minutes of any task. All it knows is that getting started is boring, while building momentum feels like work. And so it resists.
 
-The trick isn't to defeat the monkey, but rather to work with it. You need to make starting so easy, so unthreatening, that the monkey doesn't bother putting up a fight.
+The trick isn't to defeat the monkey, but rather to outsmart it. You need to make starting so easy, so unthreatening, that the monkey doesn't bother putting up a fight.
 
 ## First Attempt: Time-Based Goals
 
 My first attempt at taming the monkey was simple: plan and track a weekly time goal—ten hours a week for studying and side projects in a spreadsheet, then try to hit the target.
 
-There's real merit to this approach. Time spent is a leading metric—you can't control outcomes, but you can control inputs. Put in enough hours and good things tend to happen. Bonus you don't need to know exactly what to work on to get start. Having time spent is a win already.
+There's real merit to this approach. Time spent is a leading metric—you can't control outcomes, but you can control inputs. Put in enough hours and you already see the win. Bonus you don't need to know exactly what to work on to get start.
 
 For the first two months, it worked. I'd check off my hours, feel accomplished, and see genuine progress. The spreadsheet filled up with green cells. I felt proud of myself.
 
-Then month three came. And by month four, the whole thing collapsed. Slowly but unmistakably, every session started to feel like an obligation. I'd look at my calendar and see "Study ML - 2 hours" and feel the same dread you feel before a mid-day meeting. The monkey didn't just resist—it rebelled.
+Then month three came. And by month four, the whole thing collapsed. Slowly but unmistakably, every session started to feel like an obligation. I'd look at my calendar and see "Study ML - 2 hours" and feel bored the same way I feel before a mid-day meeting. The monkey didn't just resist—it rebelled.
+
+In hindsight I don't think the problem was discipline. 
 
 Setting time as the goal made time the enemy. Instead of asking "what interesting problem should I explore today?", I was asking "how do I survive the next two hours?" I was physically present but mentally checked out, waiting for the clock to release me.
 
@@ -46,13 +48,13 @@ Even worse, when I missed a day, the guilt compounded—now I owed the spreadshe
 
 Time-based goals had given me a system, but they'd killed the very thing that makes work sustainable: actually wanting to do it.
 
-## The 30-Minute Timebox
+## The 30-Minute Promise
 
-After being tired of chasing the big amount of hours which makes me don't really want to even look at my calendar, I tried something different. Instead of committing to hours, I made a smaller promise: just 30 minutes each time, and after that, I've earned the right to stop. No guilt. No "just a little more." If I want to walk away at minute 31, I can do that without shame.
+After being so tired of chasing hours that makes me don't really want to even look at my calendar, I tried something different. Instead of committing to hours, I made a smaller promise: just 30 minutes each time, and after that, I've earned the right to stop. No guilt. No "just a little more." If I want to walk away at minute 31, I can do that without shame.
 
 Thirty minutes is nothing. It's one episode of a sitcom. It's the time you spend scrolling through your phone before bed, convinced you'll sleep "in just a minute". The monkey doesn't even bother resisting something that small.
 
-That's the trick. The promise itself is what disarms the monkey. You're not lying to yourself about "just getting started" while secretly planning a marathon session. You genuinely mean it: 30 minutes, then you're free.
+But that's the trick. The promise itself is what disarms the monkey. You're not lying to yourself about "just getting started" while secretly planning a marathon session. You genuinely mean it: 30 minutes, then you're free.
 
 But here's what actually happens once you sit down.
 
@@ -62,7 +64,7 @@ By minute 30, you're in the middle of something. The question isn't fully resolv
 
 More often than not, you keep going. Not because you forced yourself, but because stopping feels harder than continuing. The momentum has built up. What started as a reluctant 30-minute session stretches to an hour. Sometimes two. Sometimes you look up and three hours have vanished.
 
-This is the real magic of the timebox: it's not about the 30 minutes. It's about what happens after.
+This is the real magic of the promise: it's not about the 30 minutes. It's about what happens after.
 
 And over time, something else develops—trust. When you consistently honor the 30-minute promise (yes, sometimes you actually do stop at 30), your brain starts believing you. The next time you say "just 30 minutes," there's no internal negotiation, no suspicion that you're lying to yourself. You said 30 minutes, you meant it. This trust compounds.
 
@@ -70,21 +72,19 @@ And over time, something else develops—trust. When you consistently honor the 
 
 The questions matter more than I initially realized.
 
-The quality of your session depends heavily on what question you're chasing. "Work on side project" is too vague—your mind has nothing to grab onto. But "why does this algorithm converge faster than that one?" gives you something specific to sink your teeth into. Good questions pique your curiosity. They make the momentum build faster and last longer.
+The quality of your session depends heavily on how good you start it, and this in turn credits to what question you're chasing. "Work on side project" is too vague—your mind has nothing to grab onto. But "why does this algorithm converge faster than that one?" gives you something specific to sink your teeth into. Good questions pique your curiosity. They make the momentum build faster and last longer.
 
 The best sessions I've had started with questions I genuinely cared about. Sometimes the question came from something I read the night before. Sometimes it was a problem that had been nagging at me for days. The common thread was that the question itself pulled me forward. I wasn't pushing myself to work—I was being pulled toward an answer.
 
 ## Everyday promise
 
-But the timebox alone has an obvious weakness: without some baseline discipline, it's easy to skip entirely. The solution is equally obvious—commit to at least one 30-minute session every day.
+The promise alone has an obvious weakness: without some baseline discipline, it's easy to skip entirely. The solution is committing to at least one 30-minute session every day.
 
-That daily commitment is your floor. It's the non-negotiable that keeps you in the game even on bad days. But the floor isn't where the magic happens.
+That daily commitment is your floor. It's the non-negotiable that keeps you in the game even on bad days.
 
-The magic is in the stretch.
+Here's how it works. You sit down for your 30-minute session with a specific question at 11:00 PM. You poke at it, make some progress, maybe solve it. You glance at the clock: 11:24 PM.
 
-Here's how it works. You sit down for your 30-minute session with a specific question. You poke at it, make some progress, maybe solve it. You glance at the clock: 11:36 PM. Your calendar says the session ends at 11:45—which itself was already stretched from the original 11:15.
-
-Nine minutes left. Not enough to start something new, but enough to think about what question you'd tackle next. And here's where the trick kicks in again: you promise yourself just 15 more minutes. That's it. Fifteen minutes to explore this new question, then you're done.
+Six minutes left. Not enough to start something new, but enough to think about what question you'd tackle next. And here's where the trick kicks in again: you promise yourself just 15 more minutes. That's it. Fifteen minutes to explore this new question, then you're done.
 
 But you already know what happens. Fifteen minutes in, you're curious about something else. Another 15-minute promise. Another stretch.
 

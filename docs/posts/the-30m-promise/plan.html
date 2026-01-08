@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Blog – DvQ</title>
+<title>plan – DvQ</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,27 +23,25 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<link href="./avatar.png" rel="icon" type="image/png">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
-<script src="site_libs/cookie-consent/cookie-consent.js"></script>
-<link href="site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-86daaaaad7353f9cc0c554efc1dd6d94.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-b6cf9ba9972a06bdad931cf83a4d9d4a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../avatar.png" rel="icon" type="image/png">
+<script src="../../site_libs/cookie-consent/cookie-consent.js"></script>
+<link href="../../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-86daaaaad7353f9cc0c554efc1dd6d94.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-b6cf9ba9972a06bdad931cf83a4d9d4a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -71,35 +69,6 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
-
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
-
-    const options = {
-      valueNames: ['listing-title','listing-subtitle','listing-date','listing-reading-time','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
-      searchColumns: ["listing-date","listing-title","listing-author","listing-subtitle","listing-image","listing-description","listing-categories"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-NH6GYY9FZV"></script>
 
 <script type="text/plain" cookie-consent="tracking">
@@ -136,38 +105,9 @@ cookieconsent.run({
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&amp;display=swap" rel="stylesheet">
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
-<link rel="stylesheet" href="styles.css">
-<link rel="alternate" type="application/rss+xml" title="DvQ" href="index.xml" data-external="1"></head>
+<link rel="stylesheet" href="../../styles.css">
+</head>
 
 <body class="nav-fixed">
 
@@ -176,7 +116,7 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">DvQ</span>
     </a>
   </div>
@@ -187,15 +127,15 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./about.html"> 
+    <a class="nav-link" href="../../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../../index.html"> 
 <span class="menu-text">Blog</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./projects.html"> 
+    <a class="nav-link" href="../../projects.html"> 
 <span class="menu-text">Projects</span></a>
   </li>  
   <li class="nav-item compact">
@@ -214,7 +154,7 @@ window.Quarto = {
 <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="./index.xml"> <i class="bi bi-rss" role="img">
+    <a class="nav-link" href="../../index.xml"> <i class="bi bi-rss" role="img">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -226,377 +166,164 @@ window.Quarto = {
     </nav>
 </header>
 <!-- content -->
-<header id="title-block-header" class="quarto-title-block default page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-page-left">
-      <h1 class="title">Blog</h1>
-                      </div>
-  </div>
-    
-  
-  <div class="quarto-title-meta column-page-left">
-
-      
-    
-      
-    </div>
-    
-  
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<header id="title-block-header" class="quarto-title-block"></header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(12)</span></div><div class="category" data-category="aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=">implement-recsys-series <span class="quarto-category-count">(7)</span></div><div class="category" data-category="bGxt">llm <span class="quarto-category-count">(1)</span></div><div class="category" data-category="bWFjaGluZSUyMGxlYXJuaW5n">machine learning <span class="quarto-category-count">(2)</span></div><div class="category" data-category="cmVjc3lz">recsys <span class="quarto-category-count">(7)</span></div><div class="category" data-category="c2VhcmNo">search <span class="quarto-category-count">(1)</span></div><div class="category" data-category="dGVjaA==">tech <span class="quarto-category-count">(4)</span></div></div></div>
-<!-- main -->
-<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
-
-
-
-
-
-
-
-
-
-<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
-<div class="listing-actions-group">
-    <div class="input-group input-group-sm quarto-listing-filter">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input type="text" class="search form-control" placeholder="Filter">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#internal" id="toc-internal" class="nav-link active" data-scroll-target="#internal">Internal</a>
+  <ul class="collapse">
+  <li><a href="#status" id="toc-status" class="nav-link" data-scroll-target="#status">Status</a></li>
+  </ul></li>
+  <li><a href="#objective" id="toc-objective" class="nav-link" data-scroll-target="#objective">Objective</a>
+  <ul class="collapse">
+  <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions">Questions</a></li>
+  </ul></li>
+  <li><a href="#outline" id="toc-outline" class="nav-link" data-scroll-target="#outline">Outline</a>
+  <ul class="collapse">
+  <li><a href="#hook" id="toc-hook" class="nav-link" data-scroll-target="#hook">1. HOOK</a></li>
+  <li><a href="#the-monkey-problem" id="toc-the-monkey-problem" class="nav-link" data-scroll-target="#the-monkey-problem">2. THE MONKEY PROBLEM</a></li>
+  <li><a href="#first-attempt-time-based-goals" id="toc-first-attempt-time-based-goals" class="nav-link" data-scroll-target="#first-attempt-time-based-goals">3. FIRST ATTEMPT: TIME-BASED GOALS</a></li>
+  <li><a href="#second-attempt-the-30-min-timebox" id="toc-second-attempt-the-30-min-timebox" class="nav-link" data-scroll-target="#second-attempt-the-30-min-timebox">4. SECOND ATTEMPT: THE 30-MIN TIMEBOX</a></li>
+  <li><a href="#the-synthesis" id="toc-the-synthesis" class="nav-link" data-scroll-target="#the-synthesis">5. THE SYNTHESIS</a></li>
+  <li><a href="#the-engine-detailed-mechanism" id="toc-the-engine-detailed-mechanism" class="nav-link" data-scroll-target="#the-engine-detailed-mechanism">6. THE ENGINE (detailed mechanism)</a></li>
+  <li><a href="#close" id="toc-close" class="nav-link" data-scroll-target="#close">7. CLOSE</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
-</div>
-<div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-listing-file-modified-sort="1765887462281" data-listing-reading-time-sort="9" data-listing-word-count-sort="1673">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/the-30m-promise/plan.html" class="no-external">Internal</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./posts/the-30m-promise/plan.html" class="no-external"></a>
-</div>
-</div>
-<div class="metadata">
-<p><a href="./posts/the-30m-promise/plan.html" class="no-external"></a></p><a href="./posts/the-30m-promise/plan.html" class="no-external">
-<div class="listing-reading-time">
-9 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="1" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748793600000" data-listing-file-modified-sort="1749559543430" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="21" data-listing-word-count-sort="4030">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c7/index.html" class="no-external">Implement a RecSys, Chapter 7:<br> Building the API Layer</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c7/index.html" class="no-external">From trained models to production-ready APIs with BentoML and FastAPI</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c7/index.html" class="no-external">
-<div class="listing-date">
-Jun 2, 2025
-</div>
-<div class="listing-reading-time">
-21 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="2" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748707200000" data-listing-file-modified-sort="1749558535016" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3311">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c6/index.html" class="no-external">Implement a RecSys, Chapter 6:<br> Preparing for Serving</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c6/index.html" class="no-external">Build the foundation that bridges model training to serving</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c6/index.html" class="no-external">
-<div class="listing-date">
-Jun 1, 2025
-</div>
-<div class="listing-reading-time">
-17 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="3" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748620800000" data-listing-file-modified-sort="1749478375738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="29" data-listing-word-count-sort="5800">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c5/index.html" class="no-external">Implement a RecSys, Chapter 5:<br> Design Session-based Recommendation System</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c5/index.html" class="no-external">Design and implement a two-tower retrieval system that capture temporal patterns in user behavior</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c5/index.html" class="no-external">
-<div class="listing-date">
-May 31, 2025
-</div>
-<div class="listing-reading-time">
-29 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="4" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748534400000" data-listing-file-modified-sort="1749359952550" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2845">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c4/index.html" class="no-external">Implement a RecSys, Chapter 4:<br> Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c4/index.html" class="no-external">Establishing the evaluation foundation and implementing your baseline</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c4/index.html" class="no-external">
-<div class="listing-date">
-May 30, 2025
-</div>
-<div class="listing-reading-time">
-15 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="5" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748188800000" data-listing-file-modified-sort="1749274661961" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3388">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c3/index.html" class="no-external">Implement a RecSys, Chapter 3:<br> Negative Sampling</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c3/index.html" class="no-external">Why your model needs to see what users don’t want—and how to generate those examples</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c3/index.html" class="no-external">
-<div class="listing-date">
-May 26, 2025
-</div>
-<div class="listing-reading-time">
-17 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="6" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748102400000" data-listing-file-modified-sort="1749267130115" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3085">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c2/index.html" class="no-external">Implement a RecSys, Chapter 2:<br> Understanding the Data and Feature Engineering</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c2/index.html" class="no-external">Exploring Amazon product dataset and building features for sequence models</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c2/index.html" class="no-external">
-<div class="listing-date">
-May 25, 2025
-</div>
-<div class="listing-reading-time">
-16 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="7" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748016000000" data-listing-file-modified-sort="1748962983673" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2091">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/implement-recsys/c1/index.html" class="no-external">Implement a RecSys, Chapter 1:<br> Introduction and Project Overview</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/implement-recsys/c1/index.html" class="no-external">Understanding session-based recommendations and setting up your development environment</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('cmVjc3lz'); return false;">
-recsys
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('aW1wbGVtZW50LXJlY3N5cy1zZXJpZXM='); return false;">
-implement-recsys-series
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/implement-recsys/c1/index.html" class="no-external">
-<div class="listing-date">
-May 24, 2025
-</div>
-<div class="listing-reading-time">
-11 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="8" data-categories="dGVjaCUyQ2xsbQ==" data-listing-date-sort="1726934400000" data-listing-file-modified-sort="1739535257266" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="714">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/review-rec-bot/index.html" class="no-external">Building a Conversational Assistant for Restaurant Discovery and Booking</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/review-rec-bot/index.html" class="no-external">Lessons from Creating a Chatbot Using RAG, LLMs, and Advanced Retrieval Techniques</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('dGVjaA=='); return false;">
-tech
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('bGxt'); return false;">
-llm
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/review-rec-bot/index.html" class="no-external">
-<div class="listing-date">
-Sep 22, 2024
-</div>
-<div class="listing-reading-time">
-4 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="9" data-categories="dGVjaCUyQ21hY2hpbmUlMjBsZWFybmluZw==" data-listing-date-sort="1718899200000" data-listing-file-modified-sort="1739535257271" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="54">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./projects/reviews-parsing-mlsys/index.html" class="no-external">Let’s build an ML system</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./projects/reviews-parsing-mlsys/index.html" class="no-external">End-to-end set up and deploy on Kubernetes</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('dGVjaA=='); return false;">
-tech
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('bWFjaGluZSUyMGxlYXJuaW5n'); return false;">
-machine learning
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./projects/reviews-parsing-mlsys/index.html" class="no-external">
-<div class="listing-date">
-Jun 21, 2024
-</div>
-<div class="listing-reading-time">
-1 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="10" data-categories="dGVjaCUyQ3NlYXJjaA==" data-listing-date-sort="1685548800000" data-listing-file-modified-sort="1739535257266" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="57" data-listing-word-count-sort="11257">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/site-search-elasticsearch/index.html" class="no-external">A Hierarchical approach with Elasticsearch: Lessons from 22 Months of Iteration</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./posts/site-search-elasticsearch/index.html" class="no-external">A Practical Guide to Designing Query Templates, Boosting Relevance, and Addressing Site-Search Challenges</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('dGVjaA=='); return false;">
-tech
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('c2VhcmNo'); return false;">
-search
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./posts/site-search-elasticsearch/index.html" class="no-external">
-<div class="listing-date">
-Jun 1, 2023
-</div>
-<div class="listing-reading-time">
-57 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="11" data-categories="dGVjaCUyQ21hY2hpbmUlMjBsZWFybmluZw==" data-listing-date-sort="1581868800000" data-listing-file-modified-sort="1740074003965" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2721">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/deploy-ml-gcp/index.html" class="no-external">From Model to Production: Deploying Your Machine Learning Solution on Google Cloud</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./posts/deploy-ml-gcp/index.html" class="no-external">Transforming a Laptop-Trained ML Model into a Scalable Batch Processing Pipeline using GCP’s Dataproc</a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('dGVjaA=='); return false;">
-tech
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('bWFjaGluZSUyMGxlYXJuaW5n'); return false;">
-machine learning
-</div>
-</div>
-</div>
-<div class="metadata">
-<a href="./posts/deploy-ml-gcp/index.html" class="no-external">
-<div class="listing-date">
-Feb 17, 2020
-</div>
-<div class="listing-reading-time">
-14 min
-</div>
-</a>
-</div>
-</div>
-</div>
-<div class="listing-no-matching d-none">
-No matching items
-</div>
-</div></main> <!-- /main -->
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="internal" class="level2">
+<h2 class="anchored" data-anchor-id="internal">Internal</h2>
+<section id="status" class="level3">
+<h3 class="anchored" data-anchor-id="status">Status</h3>
+<ul>
+<li>✅ Objective</li>
+<li>✅ Questions</li>
+<li>✅ Wandering</li>
+<li>✅ Develop ideas</li>
+<li>⏳ Execute (draft 1)</li>
+<li>Review and Shorten and Edit Loop</li>
+<li>Publish</li>
+</ul>
+<p><objective></objective></p>
+</section>
+</section>
+<section id="objective" class="level2">
+<h2 class="anchored" data-anchor-id="objective">Objective</h2>
+<ul>
+<li>Help people spend more time working on the thing they consciously want, by presenting a systematic way called “The 30-min timebox” to warm up and bring in the motivation</li>
+</ul>
+<p></p>
+<p><questions></questions></p>
+<section id="questions" class="level3">
+<h3 class="anchored" data-anchor-id="questions">Questions</h3>
+<ul>
+<li>Why do we need to be mindful of how we spend our time?</li>
+<li>What prevents people from spending more time on what they consciously want (i.e.&nbsp;not being dragged by the monkey like in the Tim Urbun Wait but Why procrastination blog post)?</li>
+<li>How did I realize that my typical scheduled 30-min work session can sometimes expand to hours?</li>
+<li>Why does the 30-min timebox work?</li>
+</ul>
+<p></p>
+<p><wandering></wandering></p>
+<p>Time is the most precious resource that we have. Time is the most… Repeat 3 times after me.</p>
+<p>How are you managing that precious resources?</p>
+<p>Have you ever wonder how people can spend 80 hours a week working while spending an extra 10 hours out of your 9-to-5 work seems already a big achievement for you?</p>
+<p>My hypothesis: The difference is that those people enjoy every minute of those working hours, but you don’t. What other reasons can it be?</p>
+<p>You might be thinking: Well those people are rare, and they are the lucky ones knowing what they want to do with their life. They have found their passions.</p>
+<p>Are you saying that you don’t know what to do with your life?</p>
+<p>Don’t be offended, I’m not here to tell you that everyone should have figured that out. What i’m trying to do is to filter the audiences. I don’t want to waste anyone’s time, and if you decide to read on, I hope you would find something useful for yourself.</p>
+<p>Because It’s like tricking the monkey in your head. A lot of the time we only need the momentum to get going, once the momentum is there we the monkey would either join the play or would retreat. But the monkey is short sighted, so it often views the process of creating momentum very boring, which it disgusts.</p>
+<p>One of the best ways to start the 30-min timebox is to focus on a specific question—a small enough one but just enough interesting to pique your inner interest. I have found starting the timebox by typing out the question and bulleting our thoughts is tremendously helpful. One question generally leads to others, and by the time you notice it has been 35 mins passed already.</p>
+<p>Okay, we committed to ourselves (or actually to our monkey) that we only work for 30 mins only. Now what? Shall we just find ourselves done with the work and go do other things?</p>
+<p>Of course you can. You have the right to respect your own words, even that being a promise making to an imaginary entity in our head. By doing so you creat trust in your own mind system, which I think is vital in maintaining a healthy engine in our life.</p>
+<p>However, I have found different scenarios happening in real-life, thanks to a little brother of the 30-min time box: the 15-min one! This little bro would say to you: C’mon, you have already passed 5 min, are you going lose that 5 min when you mark your proudful working session in your calendar? Since our calendar app encourages 15-min interval, lets spend 10 mins more to snap the box to the later grid.</p>
+<p>Thats how I feel energized to, well, lets start a new question and think about it just for 10 mins. And more often than not, by the time you noticed…</p>
+<p>I hope by now you understand how I’m able to put myself in long session of work.</p>
+<p>In the past, I have been experimenting with multiple time-management techniques, be it pomodoro, setting time goals for every week, etc. They have worked to some extents, but back then there were still some missing pieces that make them not stick. Later I have found out that it was due to the motive.</p>
+<p>If you design your time management for the sake of spending time and then feel rewarded by hitting the checkboxes, it makes using the the time being the objective itself. Don’t get me wrong, if you have been setting goal for yourselves like “this week I’m spending 10 hours on this topic” and you have done that then it’s awesome. Not many people can do that consistently for a long time. I have tried and failed after a few months. However, if you find yourself having trouble keeping that habit up and even feel guilty when you couldn’t meet that goal, then maybe it’s time to really think about it.</p>
+<p>There are two problems with this approach. Firstly it can feel really painful to get started, knowing that a long work session is waiting ahead today. And you can not defer because the other days are fully scheduled with likewise sessions as well. Secondly, you might not really enjoy those sessions since it feels more like obligation rather than you’re doing it with your own will. Even though feeling forced to do something is not necessary a bad thing since it’s part of every meaningful work, our mentality can be worn out over time if there is no carrot on the other side to balance the trade-off.</p>
+<p>So, what should be the right motive? The simple answer is to solve problems, or finding answers to a question. This means that instead of planning 10 hours a week to study machine learning, you tell yourselves that this week I’m gonna work on this particular idea or question, like “how to systematically improve the model offline evaluation metrics?”. And one big part of the whole idea is to really think about the questions you choose to work on. Choosing problems that you really care about ignites your curiousity. Sometimes the question or idea you have last night would be the reason why you want to jump out your bed to start working on it. More often than not, each of the answer you come up for a given question is an immediate reward in itself, making each working session well-worth. Not to mention that those small and small amazing moments add up as you reach milestones, and there’s always a big sense of accomplishment whenever you stop to look back. It’s not something like: “Phew I have been able to spend 10 hours this week on studying.. nice.. it’s challenging but let’s try to keep up next week” but “oh my god how the hell have I been able to spend 22.5 hours last week to work on these topics. And by the way how may I convert the new knowledge into something more concrete, like a write-up, that I can add to my own blog so that maybe it helps others?”</p>
+<p>Another beautiful side effect of this approach is that it forces you to go your own path. There is no other person on the planet that understands you better than you do, and if you spend serious time thinking about what questions matter to you most at the moment, I’m pretty sure that there are no better choices. I strongly believe this is how every great thing has been created. They are created by the very own questions in the mind of their creators. And I don’t think there is a chance that discipline per se is enough to help those people overcome walls and walls of problems along the course of finding answers to them. What’s much more likely is that they persevere though them because it’s deeply personal. Thinking about working like it’s something that pays off in the future does not really arm you with any momentum to get the ball rolling. But contemplating on what can be the answer to the questions of your own does, because now you have all sorts of monkeys and primal inner forces pushing the wheels together.</p>
+<p>But I’m not telling you all of this because I know for sure that’s every successful person do it this way. In fact I’m not even a successful person myself. Nonetheless, the thing I do believe with certain is that this is how every person does if their goal is to live their own lives the way they want it to be. I bet spending most of our lifetime working on the problems each one cares about is the goal of every person in the world. Who does not?</p>
+<p></p>
+<p><outline></outline></p>
+</section>
+</section>
+<section id="outline" class="level2">
+<h2 class="anchored" data-anchor-id="outline">Outline</h2>
+<section id="hook" class="level3">
+<h3 class="anchored" data-anchor-id="hook">1. HOOK</h3>
+<ul>
+<li>The 60-hour puzzle: some work 60 hrs and seem energized, you struggle with 10 extra</li>
+<li>The difference is enjoyment, not discipline</li>
+</ul>
+</section>
+<section id="the-monkey-problem" class="level3">
+<h3 class="anchored" data-anchor-id="the-monkey-problem">2. THE MONKEY PROBLEM</h3>
+<ul>
+<li>Tim Urban’s instant gratification monkey (credit him, link to Wait But Why)</li>
+<li>The resistance to starting anything that requires building momentum</li>
+</ul>
+</section>
+<section id="first-attempt-time-based-goals" class="level3">
+<h3 class="anchored" data-anchor-id="first-attempt-time-based-goals">3. FIRST ATTEMPT: TIME-BASED GOALS</h3>
+<ul>
+<li>The merits: leading metric (actions translate to visible results), good when you’re unsure what to work on (“good time comes when you’re prepared”)</li>
+<li>My experience: set 10 hrs/week goal for studying/side projects, sustained 2-3 months, then fell off</li>
+<li>The limitation: felt like obligation, not natural</li>
+</ul>
+</section>
+<section id="second-attempt-the-30-min-timebox" class="level3">
+<h3 class="anchored" data-anchor-id="second-attempt-the-30-min-timebox">4. SECOND ATTEMPT: THE 30-MIN TIMEBOX</h3>
+<ul>
+<li>The promise: “just 30 mins” — short enough for the monkey to accept</li>
+<li>The secret ingredient: start with a question you genuinely care about</li>
+<li>Why it works: tricks monkey, builds momentum, creates trust in your own system</li>
+<li>The weakness: no discipline baseline, easy to skip entirely when motivation dips</li>
+</ul>
+</section>
+<section id="the-synthesis" class="level3">
+<h3 class="anchored" data-anchor-id="the-synthesis">5. THE SYNTHESIS</h3>
+<ul>
+<li>Combine both: small minimum commitment (discipline) + 30-min/15-min stretch mechanism (motivation)</li>
+<li>The reward: seeing stretched time is satisfying in itself</li>
+<li>“Committed 5 hrs, worked 12 hrs” feels like winning</li>
+</ul>
+</section>
+<section id="the-engine-detailed-mechanism" class="level3">
+<h3 class="anchored" data-anchor-id="the-engine-detailed-mechanism">6. THE ENGINE (detailed mechanism)</h3>
+<ul>
+<li>Start with a question you care about</li>
+<li>Solve it, check clock: 23:36</li>
+<li>Calendar says session ends 23:45 (already stretched from 23:15)</li>
+<li>9 mins left → think of next interesting question</li>
+<li>Stretch by 15 mins → repeat</li>
+<li>This is how 30 mins becomes hours without feeling like it</li>
+</ul>
+</section>
+<section id="close" class="level3">
+<h3 class="anchored" data-anchor-id="close">7. CLOSE</h3>
+<ul>
+<li>The compound effect of curiosity + discipline</li>
+<li>Plant the seed: “Working on your own questions forces you onto your own path. This is how you live the life you want.”</li>
+<li>Don’t overexplain. Let it linger.</li>
+</ul>
+<p></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -1019,6 +746,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<script src="https://giscus.app/client.js" data-repo="dvquy13/icy-touch-comments" data-repo-id="R_kgDONEpzPA" data-category="General" data-category-id="DIC_kwDONEpzPM4Cjn8n" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" data-loading="lazy" async="">
+</script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -1037,5 +768,5 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
 </body></html>
