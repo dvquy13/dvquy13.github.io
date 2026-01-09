@@ -12,7 +12,7 @@ draft: true
 
 Some days I was surprised to realize that the last time I stood up from my work desk was two hours ago.
 
-Other days, I stare at my calendar and feel dread. But it's not that I don't know what I should be doing. Indeed it's quite the opposite, as I actually blocked my time for work in advance. However, when it comes to actually sit down and start working, I'd rather do almost anything else.
+Other days, I stare at my calendar and feel dread. But it's not that I don't know what I should be doing. Indeed it's quite the opposite, as I actually blocked my time for work in advance. However, when it comes to actually sitting down and start working, I'd rather do almost anything else.
 
 For years I have been contemplating what separates these two states. Are there ways to create the first one on demand?
 
@@ -34,7 +34,7 @@ The trick isn't to defeat the monkey, but rather to outsmart it. You need to mak
 
 My first attempt at taming the monkey was simple: plan and track a weekly time goal—ten hours a week for studying and side projects in a spreadsheet, then try to hit the target.
 
-There's real merit to this approach. Time spent is a leading metric—you can't control outcomes, but you can control inputs. Put in enough hours and you already see the win. Bonus you don't need to know exactly what to work on to get start.
+There's real merit to this approach. Time spent is a leading metric—you can't control outcomes, but you can control inputs. Put in enough hours and you already see the win. Bonus: you don't need to know exactly what to work on to get started.
 
 For the first two months, it worked. I'd check off my hours, feel accomplished, and see genuine progress. The spreadsheet filled up with green cells. I felt proud of myself.
 
@@ -50,7 +50,7 @@ Time-based goals had given me a system, but they'd killed the very thing that ma
 
 ## The 30-Minute Promise
 
-After being so tired of chasing hours that makes me don't really want to even look at my calendar, I tried something different. Instead of committing to hours, I made a smaller promise: just 30 minutes each time, and after that, I've earned the right to stop. No guilt. No "just a little more." If I want to walk away at minute 31, I can do that without shame.
+After growing so tired of chasing hours that I couldn't even look at my calendar, I tried something different. Instead of committing to hours, I made a smaller promise: just 30 minutes each time, and after that, I've earned the right to stop. No guilt. No "just a little more." If I want to walk away at minute 31, I can do that without shame.
 
 Thirty minutes is nothing. It's one episode of a sitcom. It's the time you spend scrolling through your phone before bed, convinced you'll sleep "in just a minute". The monkey doesn't even bother resisting something that small.
 
@@ -72,7 +72,7 @@ And over time, something else develops—trust. When you consistently honor the 
 
 The questions matter more than I initially realized.
 
-The quality of your session depends heavily on how good you start it, and this in turn credits to what question you're chasing. "Work on side project" is too vague—your mind has nothing to grab onto. But "why does this algorithm converge faster than that one?" gives you something specific to sink your teeth into. Good questions pique your curiosity. They make the momentum build faster and last longer.
+The quality of your session depends heavily on how you start it, which comes down to what question you're chasing. "Work on side project" is too vague—your mind has nothing to grab onto. But "why does this algorithm converge faster than that one?" gives you something specific to sink your teeth into. Good questions pique your curiosity. They make the momentum build faster and last longer.
 
 The best sessions I've had started with questions I genuinely cared about. Sometimes the question came from something I read the night before. Sometimes it was a problem that had been nagging at me for days. The common thread was that the question itself pulled me forward. I wasn't pushing myself to work—I was being pulled toward an answer.
 
