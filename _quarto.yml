@@ -31,10 +31,10 @@ format:
       - custom.scss
     code-fold: true
     css: styles.css
-    mainfont: "InterVariable, Inter, sans-serif"
+    mainfont: "InterVariable, sans-serif"
     highlight-style: github
-    # fontsize: 17px  # Configured in custom.scss
-    linestretch: 1.5
+    fontsize: 15.33px  # Configured in custom.scss
+    linestretch: 1.7
     linkcolor: "#0057a3"
     smooth-scroll: true
     monofont: "Roboto Mono"
