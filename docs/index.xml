@@ -10,7 +10,83 @@
 <atom:link href="https://dvquys.com/index.xml" rel="self" type="application/rss+xml"/>
 <description>DvQ Personal Website</description>
 <generator>quarto-1.6.40</generator>
-<lastBuildDate>Sun, 01 Jun 2025 16:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 07 Jan 2026 16:00:00 GMT</lastBuildDate>
+<item>
+  <title>The 30-Minute Promise</title>
+  <link>https://dvquys.com/posts/the-30m-promise/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>Some days I was surprised to realize that the last time I stood up from my work desk was two hours ago.</p>
+<p>Other days, I stare at my calendar and feel dread. But it’s not that I don’t know what I should be doing. Indeed it’s quite the opposite, as I actually blocked my time for work in advance. However, when it comes to actually sitting down and start working, I’d rather do almost anything else.</p>
+<p>For years I have been contemplating what separates these two states. Are there ways to create the first one on demand?</p>
+<p>As you probably suspect, I’ve tried pomodoro, weekly goals, gamifications, etc. Most of them were helpful for a while until they just… stopped working. Nonetheless, each has provided me a hint of what works for me and what doesn’t.</p>
+<section id="the-monkey-problem" class="level2">
+<h2 class="anchored" data-anchor-id="the-monkey-problem">The Monkey Problem</h2>
+<p>If you’ve read Tim Urban’s <a href="https://waitbutwhy.com/2013/10/why-procrastinators-procrastinate.html">Why Procrastinators Procrastinate</a>, you know about the instant gratification monkey.</p>
+<p>It’s that part of your brain that hijacks control and steers you toward whatever feels good right now.</p>
+<p>The monkey doesn’t care about your goals. It doesn’t care that you promised yourself you’d study machine learning this weekend. It only sees the immediate: this task requires effort, that YouTube video doesn’t.</p>
+<p>But here’s the thing about the monkey: it’s short-sighted. It can’t see past the first few minutes of any task. All it knows is that getting started is boring, while building momentum feels like work. And so it resists.</p>
+<p>The trick isn’t to defeat the monkey, but rather to outsmart it. You need to make starting so easy, so unthreatening, that the monkey doesn’t bother putting up a fight.</p>
+</section>
+<section id="first-attempt-time-based-goals" class="level2">
+<h2 class="anchored" data-anchor-id="first-attempt-time-based-goals">First Attempt: Time-Based Goals</h2>
+<p>My first attempt at taming the monkey was simple: plan and track a weekly time goal—ten hours a week for studying and side projects in a spreadsheet, then try to hit the target.</p>
+<p>There’s real merit to this approach. Time spent is a leading metric—you can’t control outcomes, but you can control inputs. Put in enough hours and you already see the win. Bonus: you don’t need to know exactly what to work on to get started.</p>
+<p>For the first two months, it worked. I’d check off my hours, feel accomplished, and see genuine progress. The spreadsheet filled up with green cells. I felt proud of myself.</p>
+<p>Then month three came. And by month four, the whole thing collapsed. Slowly but unmistakably, every session started to feel like an obligation. I’d look at my calendar and see “Study ML - 2 hours” and feel bored the same way I feel before a mid-day meeting. The monkey didn’t just resist—it rebelled.</p>
+<p>In hindsight I don’t think the problem was discipline.</p>
+<p>Setting time as the goal made time the enemy. Instead of asking “what interesting problem should I explore today?”, I was asking “how do I survive the next two hours?” I was physically present but mentally checked out, waiting for the clock to release me.</p>
+<p>Even worse, when I missed a day, the guilt compounded—now I owed the spreadsheet extra hours, the deficit grew, and eventually I just stopped looking at the tracker altogether.</p>
+<p>Time-based goals had given me a system, but they’d killed the very thing that makes work sustainable: actually wanting to do it.</p>
+</section>
+<section id="the-30-minute-promise" class="level2">
+<h2 class="anchored" data-anchor-id="the-30-minute-promise">The 30-Minute Promise</h2>
+<p>After growing so tired of chasing hours that I couldn’t even look at my calendar, I tried something different. Instead of committing to hours, I made a smaller promise: just 30 minutes each time, and after that, I’ve earned the right to stop. No guilt. No “just a little more.” If I want to walk away at minute 31, I can do that without shame.</p>
+<p>Thirty minutes is nothing. It’s one episode of a sitcom. It’s the time you spend scrolling through your phone before bed, convinced you’ll sleep “in just a minute”. The monkey doesn’t even bother resisting something that small.</p>
+<p>But that’s the trick. The promise itself is what disarms the monkey. You’re not lying to yourself about “just getting started” while secretly planning a marathon session. You genuinely mean it: 30 minutes, then you’re free.</p>
+<p>But here’s what actually happens once you sit down.</p>
+<p>You pick a specific question to work on—not “study machine learning,” but something concrete like “how would I implement a recommendation system for this dataset?” You start with the simplest thing possible: typing out your thoughts. That’s it, you start poking at the problem. And somewhere around minute 20, something shifts. You’re not watching the clock anymore. You’re actually curious about the answer.</p>
+<p>By minute 30, you’re in the middle of something. The question isn’t fully resolved. And now you face a choice: stop as promised, or keep going because you <em>want</em> to.</p>
+<p>More often than not, you keep going. Not because you forced yourself, but because stopping feels harder than continuing. The momentum has built up. What started as a reluctant 30-minute session stretches to an hour. Sometimes two. Sometimes you look up and three hours have vanished.</p>
+<p>This is the real magic of the promise: it’s not about the 30 minutes. It’s about what happens after.</p>
+<p>And over time, something else develops—trust. When you consistently honor the 30-minute promise (yes, sometimes you actually do stop at 30), your brain starts believing you. The next time you say “just 30 minutes,” there’s no internal negotiation, no suspicion that you’re lying to yourself. You said 30 minutes, you meant it. This trust compounds.</p>
+</section>
+<section id="about-the-questions" class="level2">
+<h2 class="anchored" data-anchor-id="about-the-questions">About the questions</h2>
+<p>The questions matter more than I initially realized.</p>
+<p>The quality of your session depends heavily on how you start it, which comes down to what question you’re chasing. “Work on side project” is too vague—your mind has nothing to grab onto. But “why does this algorithm converge faster than that one?” gives you something specific to sink your teeth into. Good questions pique your curiosity. They make the momentum build faster and last longer.</p>
+<p>The best sessions I’ve had started with questions I genuinely cared about. Sometimes the question came from something I read the night before. Sometimes it was a problem that had been nagging at me for days. The common thread was that the question itself pulled me forward. I wasn’t pushing myself to work—I was being pulled toward an answer.</p>
+</section>
+<section id="everyday-promise" class="level2">
+<h2 class="anchored" data-anchor-id="everyday-promise">Everyday promise</h2>
+<p>The promise alone has an obvious weakness: without some baseline discipline, it’s easy to skip entirely. The solution is committing to at least one 30-minute session every day.</p>
+<p>That daily commitment is your floor. It’s the non-negotiable that keeps you in the game even on bad days.</p>
+<p>Here’s how it works. You sit down for your 30-minute session with a specific question at 11:00 PM. You poke at it, make some progress, maybe solve it. You glance at the clock: 11:24 PM.</p>
+<p>Six minutes left. Not enough to start something new, but enough to think about what question you’d tackle next. And here’s where the trick kicks in again: you promise yourself just 15 more minutes. That’s it. Fifteen minutes to explore this new question, then you’re done.</p>
+<p>But you already know what happens. Fifteen minutes in, you’re curious about something else. Another 15-minute promise. Another stretch.</p>
+<p>This is how 30 minutes becomes two hours without feeling like two hours. You never committed to a marathon. You just kept making tiny promises you could keep.</p>
+<p>And here’s the satisfying part: at the end of the week, you look at your tracker and see something like “Committed: 30 mins. Actual: 3 hours.” That gap is pure win. You didn’t grind out 3 hours through willpower. You showed up for 30 minutes and let momentum do the rest.</p>
+<p>The floor keeps you consistent. The stretch keeps you engaged. Together, they create a system where discipline and enjoyment stop fighting each other and start working together.</p>
+</section>
+<section id="wrap-up" class="level2">
+<h2 class="anchored" data-anchor-id="wrap-up">Wrap up</h2>
+<p>This system won’t transform your life overnight. Some days you’ll stop at exactly 30 minutes. Other days you won’t start at all.</p>
+<p>But small things that actually work beat grand systems that don’t.</p>
+<p>Show up for 30 minutes. Chase a question you care about. Let momentum do the rest.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>life</category>
+  <category>productivity</category>
+  <guid>https://dvquys.com/posts/the-30m-promise/</guid>
+  <pubDate>Wed, 07 Jan 2026 16:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Implement a RecSys, Chapter 7: Building the API Layer</title>
   <link>https://dvquys.com/projects/implement-recsys/c7/</link>
@@ -6889,6 +6965,24 @@ font-style: inherit;">make</span> down</span></code></pre></div>
   <media:content url="https://dvquys.com/projects/implement-recsys/static/recommender%20system.png" medium="image" type="image/png"/>
 </item>
 <item>
+  <title></title>
+  <link>https://dvquys.com/posts/choose-profession/</link>
+  <description><![CDATA[ undefined ]]></description>
+  <category>life</category>
+  <category>career</category>
+  <guid>https://dvquys.com/posts/choose-profession/</guid>
+  <pubDate>Thu, 24 Oct 2024 16:00:00 GMT</pubDate>
+</item>
+<item>
+  <title></title>
+  <link>https://dvquys.com/posts/career-switch/</link>
+  <description><![CDATA[ undefined ]]></description>
+  <category>life</category>
+  <category>career</category>
+  <guid>https://dvquys.com/posts/career-switch/</guid>
+  <pubDate>Thu, 24 Oct 2024 16:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Building a Conversational Assistant for Restaurant Discovery and Booking</title>
   <link>https://dvquys.com/projects/review-rec-bot/</link>
   <description><![CDATA[ 
@@ -12904,140 +12998,6 @@ font-style: inherit;">self</span>._persist_pipeline()</span></code></pre></div>
   <category>machine learning</category>
   <guid>https://dvquys.com/posts/deploy-ml-gcp/</guid>
   <pubDate>Sun, 16 Feb 2020 16:00:00 GMT</pubDate>
-</item>
-<item>
-  <title></title>
-  <link>https://dvquys.com/posts/the-30m-promise/plan.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<section id="internal" class="level2">
-<h2 class="anchored" data-anchor-id="internal">Internal</h2>
-<section id="status" class="level3">
-<h3 class="anchored" data-anchor-id="status">Status</h3>
-<ul>
-<li>✅ Objective</li>
-<li>✅ Questions</li>
-<li>✅ Wandering</li>
-<li>✅ Develop ideas</li>
-<li>⏳ Execute (draft 1)</li>
-<li>Review and Shorten and Edit Loop</li>
-<li>Publish</li>
-</ul>
-<p><objective></objective></p>
-</section>
-</section>
-<section id="objective" class="level2">
-<h2 class="anchored" data-anchor-id="objective">Objective</h2>
-<ul>
-<li>Help people spend more time working on the thing they consciously want, by presenting a systematic way called “The 30-min timebox” to warm up and bring in the motivation</li>
-</ul>
-<p></p>
-<p><questions></questions></p>
-<section id="questions" class="level3">
-<h3 class="anchored" data-anchor-id="questions">Questions</h3>
-<ul>
-<li>Why do we need to be mindful of how we spend our time?</li>
-<li>What prevents people from spending more time on what they consciously want (i.e.&nbsp;not being dragged by the monkey like in the Tim Urbun Wait but Why procrastination blog post)?</li>
-<li>How did I realize that my typical scheduled 30-min work session can sometimes expand to hours?</li>
-<li>Why does the 30-min timebox work?</li>
-</ul>
-<p></p>
-<p><wandering></wandering></p>
-<p>Time is the most precious resource that we have. Time is the most… Repeat 3 times after me.</p>
-<p>How are you managing that precious resources?</p>
-<p>Have you ever wonder how people can spend 80 hours a week working while spending an extra 10 hours out of your 9-to-5 work seems already a big achievement for you?</p>
-<p>My hypothesis: The difference is that those people enjoy every minute of those working hours, but you don’t. What other reasons can it be?</p>
-<p>You might be thinking: Well those people are rare, and they are the lucky ones knowing what they want to do with their life. They have found their passions.</p>
-<p>Are you saying that you don’t know what to do with your life?</p>
-<p>Don’t be offended, I’m not here to tell you that everyone should have figured that out. What i’m trying to do is to filter the audiences. I don’t want to waste anyone’s time, and if you decide to read on, I hope you would find something useful for yourself.</p>
-<p>Because It’s like tricking the monkey in your head. A lot of the time we only need the momentum to get going, once the momentum is there we the monkey would either join the play or would retreat. But the monkey is short sighted, so it often views the process of creating momentum very boring, which it disgusts.</p>
-<p>One of the best ways to start the 30-min timebox is to focus on a specific question—a small enough one but just enough interesting to pique your inner interest. I have found starting the timebox by typing out the question and bulleting our thoughts is tremendously helpful. One question generally leads to others, and by the time you notice it has been 35 mins passed already.</p>
-<p>Okay, we committed to ourselves (or actually to our monkey) that we only work for 30 mins only. Now what? Shall we just find ourselves done with the work and go do other things?</p>
-<p>Of course you can. You have the right to respect your own words, even that being a promise making to an imaginary entity in our head. By doing so you creat trust in your own mind system, which I think is vital in maintaining a healthy engine in our life.</p>
-<p>However, I have found different scenarios happening in real-life, thanks to a little brother of the 30-min time box: the 15-min one! This little bro would say to you: C’mon, you have already passed 5 min, are you going lose that 5 min when you mark your proudful working session in your calendar? Since our calendar app encourages 15-min interval, lets spend 10 mins more to snap the box to the later grid.</p>
-<p>Thats how I feel energized to, well, lets start a new question and think about it just for 10 mins. And more often than not, by the time you noticed…</p>
-<p>I hope by now you understand how I’m able to put myself in long session of work.</p>
-<p>In the past, I have been experimenting with multiple time-management techniques, be it pomodoro, setting time goals for every week, etc. They have worked to some extents, but back then there were still some missing pieces that make them not stick. Later I have found out that it was due to the motive.</p>
-<p>If you design your time management for the sake of spending time and then feel rewarded by hitting the checkboxes, it makes using the the time being the objective itself. Don’t get me wrong, if you have been setting goal for yourselves like “this week I’m spending 10 hours on this topic” and you have done that then it’s awesome. Not many people can do that consistently for a long time. I have tried and failed after a few months. However, if you find yourself having trouble keeping that habit up and even feel guilty when you couldn’t meet that goal, then maybe it’s time to really think about it.</p>
-<p>There are two problems with this approach. Firstly it can feel really painful to get started, knowing that a long work session is waiting ahead today. And you can not defer because the other days are fully scheduled with likewise sessions as well. Secondly, you might not really enjoy those sessions since it feels more like obligation rather than you’re doing it with your own will. Even though feeling forced to do something is not necessary a bad thing since it’s part of every meaningful work, our mentality can be worn out over time if there is no carrot on the other side to balance the trade-off.</p>
-<p>So, what should be the right motive? The simple answer is to solve problems, or finding answers to a question. This means that instead of planning 10 hours a week to study machine learning, you tell yourselves that this week I’m gonna work on this particular idea or question, like “how to systematically improve the model offline evaluation metrics?”. And one big part of the whole idea is to really think about the questions you choose to work on. Choosing problems that you really care about ignites your curiousity. Sometimes the question or idea you have last night would be the reason why you want to jump out your bed to start working on it. More often than not, each of the answer you come up for a given question is an immediate reward in itself, making each working session well-worth. Not to mention that those small and small amazing moments add up as you reach milestones, and there’s always a big sense of accomplishment whenever you stop to look back. It’s not something like: “Phew I have been able to spend 10 hours this week on studying.. nice.. it’s challenging but let’s try to keep up next week” but “oh my god how the hell have I been able to spend 22.5 hours last week to work on these topics. And by the way how may I convert the new knowledge into something more concrete, like a write-up, that I can add to my own blog so that maybe it helps others?”</p>
-<p>Another beautiful side effect of this approach is that it forces you to go your own path. There is no other person on the planet that understands you better than you do, and if you spend serious time thinking about what questions matter to you most at the moment, I’m pretty sure that there are no better choices. I strongly believe this is how every great thing has been created. They are created by the very own questions in the mind of their creators. And I don’t think there is a chance that discipline per se is enough to help those people overcome walls and walls of problems along the course of finding answers to them. What’s much more likely is that they persevere though them because it’s deeply personal. Thinking about working like it’s something that pays off in the future does not really arm you with any momentum to get the ball rolling. But contemplating on what can be the answer to the questions of your own does, because now you have all sorts of monkeys and primal inner forces pushing the wheels together.</p>
-<p>But I’m not telling you all of this because I know for sure that’s every successful person do it this way. In fact I’m not even a successful person myself. Nonetheless, the thing I do believe with certain is that this is how every person does if their goal is to live their own lives the way they want it to be. I bet spending most of our lifetime working on the problems each one cares about is the goal of every person in the world. Who does not?</p>
-<p></p>
-<p><outline></outline></p>
-</section>
-</section>
-<section id="outline" class="level2">
-<h2 class="anchored" data-anchor-id="outline">Outline</h2>
-<section id="hook" class="level3">
-<h3 class="anchored" data-anchor-id="hook">1. HOOK</h3>
-<ul>
-<li>The 60-hour puzzle: some work 60 hrs and seem energized, you struggle with 10 extra</li>
-<li>The difference is enjoyment, not discipline</li>
-</ul>
-</section>
-<section id="the-monkey-problem" class="level3">
-<h3 class="anchored" data-anchor-id="the-monkey-problem">2. THE MONKEY PROBLEM</h3>
-<ul>
-<li>Tim Urban’s instant gratification monkey (credit him, link to Wait But Why)</li>
-<li>The resistance to starting anything that requires building momentum</li>
-</ul>
-</section>
-<section id="first-attempt-time-based-goals" class="level3">
-<h3 class="anchored" data-anchor-id="first-attempt-time-based-goals">3. FIRST ATTEMPT: TIME-BASED GOALS</h3>
-<ul>
-<li>The merits: leading metric (actions translate to visible results), good when you’re unsure what to work on (“good time comes when you’re prepared”)</li>
-<li>My experience: set 10 hrs/week goal for studying/side projects, sustained 2-3 months, then fell off</li>
-<li>The limitation: felt like obligation, not natural</li>
-</ul>
-</section>
-<section id="second-attempt-the-30-min-timebox" class="level3">
-<h3 class="anchored" data-anchor-id="second-attempt-the-30-min-timebox">4. SECOND ATTEMPT: THE 30-MIN TIMEBOX</h3>
-<ul>
-<li>The promise: “just 30 mins” — short enough for the monkey to accept</li>
-<li>The secret ingredient: start with a question you genuinely care about</li>
-<li>Why it works: tricks monkey, builds momentum, creates trust in your own system</li>
-<li>The weakness: no discipline baseline, easy to skip entirely when motivation dips</li>
-</ul>
-</section>
-<section id="the-synthesis" class="level3">
-<h3 class="anchored" data-anchor-id="the-synthesis">5. THE SYNTHESIS</h3>
-<ul>
-<li>Combine both: small minimum commitment (discipline) + 30-min/15-min stretch mechanism (motivation)</li>
-<li>The reward: seeing stretched time is satisfying in itself</li>
-<li>“Committed 5 hrs, worked 12 hrs” feels like winning</li>
-</ul>
-</section>
-<section id="the-engine-detailed-mechanism" class="level3">
-<h3 class="anchored" data-anchor-id="the-engine-detailed-mechanism">6. THE ENGINE (detailed mechanism)</h3>
-<ul>
-<li>Start with a question you care about</li>
-<li>Solve it, check clock: 23:36</li>
-<li>Calendar says session ends 23:45 (already stretched from 23:15)</li>
-<li>9 mins left → think of next interesting question</li>
-<li>Stretch by 15 mins → repeat</li>
-<li>This is how 30 mins becomes hours without feeling like it</li>
-</ul>
-</section>
-<section id="close" class="level3">
-<h3 class="anchored" data-anchor-id="close">7. CLOSE</h3>
-<ul>
-<li>The compound effect of curiosity + discipline</li>
-<li>Plant the seed: “Working on your own questions forces you onto your own path. This is how you live the life you want.”</li>
-<li>Don’t overexplain. Let it linger.</li>
-</ul>
-<p></p>
-
-
-</section>
-</section>
-
- ]]></description>
-  <guid>https://dvquys.com/posts/the-30m-promise/plan.html</guid>
-  <pubDate>Fri, 09 Jan 2026 13:55:05 GMT</pubDate>
 </item>
 </channel>
 </rss>

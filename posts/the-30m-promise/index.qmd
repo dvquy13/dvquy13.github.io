@@ -6,7 +6,7 @@ categories:
   - life
   - productivity
 keywords: time management, motivation, productivity
-draft: true
+draft: false
 ---
 
 

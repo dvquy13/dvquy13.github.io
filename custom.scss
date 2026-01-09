@@ -10,8 +10,10 @@ $navbar-fg: black;
 /* Change listing's post metadata's reading time */
 
 :root {
+  --bs-root-font-size: 16px;
   font-family: Inter, sans-serif;
   font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+  letter-spacing: -0.01em; /* match rsms.me */
 }
 
 @supports (font-variation-settings: normal) {
