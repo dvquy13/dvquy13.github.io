@@ -1,71 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://dvquys.com/about.html</loc>
-    <lastmod>2025-06-02T15:34:54.594Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects.html</loc>
-    <lastmod>2025-02-14T12:14:17.266Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/implement-recsys/c2/index.html</loc>
-    <lastmod>2025-06-07T03:32:10.115Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/implement-recsys/c4/index.html</loc>
-    <lastmod>2025-06-08T05:19:12.550Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/implement-recsys/c6/index.html</loc>
-    <lastmod>2025-06-10T12:28:55.016Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/implement-recsys/c7/index.html</loc>
-    <lastmod>2025-06-10T12:45:43.430Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/posts/deploy-ml-gcp/index.html</loc>
-    <lastmod>2025-02-20T17:53:23.965Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/posts/site-search-elasticsearch/index.html</loc>
-    <lastmod>2025-02-14T12:14:17.266Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/review-rec-bot/index.html</loc>
-    <lastmod>2025-02-14T12:14:17.266Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/implement-recsys/c1/index.html</loc>
-    <lastmod>2025-06-03T15:03:03.673Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/implement-recsys/c3/index.html</loc>
-    <lastmod>2025-06-07T05:37:41.961Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/implement-recsys/c5/index.html</loc>
-    <lastmod>2025-06-09T14:12:55.738Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dvquys.com/projects/reviews-parsing-mlsys/index.html</loc>
-    <lastmod>2025-02-14T12:14:17.271Z</lastmod>
+    <loc>https://dvquys.com/CLAUDE.html</loc>
+    <lastmod>2025-12-15T11:33:29.221Z</lastmod>
   </url>
   <url>
     <loc>https://dvquys.com/index.html</loc>
     <lastmod>2025-05-24T04:40:14.934Z</lastmod>
   </url>
   <url>
-    <loc>https://dvquys.com/posts/the-30m-timebox/plan.html</loc>
-    <lastmod>2025-12-16T12:17:42.281Z</lastmod>
+    <loc>https://dvquys.com/projects/reviews-parsing-mlsys/index.html</loc>
+    <lastmod>2025-02-14T12:14:17.271Z</lastmod>
   </url>
   <url>
-    <loc>https://dvquys.com/CLAUDE.html</loc>
-    <lastmod>2025-12-15T11:33:29.221Z</lastmod>
+    <loc>https://dvquys.com/projects/implement-recsys/c5/index.html</loc>
+    <lastmod>2025-06-09T14:12:55.738Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects/implement-recsys/c3/index.html</loc>
+    <lastmod>2025-06-07T05:37:41.961Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects/implement-recsys/c1/index.html</loc>
+    <lastmod>2025-06-03T15:03:03.673Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects/review-rec-bot/index.html</loc>
+    <lastmod>2025-02-14T12:14:17.266Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/posts/site-search-elasticsearch/index.html</loc>
+    <lastmod>2025-02-14T12:14:17.266Z</lastmod>
   </url>
   <url>
     <loc>https://dvquys.com/posts/the-30m-promise/plan.html</loc>
     <lastmod>2025-12-16T12:17:42.281Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/posts/deploy-ml-gcp/index.html</loc>
+    <lastmod>2025-02-20T17:53:23.965Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects/implement-recsys/c7/index.html</loc>
+    <lastmod>2025-06-10T12:45:43.430Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects/implement-recsys/c6/index.html</loc>
+    <lastmod>2025-06-10T12:28:55.016Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects/implement-recsys/c4/index.html</loc>
+    <lastmod>2025-06-08T05:19:12.550Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects/implement-recsys/c2/index.html</loc>
+    <lastmod>2025-06-07T03:32:10.115Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/projects.html</loc>
+    <lastmod>2025-02-14T12:14:17.266Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dvquys.com/about.html</loc>
+    <lastmod>2025-06-02T15:34:54.594Z</lastmod>
   </url>
 </urlset>

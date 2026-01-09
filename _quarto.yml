@@ -4,6 +4,7 @@ project:
 
 website:
   title: "DvQ"
+  draft-mode: unlinked
   site-url: https://dvquys.com
   description: "DvQ Personal Website"
   navbar:

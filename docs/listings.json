@@ -1,19 +1,5 @@
 [
   {
-    "listing": "/projects.html",
-    "items": [
-      "/projects/implement-recsys/c7/index.html",
-      "/projects/implement-recsys/c6/index.html",
-      "/projects/implement-recsys/c5/index.html",
-      "/projects/implement-recsys/c4/index.html",
-      "/projects/implement-recsys/c3/index.html",
-      "/projects/implement-recsys/c2/index.html",
-      "/projects/implement-recsys/c1/index.html",
-      "/projects/review-rec-bot/index.html",
-      "/projects/reviews-parsing-mlsys/index.html"
-    ]
-  },
-  {
     "listing": "/index.html",
     "items": [
       "/posts/the-30m-promise/plan.html",
@@ -28,6 +14,20 @@
       "/projects/reviews-parsing-mlsys/index.html",
       "/posts/site-search-elasticsearch/index.html",
       "/posts/deploy-ml-gcp/index.html"
+    ]
+  },
+  {
+    "listing": "/projects.html",
+    "items": [
+      "/projects/implement-recsys/c7/index.html",
+      "/projects/implement-recsys/c6/index.html",
+      "/projects/implement-recsys/c5/index.html",
+      "/projects/implement-recsys/c4/index.html",
+      "/projects/implement-recsys/c3/index.html",
+      "/projects/implement-recsys/c2/index.html",
+      "/projects/implement-recsys/c1/index.html",
+      "/projects/review-rec-bot/index.html",
+      "/projects/reviews-parsing-mlsys/index.html"
     ]
   }
 ]
