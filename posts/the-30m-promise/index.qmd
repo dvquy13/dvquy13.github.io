@@ -54,7 +54,7 @@ Time-based goals had given me a system, but they'd killed the very thing that ma
 
 After my tracking system collapsed, I couldn't even look at my calendar. The sight of those time blocks triggered guilt.
 
-There's a small issue: Tracking time is still in my blood though. I've always been the person who blocks out my week, who wants to see where my hours went. Abandoning that entirely felt like losing a limb. So I kept using Google Calendar—just without the weekly targets. I'd block time for a session, start working, and if I wanted to keep going, I'd drag the end time forward.
+There's a small issue: Tracking time is still in my blood. I've always been the person who blocks out my week, who wants to see where my hours went. Abandoning that entirely felt like losing a limb. So I kept using Google Calendar—just without the weekly targets. I'd block time for a session, start working, and if I wanted to keep going, I'd drag the end time forward.
 
 That's when I noticed something. Calendar only lets you snap to 15-minute increments. Every time I extended a session, I was committing to "just 15 more minutes." But here's what happened: I'd finish my current task six minutes into that new block — and suddenly I had nine minutes left to fill. That leftover time created a **strange pull**. Instead of stopping, I'd start on something else just to complete the block. Then I'd drag it again.
 
@@ -62,9 +62,9 @@ That's when I noticed something. Calendar only lets you snap to 15-minute increm
 ![Look I just dragged the blogging session 15m more, then sure I would go to bed](./the-30minute-timebox.png){.lightbox}
 :::
 
-The pattern was obvious once I saw it. Tracking time wasn't the problem and it shouldn't be. The monkey had been fighting the idea of advance commitment to long hours, not the work itself. When I stopped measuring myself against the calendar and started using it to make it support me—to help coordinate small commitments, everything changed.
+The pattern was obvious once I saw it. Tracking time wasn't the problem and it shouldn't be. The monkey had been fighting the idea of advance commitment to long hours, not the work itself. When I stopped measuring myself against the calendar and started using it to help coordinate small commitments, everything changed.
 
-Now I start every session with Calendar open in front of me. The same tool I once avoided is now how I trick myself into starting and keep myself going.
+Now I start every session with Calendar open. The same tool I once avoided is now how I trick myself into starting and keep myself going.
 
 ## The 30-Minute Promise
 
@@ -72,9 +72,9 @@ So I made the commitment explicit: just 30 minutes to start, with real permissio
 
 Thirty minutes is nothing. It's one episode of a sitcom. The monkey doesn't even bother resisting something that small.
 
-But that's the trick. The promise itself is what disarms the monkey. You're not lying to yourself about "just getting started". You genuinely mean it: 30 minutes, then you're free.
+That's the trick though. The promise itself is what disarms the monkey. You're not lying to yourself about "just getting started". You genuinely mean it: 30 minutes, then you're free.
 
-Here's what actually happens once you sit down.
+But here's what actually happens once you sit down.
 
 You pick a specific question to work on—not "study machine learning," but something concrete like "how would I implement a recommendation system for this dataset?". You start with the simplest thing possible: typing out your thoughts. That's it, you start poking at the problem. And somewhere around minute 20, something shifts. You're not watching the clock anymore. You're actually curious about the answer.
 
@@ -97,7 +97,7 @@ Here's what mine looks like mid-project:
 
 Notice it's not either pretty or even clear. The important bit is that the little ⏳ tells future-me exactly where to pick up.
 
-There's another beautiful benefit in this act. The next time you sit down for 30 minutes, you don't need to figure out what to work on. The questions are already there, waiting to run over your mind. By no time you're so back into the context.
+There's another beautiful benefit in this act. The next time you sit down for 30 minutes, you don't need to figure out what to work on. The questions are already there, waiting to run over your mind. In no time you're deep into the context.
 
 ## Everyday Promise
 
@@ -106,3 +106,12 @@ The promise alone has an obvious weakness: without some baseline discipline, it'
 That daily commitment is your bottom line. It's the non-negotiable that keeps you in the game even on bad days. Some days you'll stop at exactly 30 minutes—and that's fine.
 
 What matters is that you showed up.
+
+## Credits
+
+Kudos to Binh, Son and Ha for reviewing the drafts.
+
+<br>
+If you find this article helpful, please cite this writeup as:
+
+> Quy, Dinh. (Jan 2026). {{< meta title >}}. {{< var website_url >}}. https://{{< var website_url >}}/posts/the-30m-promise/.
