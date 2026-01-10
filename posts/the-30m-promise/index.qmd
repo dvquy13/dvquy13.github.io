@@ -38,7 +38,7 @@ For the first two months, I'd check off my hours, feel accomplished, and see gen
 
 Then month three came with a bit of struggles. For the first time I wasn't able to keep up with my plan cause, you know, a surprise visit from a close friend and then came great time together for a few days.
 
-By month four, the whole thing collapsed. Slowly but unmistakably, every session started to feel like an obligation. I'd look at my calendar and see "Study ML - 2 hours" and feel bored the same way I feel before a mid-day meeting. The monkey didn't just resist—it rebelled.
+By month four, the whole thing collapsed. Slowly but unmistakably, every session started to feel like an obligation. I'd look at my calendar and see "Study ML - 2 hours" and feel dread the same way I feel before a mid-day meeting. The monkey didn't just resist—it rebelled.
 
 In hindsight I don't think the problem was discipline. Setting time as the goal made time the enemy.
 
@@ -48,9 +48,25 @@ Even worse, when I missed a day, the guilt compounded—now I owed the spreadshe
 
 Time-based goals had given me a system, but they'd killed the very thing that makes work sustainable: actually wanting to do it.
 
+## The Shift
+
+After my tracking system collapsed, I couldn't even look at my calendar. The sight of those time blocks triggered guilt.
+
+But here's the thing: tracking time is in my blood. I've always been the person who blocks out my week, who wants to see where my hours went. Abandoning that entirely felt like losing a limb. So I kept using Google Calendar — just without the weekly targets. I'd block time for a session, start working, and if I wanted to keep going, I'd drag the end time forward.
+
+That's when I noticed something. Calendar only lets you snap to 15-minute increments. Every time I extended a session, I was committing to "just 15 more minutes." But here's what happened: I'd finish my current task six minutes into that new block — and suddenly I had nine minutes left to fill. That leftover time created a strange pull. Instead of stopping, I'd start on something else just to complete the block. Then I'd drag it again.
+
+:::{.column-page}
+![Look I just dragged the blogging session 15m more, then sure I would go to bed](./the-30minute-timebox.png){.lightbox}
+:::
+
+The pattern was obvious once I saw it. Tracking time wasn't the problem and it shouldn't be. Using time as a scorecard was. When I stopped measuring myself against the calendar and started using it to make it work for me—to help coordinate small commitments, everything changed.
+
+Now I start every session with Calendar open in front of me. The same tool I once avoided is now how I trick myself into starting — and keep myself going.
+
 ## The 30-Minute Promise
 
-After growing so tired of chasing hours that I couldn't even look at my calendar, I tried something different. Instead of committing to hours, I made a smaller promise: just 30 minutes each time, and after that, I've earned the right to stop. If I want to walk away at minute 31, I can do that without feeling guilty.
+So I made the commitment explicit: just 30 minutes to start, with real permission to stop. If I want to walk away at minute 31, I can do that without feeling guilty.
 
 Thirty minutes is nothing. It's one episode of a sitcom. The monkey doesn't even bother resisting something that small.
 
@@ -60,15 +76,7 @@ But here's what actually happens once you sit down.
 
 You pick a specific question to work on—not "study machine learning," but something concrete like "how would I implement a recommendation system for this dataset?". You start with the simplest thing possible: typing out your thoughts. That's it, you start poking at the problem. And somewhere around minute 20, something shifts. You're not watching the clock anymore. You're actually curious about the answer.
 
-By minute 30, you're in the middle of something. The question isn't fully resolved. Oh and what about that other thing? Why it is the way it is? ... At this point stopping is much harder than just continuing.
-
-So you extend the session—basically starting another sort-of 30-minute (or just 15[^1]) promise. This flywheel keeps running until you notice that three hours have passed.
-
-:::{.column-page}
-![Look I just dragged the blogging session 15m more, then sure I would go to bed 😉](./the-30minute-timebox.png){.lightbox}
-:::
-
-[^1]: Well I must give credit to Google Calendar UI Designer. When dragging the bottom edge of an event you can only snap it to the next 15-minute.
+By minute 30, you're in the middle of something. Stopping feels harder than continuing. So you extend — and the flywheel kicks in.
 
 Over time, something else develops—trust. When you consistently honor the promise (yes, sometimes you actually do stop early), your brain starts believing you. The next time you say "just 30 minutes," there's no internal negotiation, no suspicion that you're lying to yourself.
 
