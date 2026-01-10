@@ -18,13 +18,15 @@ For years I have been contemplating what separates these two states. Is there a 
 
 As you probably suspect, I've tried pomodoro, weekly goals, gamifications, etc. Most of them were helpful for a while until they just... stopped working.
 
-## The Monkey Problem
+## The Monkey
 
-If you've read Tim Urban's [Why Procrastinators Procrastinate](https://waitbutwhy.com/2013/10/why-procrastinators-procrastinate.html), you know about the instant gratification monkey.
+Does this look familiar?
 
-It's that part of your brain that hijacks control and steers you toward whatever feels good right now.
+![Source: [Why Procrastinators Procrastinate](https://waitbutwhy.com/2013/10/why-procrastinators-procrastinate.html) by Tim Urban](./monkey.png)
 
-The monkey doesn't care about your goals. It doesn't care that you promised yourself you'd study machine learning this weekend. It only sees the immediate: this task requires effort, that YouTube video doesn't.
+If you've read that Tim Urban's famous post, you know about the instant gratification monkey.
+
+It's that part of your brain that hijacks control and steers you toward whatever feels good right now. It only sees the immediate: this task requires effort, that YouTube video doesn't.
 
 The trick isn't to defeat the monkey, but rather to outsmart it. You need to make starting so easy, so unthreatening, that the monkey doesn't bother putting up a fight.
 
@@ -36,7 +38,7 @@ There's real merit to this approach. Time spent is a leading metric—you can't 
 
 For the first two months, I'd check off my hours, feel accomplished, and see genuine progress. The spreadsheet filled up with green cells. I felt proud of myself.
 
-Then month three came with a bit of struggles. For the first time I wasn't able to keep up with my plan cause, you know, a surprise visit from a close friend and then came great time together for a few days.
+Then month three came with a bit of struggles. For the first time I wasn't able to keep up with my plan cause, you know, a surprise visit from a close friend. Then came great time together for a few days.
 
 By month four, the whole thing collapsed. Slowly but unmistakably, every session started to feel like an obligation. I'd look at my calendar and see "Study ML - 2 hours" and feel dread the same way I feel before a mid-day meeting. The monkey didn't just resist—it rebelled.
 
@@ -46,23 +48,23 @@ Instead of asking "what interesting problem should I explore today?", I was aski
 
 Even worse, when I missed a day, the guilt compounded—now I owed the spreadsheet extra hours, the deficit grew, and eventually I just stopped looking at the tracker altogether.
 
-Time-based goals had given me a system, but they'd killed the very thing that makes work sustainable: actually wanting to do it.
+Time-based goals had given me a system, but they'd killed the very thing that makes work sustainable: curiosity.
 
-## The Shift
+## The Love-Hate Calendar
 
 After my tracking system collapsed, I couldn't even look at my calendar. The sight of those time blocks triggered guilt.
 
-But here's the thing: tracking time is in my blood. I've always been the person who blocks out my week, who wants to see where my hours went. Abandoning that entirely felt like losing a limb. So I kept using Google Calendar — just without the weekly targets. I'd block time for a session, start working, and if I wanted to keep going, I'd drag the end time forward.
+There's a small issue: Tracking time is still in my blood though. I've always been the person who blocks out my week, who wants to see where my hours went. Abandoning that entirely felt like losing a limb. So I kept using Google Calendar—just without the weekly targets. I'd block time for a session, start working, and if I wanted to keep going, I'd drag the end time forward.
 
-That's when I noticed something. Calendar only lets you snap to 15-minute increments. Every time I extended a session, I was committing to "just 15 more minutes." But here's what happened: I'd finish my current task six minutes into that new block — and suddenly I had nine minutes left to fill. That leftover time created a strange pull. Instead of stopping, I'd start on something else just to complete the block. Then I'd drag it again.
+That's when I noticed something. Calendar only lets you snap to 15-minute increments. Every time I extended a session, I was committing to "just 15 more minutes." But here's what happened: I'd finish my current task six minutes into that new block — and suddenly I had nine minutes left to fill. That leftover time created a **strange pull**. Instead of stopping, I'd start on something else just to complete the block. Then I'd drag it again.
 
 :::{.column-page}
 ![Look I just dragged the blogging session 15m more, then sure I would go to bed](./the-30minute-timebox.png){.lightbox}
 :::
 
-The pattern was obvious once I saw it. Tracking time wasn't the problem and it shouldn't be. Using time as a scorecard was. When I stopped measuring myself against the calendar and started using it to make it work for me—to help coordinate small commitments, everything changed.
+The pattern was obvious once I saw it. Tracking time wasn't the problem and it shouldn't be. The monkey had been fighting the idea of advance commitment to long hours, not the work itself. When I stopped measuring myself against the calendar and started using it to make it support me—to help coordinate small commitments, everything changed.
 
-Now I start every session with Calendar open in front of me. The same tool I once avoided is now how I trick myself into starting — and keep myself going.
+Now I start every session with Calendar open in front of me. The same tool I once avoided is now how I trick myself into starting and keep myself going.
 
 ## The 30-Minute Promise
 
@@ -72,20 +74,35 @@ Thirty minutes is nothing. It's one episode of a sitcom. The monkey doesn't even
 
 But that's the trick. The promise itself is what disarms the monkey. You're not lying to yourself about "just getting started". You genuinely mean it: 30 minutes, then you're free.
 
-But here's what actually happens once you sit down.
+Here's what actually happens once you sit down.
 
 You pick a specific question to work on—not "study machine learning," but something concrete like "how would I implement a recommendation system for this dataset?". You start with the simplest thing possible: typing out your thoughts. That's it, you start poking at the problem. And somewhere around minute 20, something shifts. You're not watching the clock anymore. You're actually curious about the answer.
 
-By minute 30, you're in the middle of something. Stopping feels harder than continuing. So you extend — and the flywheel kicks in.
+By minute 30, you're in the middle of something. Stopping feels harder than continuing. So you extend, and the flywheel kicks in.
 
-Over time, something else develops—trust. When you consistently honor the promise (yes, sometimes you actually do stop early), your brain starts believing you. The next time you say "just 30 minutes," there's no internal negotiation, no suspicion that you're lying to yourself.
+Over time, something strange happens: the monkey starts trusting you. When you consistently honor the promise—yes, sometimes you actually do stop early—your brain stops treating "30 minutes" as a lie. The next time you say it, there's no negotiation.
 
-Remember that the magic is not about the initial 30 minutes. It's about what happens after.
+Also remember that the magic is not about the initial 30 minutes. It's about what happens after.
 
-## Everyday promise
+## Saving Your State
+
+What happens when you have to stop mid-task? That's fine—just spend two minutes writing down where you are. Anything, even a messy state dump can do.
+
+Here's what mine looks like mid-project:
+
+> - ✅ PoC connect to real user data and display the chart
+> - ✅ Add debug mode with query date range and events list
+> - ✅ Move to different week updates the visuals
+> - ⏳ ⚠️ Content not responsive when side panel shrinks
+
+Notice it's not either pretty or even clear. The important bit is that the little ⏳ tells future-me exactly where to pick up.
+
+There's another beautiful benefit in this act. The next time you sit down for 30 minutes, you don't need to figure out what to work on. The questions are already there, waiting to run over your mind. By no time you're so back into the context.
+
+## Everyday Promise
 
 The promise alone has an obvious weakness: without some baseline discipline, it's easy to skip entirely. The solution is committing to at least one 30-minute session every day.
 
-That daily commitment is your floor. It's the non-negotiable that keeps you in the game even on bad days. Some days you'll stop at exactly 30 minutes—and that's fine.
+That daily commitment is your bottom line. It's the non-negotiable that keeps you in the game even on bad days. Some days you'll stop at exactly 30 minutes—and that's fine.
 
 What matters is that you showed up.
