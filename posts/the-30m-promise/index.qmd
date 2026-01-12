@@ -20,11 +20,9 @@ As you probably suspect, I've tried pomodoro, weekly goals, gamifications, etc. 
 
 ## The Monkey
 
-Does this look familiar?
+If you've read that Tim Urban's famous post, you know about the instant gratification monkey.
 
 ![Source: [Why Procrastinators Procrastinate](https://waitbutwhy.com/2013/10/why-procrastinators-procrastinate.html) by Tim Urban](./monkey.png)
-
-If you've read that Tim Urban's famous post, you know about the instant gratification monkey.
 
 It's that part of your brain that hijacks control and steers you toward whatever feels good right now. It only sees the immediate: this task requires effort, that YouTube video doesn't.
 
@@ -40,7 +38,7 @@ For the first two months, I'd check off my hours, feel accomplished, and see gen
 
 Then month three came with a bit of struggles. For the first time I wasn't able to keep up with my plan cause, you know, a surprise visit from a close friend. Then came great time together for a few days.
 
-By month four, the whole thing collapsed. Slowly but unmistakably, every session started to feel like an obligation. I'd look at my calendar and see "Study ML - 2 hours" and feel dread the same way I feel before a mid-day meeting. The monkey didn't just resist—it rebelled.
+By month four, the whole thing collapsed. Every session started to feel like an obligation. I'd look at my calendar and see "Study ML - 2 hours" and feel dread the same way I feel before a mid-day meeting.
 
 In hindsight I don't think the problem was discipline. Setting time as the goal made time the enemy.
 
@@ -97,7 +95,7 @@ Here's what mine looks like mid-project:
 
 Notice it's not either pretty or even clear. The important bit is that the little ⏳ tells future-me exactly where to pick up.
 
-There's another beautiful benefit in this act. The next time you sit down for 30 minutes, you don't need to figure out what to work on. The questions are already there, waiting to run over your mind. In no time you're deep into the context.
+There's another benefit in this act. The next time you sit down for 30 minutes, you don't need to figure out what to work on. The questions are already there, waiting to run over your mind. In no time you're deep into the context.
 
 ## Everyday Promise
 
@@ -109,7 +107,7 @@ What matters is that you showed up.
 
 ## Credits
 
-Kudos to Binh, Son and Ha for reviewing the drafts.
+Appreciate Binh, Son and Ha for reviewing the drafts.
 
 <br>
 If you find this article helpful, please cite this writeup as:
