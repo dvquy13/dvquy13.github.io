@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/the-30m-promise/index.html",
       "/projects/implement-recsys/c7/index.html",
       "/projects/implement-recsys/c6/index.html",
       "/projects/implement-recsys/c5/index.html",
