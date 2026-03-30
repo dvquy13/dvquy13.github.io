@@ -10,15 +10,26 @@ $navbar-fg: black;
 /* Change listing's post metadata's reading time */
 
 :root {
-  font-family: Inter, sans-serif;
+  font-family: "DM Sans", Inter, sans-serif;
   font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
-  // letter-spacing: -0.01em; /* match rsms.me */
 }
 
 @supports (font-variation-settings: normal) {
   :root {
-    font-family: InterVariable, sans-serif;
+    font-family: "DM Sans", InterVariable, sans-serif;
   }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Google Sans", InterVariable, Inter, sans-serif;
+}
+
+code, pre, kbd, samp {
+  font-family: "Google Sans Code", "Roboto Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.navbar, a.navbar-brand, .navbar-nav .nav-link {
+  font-family: "Google Sans", InterVariable, Inter, sans-serif;
 }
 
 /* Remove blue background from title banner if present */
@@ -65,6 +76,17 @@ div.callout-note.callout {
 /* Increase the space between the Search bar and the listing */
 div.listing-actions-group {
   margin-bottom: 20px;
+  justify-content: flex-start;
+}
+
+div.quarto-listing-filter {
+  margin-left: calc(20% + 2em) !important;
+}
+
+/* Remove borders between listing posts */
+div.quarto-post {
+  border-bottom: none !important;
+  margin-bottom: 2rem;
 }
 
 /* Change subtitle color */
@@ -110,6 +132,7 @@ p.subtitle.lead {
 // Change title font weight
 a.navbar-brand {
   font-variation-settings: 'wght' 600;
+  font-weight: 600;
 }
 
 // Change body font color
@@ -151,5 +174,5 @@ div.quarto-post a {
   --mermaid-edge-color: black;
   
   /* Use Inter Variable font family */
-  --mermaid-font-family: InterVariable, Inter, sans-serif;
+  --mermaid-font-family: "Google Sans", InterVariable, Inter, sans-serif;
 }
