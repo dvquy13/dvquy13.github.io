@@ -8,7 +8,7 @@ listing:
   type: default
   categories: true
   sort-ui: false
-  filter-ui: true
+  filter-ui: false
   # We can remove image show here by not including the image in the fields
   fields: [title, subtitle, date, reading-time, categories]
   feed: true

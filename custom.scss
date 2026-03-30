@@ -73,14 +73,9 @@ div.callout-note.callout {
   padding-bottom: 0.7rem;
 }
 
-/* Increase the space between the Search bar and the listing */
-div.listing-actions-group {
-  margin-bottom: 20px;
-  justify-content: flex-start;
-}
-
-div.quarto-listing-filter {
-  margin-left: calc(20% + 2em) !important;
+/* Align Categories title with the first post */
+.quarto-listing-category-title {
+  margin-top: 1em;
 }
 
 /* Remove borders between listing posts */
