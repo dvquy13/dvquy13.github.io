@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -176,12 +210,16 @@ cookieconsent.run({
   <li><a href="#publish-architecture" id="toc-publish-architecture" class="nav-link" data-scroll-target="#publish-architecture">Publish Architecture</a>
   <ul class="collapse">
   <li><a href="#ci-workflow-.githubworkflowspublish.yml" id="toc-ci-workflow-.githubworkflowspublish.yml" class="nav-link" data-scroll-target="#ci-workflow-.githubworkflowspublish.yml">CI Workflow (<code>.github/workflows/publish.yml</code>)</a></li>
+  <li><a href="#rss-post-processing" id="toc-rss-post-processing" class="nav-link" data-scroll-target="#rss-post-processing">RSS Post-Processing</a></li>
+  <li><a href="#rss-validation" id="toc-rss-validation" class="nav-link" data-scroll-target="#rss-validation">RSS Validation</a></li>
   </ul></li>
   <li><a href="#gotchas" id="toc-gotchas" class="nav-link" data-scroll-target="#gotchas">Gotchas</a>
   <ul class="collapse">
   <li><a href="#quarto-publish-is-incompatible-with-output-dir-docs" id="toc-quarto-publish-is-incompatible-with-output-dir-docs" class="nav-link" data-scroll-target="#quarto-publish-is-incompatible-with-output-dir-docs"><code>quarto publish</code> is incompatible with <code>output-dir: docs</code></a></li>
   <li><a href="#bootstrap-hash-accumulation-historical" id="toc-bootstrap-hash-accumulation-historical" class="nav-link" data-scroll-target="#bootstrap-hash-accumulation-historical">Bootstrap hash accumulation (historical)</a></li>
   <li><a href="#quarto-version" id="toc-quarto-version" class="nav-link" data-scroll-target="#quarto-version">Quarto version</a></li>
+  <li><a href="#color-null-background-color-null-in-rss-feed" id="toc-color-null-background-color-null-in-rss-feed" class="nav-link" data-scroll-target="#color-null-background-color-null-in-rss-feed"><code>color: null</code> / <code>background-color: null</code> in RSS feed</a></li>
+  <li><a href="#quarto-preview-overwrites-the-postprocessed-feed" id="toc-quarto-preview-overwrites-the-postprocessed-feed" class="nav-link" data-scroll-target="#quarto-preview-overwrites-the-postprocessed-feed"><code>quarto preview</code> overwrites the postprocessed feed</a></li>
   </ul></li>
   </ul></li>
   </ul>
@@ -213,8 +251,20 @@ _freeze/            — pre-computed notebook outputs (committed)
 <p><strong>Source branch:</strong> <code>main</code> (<code>.qmd</code> source files, <code>custom.scss</code>, config) <strong>Published branch:</strong> <code>gh-pages</code> (rendered HTML, managed entirely by CI) <strong>GitHub Pages setting:</strong> <code>gh-pages</code> branch, root <code>/</code></p>
 <section id="ci-workflow-.githubworkflowspublish.yml" class="level3">
 <h3 class="anchored" data-anchor-id="ci-workflow-.githubworkflowspublish.yml">CI Workflow (<code>.github/workflows/publish.yml</code>)</h3>
-<p>On every push to <code>main</code>: 1. <code>quarto render</code> — renders all <code>.qmd</code> files to <code>docs/</code> (output-dir) 2. <code>peaceiris/actions-gh-pages@v4</code> — pushes <code>docs/</code> contents to root of <code>gh-pages</code> branch</p>
+<p>On every push to <code>main</code>: 1. <code>scripts/check-quarto-version.sh</code> — asserts local and CI Quarto versions match (pinned to <code>1.6.40</code>) 2. <code>quarto render</code> — renders all <code>.qmd</code> files to <code>docs/</code> (output-dir); triggers post-render hook automatically 3. <code>scripts/validate-rss.sh</code> — POSTs <code>docs/index.xml</code> to W3C Feed Validation API; fails build on errors or blocking warnings 4. <code>peaceiris/actions-gh-pages@v4</code> — pushes <code>docs/</code> contents to root of <code>gh-pages</code> branch</p>
 <p><code>docs/</code> is gitignored on <code>main</code>. Never commit it.</p>
+</section>
+<section id="rss-post-processing" class="level3">
+<h3 class="anchored" data-anchor-id="rss-post-processing">RSS Post-Processing</h3>
+<p><code>scripts/postprocess-feed.sh</code> is registered as a Quarto <strong>post-render hook</strong> in <code>_quarto.yml</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">project</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">post-render</span><span class="kw">:</span><span class="at"> scripts/postprocess-feed.sh</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This strips <code>color: null</code> and <code>background-color: null</code> from <code>docs/index.xml</code> after every render — including <code>quarto preview</code> auto-rebuilds. See the Gotchas section for why this exists.</p>
+</section>
+<section id="rss-validation" class="level3">
+<h3 class="anchored" data-anchor-id="rss-validation">RSS Validation</h3>
+<p><code>scripts/validate-rss.sh</code> validates <code>docs/index.xml</code> against the W3C Feed Validation Service API (<code>POST rawdata</code>). Run locally with <code>make validate</code>.</p>
+<p><strong>Blocking</strong> (fail the build): URI errors (spaces in filenames), <code>DangerousStyleAttr</code> (style=null). <strong>Allowed</strong> (intentional): <code>ContainsRelRef</code> (relative img URLs in descriptions), <code>SecurityRisk</code> (YouTube iframes), <code>SelfDoesntMatchLocation</code> (expected when POSTing local feed — atom:link points to live URL).</p>
 </section>
 </section>
 <section id="gotchas" class="level2">
@@ -230,7 +280,18 @@ _freeze/            — pre-computed notebook outputs (committed)
 </section>
 <section id="quarto-version" class="level3">
 <h3 class="anchored" data-anchor-id="quarto-version">Quarto version</h3>
-<p>Pinned to <code>1.6.40</code> in CI (<code>.github/workflows/publish.yml</code>) to match local. Upgrade both together.</p>
+<p>Pinned to <code>1.6.40</code> in CI (<code>.github/workflows/publish.yml</code>) to match local. <code>scripts/check-quarto-version.sh</code> enforces this at build time. Upgrade both together.</p>
+</section>
+<section id="color-null-background-color-null-in-rss-feed" class="level3">
+<h3 class="anchored" data-anchor-id="color-null-background-color-null-in-rss-feed"><code>color: null</code> / <code>background-color: null</code> in RSS feed</h3>
+<p>Quarto’s <code>github</code> highlight theme emits <code>color: null;</code> and <code>background-color: null;</code> as literal CSS in the RSS feed’s inline-styled code blocks. This is a Quarto bug in <code>src/core/pandoc/css.ts</code> (no null guard before string interpolation) — unfixed as of v1.9.36 (March 2026), present since at least v1.1 (2022).</p>
+<p><strong>Why it only affects RSS:</strong> HTML pages use CSS classes for syntax highlighting (external stylesheet), but RSS <code>&lt;description&gt;</code> content uses inline styles — which is where the null values surface.</p>
+<p><strong>Why postprocess instead of a custom theme:</strong> A custom theme file (copying <code>github-light.theme</code> with nulls replaced) would need to be maintained across Quarto upgrades, offers no visual benefit (null only affects RSS, not the rendered site), and couples us to Pandoc’s theme format. The postprocess script is targeted and upgrade-proof.</p>
+<p><strong>Why not upgrade Quarto:</strong> The bug is not fixed in any version. Upgrading would not help.</p>
+</section>
+<section id="quarto-preview-overwrites-the-postprocessed-feed" class="level3">
+<h3 class="anchored" data-anchor-id="quarto-preview-overwrites-the-postprocessed-feed"><code>quarto preview</code> overwrites the postprocessed feed</h3>
+<p><code>quarto preview</code> auto-rebuilds <code>docs/index.xml</code> on file changes, bypassing <code>make build</code>. Before adding the post-render hook, this would wipe the postprocess script’s work, causing <code>make validate</code> to fail even after a clean <code>make build</code>. The post-render hook in <code>_quarto.yml</code> resolves this — postprocess runs after every render, including preview rebuilds.</p>
 
 
 </section>
