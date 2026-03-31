@@ -1,15 +1,4 @@
 ---
-title: "About"
-image: avatar.svg
-about:
-  template: jolla
-  links:
-    - icon: linkedin
-      href: https://www.linkedin.com/in/dvquy/
-    - icon: github
-      href: https://github.com/dvquy13
-    - icon: twitter-x
-      href: https://x.com/dvquys
 ---
 
 Hi, I'm Quy—an Applied Data Scientist. I'm from Hanoi, Vietnam 🇻🇳. Currently living in Singapore 🇸🇬.

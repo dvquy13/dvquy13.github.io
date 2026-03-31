@@ -21,7 +21,7 @@ $navbar-fg: black;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Google Sans", InterVariable, Inter, sans-serif;
+  font-family: "Google Sans Flex", InterVariable, Inter, sans-serif;
 }
 
 code, pre, kbd, samp {
@@ -29,7 +29,7 @@ code, pre, kbd, samp {
 }
 
 .navbar, a.navbar-brand, .navbar-nav .nav-link {
-  font-family: "Google Sans", InterVariable, Inter, sans-serif;
+  font-family: "Google Sans Flex", InterVariable, Inter, sans-serif;
 }
 
 /* Remove blue background from title banner if present */
@@ -48,7 +48,7 @@ code, pre, kbd, samp {
 }
 
 div.listing-reading-time {
-  font-size: 0.8em;
+  font-size: 1em;
 }
 
 div.quarto-post .thumbnail {
@@ -57,10 +57,18 @@ div.quarto-post .thumbnail {
 
 /* Change listing's post metadata size */
 div.quarto-post .metadata {
-  flex-basis: 20%;
-  text-align: left;
-  font-size: 1em;
-  margin-top: 0;
+  flex-basis: 100%;
+  font-size: 0.85em;
+  color: #797979;
+  padding-top: 0.25rem;
+}
+
+// Put date and reading-time on the same line
+div.quarto-post .metadata > a {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  color: inherit;
 }
 
 /* Change Note Callout color */
@@ -78,10 +86,46 @@ div.callout-note.callout {
   margin-top: 1em;
 }
 
+/* Match listing page top spacing to blog detail page (~38px total vs ~29px default) */
+.quarto-listing-container-default {
+  margin-top: 9px;
+}
+
 /* Remove borders between listing posts */
 div.quarto-post {
   border-bottom: none !important;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+
+// Flatten .body children into the flex container so we can interleave .metadata
+div.quarto-post .body {
+  display: contents;
+}
+
+div.quarto-post .body .listing-title {
+  flex-basis: 100%;
+  order: 1;
+}
+
+div.quarto-post .body .listing-subtitle {
+  flex-basis: 100%;
+  order: 2;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
+div.quarto-post .metadata {
+  order: 3;
+  padding-top: 0;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
+div.quarto-post .body .listing-categories {
+  flex-basis: 100%;
+  order: 4;
 }
 
 /* Change subtitle color */
@@ -111,12 +155,6 @@ div.quarto-title .quarto-categories .quarto-category:hover {
   opacity: 100%;
 }
 
-/* Change About text align */
-div.quarto-about-jolla main {
-  text-align: left;
-  /* Do not change width like this since it would break on mobile */
-  /* width: 500px; */
-}
 
 /* // Change subtitle font size */
 p.subtitle.lead {
@@ -124,10 +162,109 @@ p.subtitle.lead {
   font-size: 14.67px;
 }
 
-// Change title font weight
+// Change title font weight and size
 a.navbar-brand {
   font-variation-settings: 'wght' 600;
   font-weight: 600;
+  font-size: 3.0rem;
+  line-height: 1.2;
+}
+
+// Left-align logo (override mx-auto centering)
+.navbar-brand-container {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+// Left-align nav items after logo (override ms-auto right-push)
+ul.navbar-nav.ms-auto {
+  margin-left: 1rem !important;
+}
+
+// Push search icon to the far right
+#quarto-search {
+  margin-left: auto !important;
+}
+
+// Match search icon size to social icons
+#quarto-search .aa-SubmitIcon {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+// Prevent collapse from growing to fill all space (would push search right)
+#navbarCollapse {
+  flex-grow: 0 !important;
+}
+
+.navbar-container.container-fluid {
+  max-width: 885px;
+  margin-left: auto;
+  margin-right: auto;
+  // Align brand left edge with body-content-start:
+  // page-start → body-content-start = 35px (body-start-outset) + 35px (body-start) + 1.5em (gap)
+  padding-left: calc(70px + 1.5em);
+  justify-content: flex-start !important;
+}
+
+// Desktop: nav items that have an icon (social links) are icon-only — hide text label
+// :has(i) targets li elements containing a Bootstrap icon
+.navbar-nav .nav-item:has(i) .menu-text {
+  display: none !important;
+}
+
+// Mobile: hamburger+logo left-aligned with body content, search pushed to far right
+@media (max-width: 767.98px) {
+  .navbar-container.container-fluid {
+    // body-content-start = 1.5rem from viewport; navbar has 1rem left padding
+    // so container needs 0.5rem to land the toggler at body-content-start
+    padding-left: 0.5rem !important;
+  }
+
+  // Reset ms-auto margin so items start from left
+  #navbarCollapse ul.navbar-nav {
+    margin-left: 0 !important;
+    padding-left: 0;
+  }
+
+  // Zero out nav-link left padding so items align with body-content-start
+  // (navbar padding 1rem + container padding 0.5rem = 1.5rem = body-content-start)
+  #navbarCollapse .nav-link {
+    padding-left: 0 !important;
+  }
+
+  // Big, bold text for primary nav links (About, Blog)
+  #navbarCollapse .nav-item:not(:has(i)) .nav-link {
+    font-size: 1.75rem !important;
+    font-variation-settings: 'wght' 600;
+    font-weight: 600;
+    padding-top: 0.4rem !important;
+    padding-bottom: 0.4rem !important;
+    color: black !important;
+  }
+
+  // Separator + spacing before social icons (first icon-nav-item after text-nav-items)
+  #navbarCollapse .nav-item:not(:has(i)) + .nav-item:has(i) {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #e5e5e5;
+  }
+
+  // Social icon rows: icon + label, readable size
+  #navbarCollapse .nav-item:has(i) .nav-link {
+    display: flex !important;
+    align-items: center;
+    gap: 0.6rem;
+    padding-top: 0.3rem !important;
+    padding-bottom: 0.3rem !important;
+    font-size: 1rem;
+    color: #444 !important;
+  }
+
+  // Show text label for social icons in mobile menu
+  #navbarCollapse .nav-item:has(i) .menu-text {
+    display: inline !important;
+  }
 }
 
 // Change body font color
@@ -169,5 +306,5 @@ div.quarto-post a {
   --mermaid-edge-color: black;
   
   /* Use Inter Variable font family */
-  --mermaid-font-family: "Google Sans", InterVariable, Inter, sans-serif;
+  --mermaid-font-family: "Google Sans Flex", InterVariable, Inter, sans-serif;
 }

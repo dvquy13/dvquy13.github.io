@@ -6,5 +6,7 @@ _site
 .venv/
 **/.DS_Store
 
+.claude/settings.local.json
+
 # Build output — published via gh-pages branch
 docs/

@@ -6,7 +6,7 @@ This repo hosts the source code for DvQ's personal blog site, built using Quarto
 
 To render preview at local:
 - Install QuartoCLI
-- Run `quarto preview`
+- Run `quarto preview --port 8183`
 
 To deploy changes:
 - Run `quarto render` to prepare `/docs` files
