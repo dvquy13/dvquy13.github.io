@@ -181,9 +181,9 @@ ul.navbar-nav.ms-auto {
   margin-left: 1rem !important;
 }
 
-// Pull search icon left next to social icons (override order: 999)
+// Push search icon to the far right
 #quarto-search {
-  order: 901 !important;
+  margin-left: auto !important;
 }
 
 // Match search icon size to social icons
@@ -219,11 +219,6 @@ ul.navbar-nav.ms-auto {
     // body-content-start = 1.5rem from viewport; navbar has 1rem left padding
     // so container needs 0.5rem to land the toggler at body-content-start
     padding-left: 0.5rem !important;
-  }
-
-  // Search pushed to far right
-  #quarto-search {
-    margin-left: auto !important;
   }
 
   // Reset ms-auto margin so items start from left
