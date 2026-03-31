@@ -7,6 +7,10 @@ $navbar-bg: white;
 $navbar-fg: black;
 
 /*-- scss:rules --*/
+/* Prevent layout shift when navigating between pages with/without scrollbar */
+html {
+  scrollbar-gutter: stable;
+}
 /* Change listing's post metadata's reading time */
 
 :root {
