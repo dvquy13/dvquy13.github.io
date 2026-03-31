@@ -5,3 +5,5 @@ _site
 .obsidian/
 .venv/
 **/.DS_Store
+
+.claude/settings.local.json
