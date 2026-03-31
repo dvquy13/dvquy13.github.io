@@ -1,5 +1,0 @@
-- source: project
-  gh-pages:
-    - branch: gh-pages
-      remote: origin
-      url: 'https://dvquys.com'
