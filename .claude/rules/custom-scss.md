@@ -23,6 +23,22 @@ getComputedStyle(child).flexGrow         // flex-grow: 1 on a sibling absorbs al
 ```
 Changing `order` alone is not enough if the parent uses `justify-content: space-between` or a sibling has `flex-grow: 1`. Fix those too.
 
+## Quarto `compact` Class Behavior
+
+Quarto adds `class="nav-item compact"` to navbar items **only when they have an icon and no text**. Adding `text:` to a social icon item in `_quarto.yml` silently removes the `compact` class.
+
+**Consequence:** CSS selectors like `.nav-item.compact` will match nothing after text is added.
+**Correct selector for icon nav items:** `.nav-item:has(i)` — this targets by icon presence regardless of `compact`.
+
+Use `:has(i)` for any styling that should apply to icon-based nav items.
+
+## Mobile Navbar — Alignment Formula
+
+On mobile (390px viewport):
+- `nav.navbar` has `padding-left: 1rem` (Bootstrap default = 15.33px at root font-size)
+- `body-content-start` is at `1.5rem` from viewport left
+- Therefore `.navbar-container` needs `padding-left: 0.5rem` to land the first item at `body-content-start`
+
 ## Verify in Browser
 
 After any CSS change, confirm the effect via computed styles or screenshot before marking the task done. A rule compiling without error does not mean it rendered correctly.

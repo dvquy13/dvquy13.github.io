@@ -207,6 +207,71 @@ ul.navbar-nav.ms-auto {
   justify-content: flex-start !important;
 }
 
+// Desktop: nav items that have an icon (social links) are icon-only — hide text label
+// :has(i) targets li elements containing a Bootstrap icon
+.navbar-nav .nav-item:has(i) .menu-text {
+  display: none !important;
+}
+
+// Mobile: hamburger+logo left-aligned with body content, search pushed to far right
+@media (max-width: 767.98px) {
+  .navbar-container.container-fluid {
+    // body-content-start = 1.5rem from viewport; navbar has 1rem left padding
+    // so container needs 0.5rem to land the toggler at body-content-start
+    padding-left: 0.5rem !important;
+  }
+
+  // Search pushed to far right
+  #quarto-search {
+    margin-left: auto !important;
+  }
+
+  // Reset ms-auto margin so items start from left
+  #navbarCollapse ul.navbar-nav {
+    margin-left: 0 !important;
+    padding-left: 0;
+  }
+
+  // Zero out nav-link left padding so items align with body-content-start
+  // (navbar padding 1rem + container padding 0.5rem = 1.5rem = body-content-start)
+  #navbarCollapse .nav-link {
+    padding-left: 0 !important;
+  }
+
+  // Big, bold text for primary nav links (About, Blog)
+  #navbarCollapse .nav-item:not(:has(i)) .nav-link {
+    font-size: 1.75rem !important;
+    font-variation-settings: 'wght' 600;
+    font-weight: 600;
+    padding-top: 0.4rem !important;
+    padding-bottom: 0.4rem !important;
+    color: black !important;
+  }
+
+  // Separator + spacing before social icons (first icon-nav-item after text-nav-items)
+  #navbarCollapse .nav-item:not(:has(i)) + .nav-item:has(i) {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #e5e5e5;
+  }
+
+  // Social icon rows: icon + label, readable size
+  #navbarCollapse .nav-item:has(i) .nav-link {
+    display: flex !important;
+    align-items: center;
+    gap: 0.6rem;
+    padding-top: 0.3rem !important;
+    padding-bottom: 0.3rem !important;
+    font-size: 1rem;
+    color: #444 !important;
+  }
+
+  // Show text label for social icons in mobile menu
+  #navbarCollapse .nav-item:has(i) .menu-text {
+    display: inline !important;
+  }
+}
+
 // Change body font color
 body.nav-fixed.quarto-light {
   color: black;
