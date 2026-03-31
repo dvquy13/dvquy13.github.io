@@ -5,3 +5,6 @@ _site
 .obsidian/
 .venv/
 **/.DS_Store
+
+# Build output — published via gh-pages branch
+docs/
