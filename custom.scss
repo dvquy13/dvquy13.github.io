@@ -48,7 +48,7 @@ code, pre, kbd, samp {
 }
 
 div.listing-reading-time {
-  font-size: 0.8em;
+  font-size: 1em;
 }
 
 div.quarto-post .thumbnail {
@@ -57,10 +57,18 @@ div.quarto-post .thumbnail {
 
 /* Change listing's post metadata size */
 div.quarto-post .metadata {
-  flex-basis: 20%;
-  text-align: left;
-  font-size: 1em;
-  margin-top: 0;
+  flex-basis: 100%;
+  font-size: 0.85em;
+  color: #797979;
+  padding-top: 0.25rem;
+}
+
+// Put date and reading-time on the same line
+div.quarto-post .metadata > a {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  color: inherit;
 }
 
 /* Change Note Callout color */
@@ -78,10 +86,46 @@ div.callout-note.callout {
   margin-top: 1em;
 }
 
+/* Match listing page top spacing to blog detail page (~38px total vs ~29px default) */
+.quarto-listing-container-default {
+  margin-top: 9px;
+}
+
 /* Remove borders between listing posts */
 div.quarto-post {
   border-bottom: none !important;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+
+// Flatten .body children into the flex container so we can interleave .metadata
+div.quarto-post .body {
+  display: contents;
+}
+
+div.quarto-post .body .listing-title {
+  flex-basis: 100%;
+  order: 1;
+}
+
+div.quarto-post .body .listing-subtitle {
+  flex-basis: 100%;
+  order: 2;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
+div.quarto-post .metadata {
+  order: 3;
+  padding-top: 0;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
+div.quarto-post .body .listing-categories {
+  flex-basis: 100%;
+  order: 4;
 }
 
 /* Change subtitle color */
@@ -111,12 +155,6 @@ div.quarto-title .quarto-categories .quarto-category:hover {
   opacity: 100%;
 }
 
-/* Change About text align */
-div.quarto-about-jolla main {
-  text-align: left;
-  /* Do not change width like this since it would break on mobile */
-  /* width: 500px; */
-}
 
 /* // Change subtitle font size */
 p.subtitle.lead {
@@ -124,10 +162,49 @@ p.subtitle.lead {
   font-size: 14.67px;
 }
 
-// Change title font weight
+// Change title font weight and size
 a.navbar-brand {
   font-variation-settings: 'wght' 600;
   font-weight: 600;
+  font-size: 3.0rem;
+  line-height: 1.2;
+}
+
+// Left-align logo (override mx-auto centering)
+.navbar-brand-container {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+// Left-align nav items after logo (override ms-auto right-push)
+ul.navbar-nav.ms-auto {
+  margin-left: 1rem !important;
+}
+
+// Pull search icon left next to social icons (override order: 999)
+#quarto-search {
+  order: 901 !important;
+}
+
+// Match search icon size to social icons
+#quarto-search .aa-SubmitIcon {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+// Prevent collapse from growing to fill all space (would push search right)
+#navbarCollapse {
+  flex-grow: 0 !important;
+}
+
+.navbar-container.container-fluid {
+  max-width: 885px;
+  margin-left: auto;
+  margin-right: auto;
+  // Align brand left edge with body-content-start:
+  // page-start → body-content-start = 35px (body-start-outset) + 35px (body-start) + 1.5em (gap)
+  padding-left: calc(70px + 1.5em);
+  justify-content: flex-start !important;
 }
 
 // Change body font color

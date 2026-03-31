@@ -9,9 +9,10 @@ website:
   description: "DvQ Personal Website"
   navbar:
     right:
-      - about.qmd
-      - index.qmd
-      - projects.qmd
+      - text: "About"
+        href: about.qmd
+      - text: "Blog"
+        href: index.qmd
       - icon: linkedin
         href: https://www.linkedin.com/in/dvquy/
       - icon: github
