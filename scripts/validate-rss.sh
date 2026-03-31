@@ -13,7 +13,8 @@ fi
 
 if $LIVE; then
   echo "Validating live feed: https://dvquys.com/index.xml"
-  RESPONSE=$(curl -s "https://validator.w3.org/feed/check.cgi?url=https%3A%2F%2Fdvquys.com%2Findex.xml&output=soap12")
+  CB=$(date +%s)
+  RESPONSE=$(curl -s "https://validator.w3.org/feed/check.cgi?url=https%3A%2F%2Fdvquys.com%2Findex.xml%3Fcb%3D${CB}&output=soap12")
 else
   FEED="$(dirname "$0")/../docs/index.xml"
   if [[ ! -f "$FEED" ]]; then
