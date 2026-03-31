@@ -30,7 +30,7 @@ All code for this chapter is available in the `api/` and `model_server/` directo
 ## The Serving Logic
 
 ::: {.column-page .my-5}
-![A reminder of the overall serving architecture](../static/Model Serving.drawio.png){.lightbox}
+![A reminder of the overall serving architecture](../static/model-serving.drawio.png){.lightbox}
 :::
 
 ::: {.column-page}
@@ -493,7 +493,7 @@ Let's not forget that in our code repository, we have a `ui/` directory that con
 Now with all the pieces in place, refer to the project `README.md` > `Start UI` section for how to get the frontend web application running. It's a great way to conclude our project!
 
 :::{.column-page}
-![The Demo](../static/session-based%20retriever%20-%20demo%20v2.gif){.lightbox}
+![The Demo](../static/session-based-retriever-demo-v2.gif){.lightbox}
 :::
 
 # The End

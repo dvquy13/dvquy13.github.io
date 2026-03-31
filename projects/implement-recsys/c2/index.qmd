@@ -5,7 +5,7 @@ title: |
 subtitle: "Exploring Amazon product dataset and building features for sequence models"
 date: "2025-05-25"
 categories: [recsys, implement-recsys-series]
-image: "../static/L2%20-%20Data%20signals.excalidraw.png"
+image: "../static/l2-data-signals.excalidraw.png"
 format:
   html:
     code-fold: false

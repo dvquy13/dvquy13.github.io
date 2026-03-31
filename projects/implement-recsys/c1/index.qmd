@@ -5,7 +5,7 @@ title: |
 subtitle: "Understanding session-based recommendations and setting up your development environment"
 date: "2025-05-24"
 categories: [recsys, implement-recsys-series]
-image: "../static/recommender%20system.png"
+image: "../static/recommender-system.png"
 format:
   html:
     code-fold: false
@@ -25,7 +25,7 @@ If you've ever have those questions, this tutorial series is for you.
 Over the next 7 chapters, I'll walk you through building an end-to-end **recommendation system** that reacts in real-time based on user behavior sequences. We'll go from raw data to a complete recommender system that personalizes recommendations as users interact with your platform. The final product looks like this:
 
 :::{.column-page}
-![The Demo](../static/session-based%20retriever%20-%20demo%20v2.gif){.lightbox}
+![The Demo](../static/session-based-retriever-demo-v2.gif){.lightbox}
 :::
 
 ::: {.callout-note appearance="simple"}
@@ -37,7 +37,7 @@ If you're familiar with RecSys and just want to see the code, here it is: [https
 A quick recap for those who aren't well aware of what a recommender system is: Recommender systems are specialized tools designed to suggest items—whether products, content, or services—to users based on what we know about their preferences and behaviors. At their core, they comprise a set of technologies, algorithms, and processes that analyze user interaction signals (clicks, views, purchases, ratings, etc.) to predict what individual users might find relevant or engaging.
 
 :::{.column-page}
-![](../static/recommender%20system.png){.lightbox}
+![](../static/recommender-system.png){.lightbox}
 :::
 
 From the user's perspective, these systems help uncover content or products they might never have discovered on their own and save time by surfacing the most relevant options up front.
@@ -96,7 +96,7 @@ Consider a typical e-commerce browsing session that illustrates why this sequent
 Each step provides context for the next recommendation. Traditional systems might miss this sequential pattern and treat each interaction independently, while session-based models capture the evolving intent throughout the entire journey—understanding that the user is comparison shopping for headphones within a specific price range.
 
 :::{.column-page}
-![The signals we can leverage to deliver better recommenations](../static/L2%20-%20Data%20signals.excalidraw.png){.lightbox}
+![The signals we can leverage to deliver better recommenations](../static/l2-data-signals.excalidraw.png){.lightbox}
 :::
 
 In essence, this approach addresses the limitations of traditional methods by:

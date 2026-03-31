@@ -5,7 +5,7 @@ title: |
 subtitle: "Build the foundation that bridges model training to serving"
 date: "2025-06-01"
 categories: [recsys, implement-recsys-series]
-image: "../static/Model Serving.drawio.png"
+image: "../static/model-serving.drawio.png"
 format:
   html:
     code-fold: false
@@ -40,7 +40,7 @@ This analogy extends further when we consider the restaurant's serving strategy.
 ### How Recommendations Reach Users
 
 ::: {.column-page .my-5}
-![An overview of the serving pipeline](../static/Model Serving.drawio.png){.lightbox}
+![An overview of the serving pipeline](../static/model-serving.drawio.png){.lightbox}
 :::
 
 Understanding serving paradigms starts with tracing the journey from user action to displayed recommendations. When a user opens your app, a carefully orchestrated process begins:
@@ -94,7 +94,7 @@ In practice, most production recommendation systems use a hybrid approach that c
 As you can see, the UI demo for our project also starts by showing the popular recommendations before updating the list with respect to user's interactions.
 
 ::: {.column-page}
-![](../static/session-based%20retriever%20-%20demo%20v2.gif)
+![](../static/session-based-retriever-demo-v2.gif)
 :::
 
 ## Three-Pillar Serving Architecture
@@ -104,7 +104,7 @@ How to implement this hybrid serving strategy?
 We'll set up three main components that form the backbone of serving our retrieval model: **MLflow** for model registry and deployment, **Qdrant** for vector similarity search, and **Redis** as KV store for user sequences and metadata.
 
 ::: {.column-page}
-![Three-pillar serving architecture with Model Registry, Vector Store, and Key-Value Store](../static/Model Serving.drawio.png)
+![Three-pillar serving architecture with Model Registry, Vector Store, and Key-Value Store](../static/model-serving.drawio.png)
 :::
 
 ### Pillar 1: Model Registry (MLflow)

@@ -1,6 +1,7 @@
 project:
   type: website
   output-dir: docs
+  post-render: scripts/postprocess-feed.sh
 
 website:
   title: "DvQ"

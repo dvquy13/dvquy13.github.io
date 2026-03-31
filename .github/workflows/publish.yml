@@ -19,8 +19,14 @@ jobs:
         with:
           version: 1.6.40
 
+      - name: Check Quarto version
+        run: bash scripts/check-quarto-version.sh
+
       - name: Render site
         run: quarto render
+
+      - name: Validate RSS feed
+        run: bash scripts/validate-rss.sh
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
