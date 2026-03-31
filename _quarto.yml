@@ -2,6 +2,9 @@ project:
   type: website
   output-dir: docs
   post-render: scripts/postprocess-feed.sh
+  render:
+    - "*.qmd"
+    - "**/*.qmd"
 
 website:
   title: "DvQ"

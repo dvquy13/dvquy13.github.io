@@ -74,6 +74,21 @@ Quarto's `github` highlight theme emits `color: null;` and `background-color: nu
 
 **Why not upgrade Quarto:** The bug is not fixed in any version. Upgrading would not help.
 
+### Excluding `.md` files from rendering (`.quartoignore` does not work)
+
+`.quartoignore` has no effect on preventing `.md` files from being rendered in a Quarto website project. Files like `README.md`, `CLAUDE.md`, and `ARCHITECTURE.md` will still be rendered to HTML and published.
+
+The correct approach is to restrict the `render:` list in `_quarto.yml` to only `.qmd` files:
+
+```yaml
+project:
+  render:
+    - "*.qmd"
+    - "**/*.qmd"
+```
+
+**Pitfall:** Using only `!`-prefixed exclusions (e.g. `- "!README.md"`) in the `render:` list breaks the build entirely — no files are rendered, `docs/index.xml` is never created, and the post-render hook fails.
+
 ### `quarto preview` overwrites the postprocessed feed
 
 `quarto preview` auto-rebuilds `docs/index.xml` on file changes, bypassing `make build`. Before adding the post-render hook, this would wipe the postprocess script's work, causing `make validate` to fail even after a clean `make build`. The post-render hook in `_quarto.yml` resolves this — postprocess runs after every render, including preview rebuilds.
