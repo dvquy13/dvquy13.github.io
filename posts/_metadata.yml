@@ -8,8 +8,9 @@ freeze: true
 title-block-banner: true
 
 comments:
-  giscus: 
+  giscus:
     repo: dvquy13/icy-touch-comments
     reactions-enabled: true
     loading: lazy
     input-position: top
+    theme: https://raw.githubusercontent.com/dvquy13/dvquy13.github.io/main/giscus-theme.css

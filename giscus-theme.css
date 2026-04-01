@@ -1,0 +1,19 @@
+/* Extend Giscus light theme with site typography */
+@import url("https://giscus.app/themes/light.css");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap");
+
+:root {
+  --font-body: "DM Sans", sans-serif;
+}
+
+body,
+.gsc-main,
+.gsc-comment-box,
+.gsc-comment-box-textarea,
+.gsc-comment-content,
+.gsc-reply,
+input,
+textarea,
+button {
+  font-family: "DM Sans", sans-serif !important;
+}
