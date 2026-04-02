@@ -51,6 +51,13 @@ format:
       # Chosen so that we have maximum 75 characters in the text body for readability
       body-width: 550px
     header-includes: |
+      <script>
+      document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'open_preferences_center') {
+          e.preventDefault();
+        }
+      });
+      </script>
       <!-- Inter (fallback) -->
       <link rel="preconnect" href="https://rsms.me/">
       <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
