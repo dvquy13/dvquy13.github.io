@@ -5,6 +5,8 @@ project:
   render:
     - "*.qmd"
     - "**/*.qmd"
+  resources:
+    - dashboard.html
 
 website:
   title: "DvQ"
@@ -73,4 +75,3 @@ number-sections: false
 
 resource:
   - CNAME
-  - dashboard.html
