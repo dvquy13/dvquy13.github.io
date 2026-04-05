@@ -16,4 +16,7 @@ analytics/cookies/
 analytics/secrets/
 analytics/credentials/
 
+# Supabase CLI local state
+supabase/.temp/
+
 .env

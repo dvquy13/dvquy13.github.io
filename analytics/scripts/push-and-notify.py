@@ -4,13 +4,14 @@
 # dependencies = ["pyyaml"]
 # ///
 """
-Read fetch output JSON from stdin, append snapshot to a JSONL file, send alerts.
+Read fetch output JSON from stdin, insert snapshot into Supabase, send alerts.
 
 Usage:
     uv run scripts/fetch-metrics.py | uv run scripts/push-and-notify.py
 
 Env vars:
-    METRICS_JSONL       — path to metrics JSONL file (default: metrics.jsonl in analytics/ dir)
+    SUPABASE_URL              — Supabase project URL (required)
+    SUPABASE_SERVICE_ROLE_KEY — Supabase service role key for writes (required)
 
 Notifiers (all optional — skipped if not configured in alerts.yaml):
     Telegram: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_TOPIC_ID
@@ -26,26 +27,45 @@ from pathlib import Path
 import yaml
 
 
-# ── JSONL storage ──────────────────────────────────────────────────────────────
+# ── Supabase storage ───────────────────────────────────────────────────────────
 
-def jsonl_get_latest(path: Path) -> dict | None:
-    """Return the last snapshot in the JSONL file, or None if empty/missing."""
-    if not path.exists():
-        return None
-    last = None
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                last = line
-    return json.loads(last) if last else None
+def supabase_get_latest(url: str, key: str, table: str) -> dict | None:
+    """Return the most recent snapshot from Supabase, or None on failure."""
+    endpoint = f"{url}/rest/v1/{table}?order=fetched_at.desc&limit=1&select=fetched_at,metrics"
+    req = urllib.request.Request(
+        endpoint,
+        headers={"apikey": key, "Authorization": f"Bearer {key}"},
+    )
+    try:
+        with urllib.request.urlopen(req) as resp:
+            rows = json.loads(resp.read())
+            if rows:
+                return {"fetched_at": rows[0]["fetched_at"], "metrics": rows[0]["metrics"]}
+    except Exception as e:
+        print(f"[push-and-notify] WARNING: Supabase get latest failed: {e}", file=sys.stderr)
+    return None
 
 
-def jsonl_append(path: Path, snapshot: dict) -> None:
-    """Append one snapshot as a JSON line."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "a") as f:
-        f.write(json.dumps({"fetched_at": snapshot["fetched_at"], "metrics": snapshot["metrics"]}) + "\n")
+def supabase_insert(url: str, key: str, table: str, snapshot: dict) -> None:
+    """Insert a new snapshot row into Supabase."""
+    endpoint = f"{url}/rest/v1/{table}"
+    payload = json.dumps({
+        "fetched_at": snapshot["fetched_at"],
+        "metrics": snapshot["metrics"],
+    }).encode()
+    req = urllib.request.Request(
+        endpoint,
+        data=payload,
+        headers={
+            "apikey": key,
+            "Authorization": f"Bearer {key}",
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(req) as resp:
+        _ = resp.read()
 
 
 # ── Alert evaluation (shared) ──────────────────────────────────────────────────
@@ -296,15 +316,19 @@ def main():
 
     alert_rules = alerts_cfg.get("alerts", [])
 
-    # 3. JSONL: read previous snapshot, append current
-    default_jsonl = (script_dir / ".." / "metrics.jsonl").resolve()
-    jsonl_path = Path(os.environ.get("METRICS_JSONL", str(default_jsonl)))
+    # 3. Supabase: read previous snapshot, insert current
+    supabase_url = os.environ.get("SUPABASE_URL", "")
+    supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+    supabase_table = alerts_cfg.get("supabase", {}).get("table", "metrics_snapshots")
 
-    previous = jsonl_get_latest(jsonl_path)
-    print(f"[push-and-notify] previous snapshot: {(previous or {}).get('fetched_at', 'none')}", file=sys.stderr)
-
-    jsonl_append(jsonl_path, snapshot)
-    print(f"[push-and-notify] appended snapshot fetched_at={snapshot['fetched_at']} to {jsonl_path}", file=sys.stderr)
+    if not supabase_url or not supabase_key:
+        print("[push-and-notify] SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY not set — skipping storage", file=sys.stderr)
+        previous = None
+    else:
+        previous = supabase_get_latest(supabase_url, supabase_key, supabase_table)
+        print(f"[push-and-notify] previous snapshot: {(previous or {}).get('fetched_at', 'none')}", file=sys.stderr)
+        supabase_insert(supabase_url, supabase_key, supabase_table, snapshot)
+        print(f"[push-and-notify] inserted snapshot fetched_at={snapshot['fetched_at']} into {supabase_table}", file=sys.stderr)
 
     # 4. Evaluate alerts
     alerts = evaluate_alerts(alert_rules, snapshot, previous)
