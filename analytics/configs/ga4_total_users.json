@@ -1,0 +1,24 @@
+{
+  "name": "ga4_total_users",
+  "description": "GA4 total users on dvquys.com over the last 30 days (property 464728949).",
+  "auth": {
+    "type": "service_account",
+    "credentials_file": "credentials/ga4-service-account.json",
+    "scopes": ["https://www.googleapis.com/auth/analytics.readonly"]
+  },
+  "request": {
+    "url": "https://analyticsdata.googleapis.com/v1beta/properties/464728949:runReport",
+    "method": "POST",
+    "body": {
+      "dateRanges": [{"startDate": "{{today-30d}}", "endDate": "{{today}}"}],
+      "metrics": [{"name": "totalUsers"}]
+    }
+  },
+  "extract": {
+    "type": "jsonpath",
+    "path": "rows.0.metricValues.0.value",
+    "cast": "int",
+    "default_value": 0
+  },
+  "validate": { "min": 0, "max": 10000000 }
+}

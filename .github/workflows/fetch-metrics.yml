@@ -1,0 +1,45 @@
+on:
+  schedule:
+    - cron: '0 1 * * *'   # 01:00 UTC daily (08:00 GMT+7)
+  workflow_dispatch:
+
+name: Fetch Metrics & Update Dashboard
+
+jobs:
+  fetch-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Write GA4 service account credentials
+        run: |
+          mkdir -p analytics/credentials
+          echo '${{ secrets.GA4_SERVICE_ACCOUNT_JSON }}' > analytics/credentials/ga4-service-account.json
+
+      - name: Fetch GA4 metrics
+        run: cd analytics && uv run scripts/fetch-metrics.py > /tmp/ga4-metrics.json
+
+      - name: Fetch Giscus reactions
+        run: cd analytics && uv run scripts/fetch-giscus-reactions.py > /tmp/giscus-metrics.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate dashboard HTML
+        run: |
+          python3 analytics/scripts/generate-dashboard-html.py \
+            /tmp/ga4-metrics.json /tmp/giscus-metrics.json > dashboard.html
+
+      - name: Commit dashboard if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dashboard.html
+          git diff --staged --quiet && echo "No changes." || \
+            (git commit -m "chore: update analytics dashboard" && git push)

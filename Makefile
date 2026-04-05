@@ -1,4 +1,4 @@
-.PHONY:
+.PHONY: run build validate analytics analytics-push
 .ONESHELL:
 
 run:
@@ -11,3 +11,21 @@ build:
 
 validate:
 	bash scripts/validate-rss.sh
+
+analytics:
+	cd analytics && \
+		uv run scripts/fetch-metrics.py > /tmp/dvq-ga4-metrics.json ; \
+		uv run scripts/fetch-giscus-reactions.py > /tmp/dvq-giscus-metrics.json ; \
+		python3 scripts/display-dashboard.py /tmp/dvq-ga4-metrics.json /tmp/dvq-giscus-metrics.json
+
+analytics-push:
+	cd analytics && \
+		uv run scripts/fetch-metrics.py > /tmp/dvq-ga4-metrics.json && \
+		uv run scripts/fetch-giscus-reactions.py > /tmp/dvq-giscus-metrics.json && \
+		python3 -c "\
+import json; \
+ga4=json.load(open('/tmp/dvq-ga4-metrics.json')); \
+gi=json.load(open('/tmp/dvq-giscus-metrics.json')); \
+merged={**ga4,'metrics':{**ga4['metrics'],**gi['metrics']}}; \
+print(json.dumps(merged)) \
+		" | uv run scripts/push-and-notify.py

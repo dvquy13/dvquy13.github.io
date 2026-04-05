@@ -1,0 +1,16 @@
+telegram:
+  bot_token_env: TELEGRAM_BOT_TOKEN
+  chat_id_env: TELEGRAM_CHAT_ID
+
+alerts:
+  - type: failure
+  - type: metric_change
+    metric: ga4_total_users
+    label: "Visitors (last 30d)"
+    direction: increase
+    min_delta: 10
+  - type: metric_change
+    metric: giscus_total_reactions
+    label: "Total post reactions"
+    direction: any
+    min_delta: 1

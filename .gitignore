@@ -10,3 +10,10 @@ _site
 
 # Build output — published via gh-pages branch
 docs/
+
+# Analytics: sensitive files (credentials, cookies, secrets)
+analytics/cookies/
+analytics/secrets/
+analytics/credentials/
+
+.env
