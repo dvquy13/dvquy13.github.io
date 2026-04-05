@@ -11,7 +11,9 @@ styles.css          — minimal extra styles
 posts/              — blog posts (*.qmd)
 projects/           — project write-ups (*.qmd)
 _freeze/            — pre-computed notebook outputs (committed)
-.github/workflows/  — CI publish workflow
+dashboard.html      — analytics dashboard (CI-generated, committed to main)
+analytics/          — metrics pipeline (scripts, configs, fixtures)
+.github/workflows/  — CI workflows (publish + fetch-metrics)
 ```
 
 ## Publish Architecture
@@ -47,6 +49,24 @@ This strips `color: null` and `background-color: null` from `docs/index.xml` aft
 
 **Blocking** (fail the build): URI errors (spaces in filenames), `DangerousStyleAttr` (style=null).
 **Allowed** (intentional): `ContainsRelRef` (relative img URLs in descriptions), `SecurityRisk` (YouTube iframes), `SelfDoesntMatchLocation` (expected when POSTing local feed — atom:link points to live URL).
+
+## Analytics Pipeline
+
+**Dashboard:** `dvquys.com/dashboard` (served via Cloudflare redirect from `dashboard.dvquys.com`).
+
+**Data flow:**
+1. `.github/workflows/fetch-metrics.yml` runs daily at 08:00 GMT+7
+2. Fetches GA4 30d visitors (service account auth) + Giscus reactions (GitHub GraphQL)
+3. Regenerates `dashboard.html` via `analytics/scripts/generate-dashboard-html.py`
+4. Commits `dashboard.html` to `main` if changed → triggers `publish.yml` → deploys
+
+**Infrastructure:**
+- GA4 property ID: `464728949`; service account: `dvquys-analytics@centered-flow-429008-d3.iam.gserviceaccount.com` (Viewer in GA4)
+- Giscus repo: `dvquy13/icy-touch-comments` (GitHub GraphQL API, falls back to `gh auth token`)
+- Cloudflare: proxied CNAME `dashboard.dvquys.com` + Page Rule redirect → `dvquys.com/dashboard`
+- Secret `GA4_SERVICE_ACCOUNT_JSON` stored in GitHub repo secrets
+
+**Local:** `make analytics` (display), `make analytics-push` (push to Supabase + Telegram alerts when configured).
 
 ## Gotchas
 
@@ -88,6 +108,18 @@ project:
 ```
 
 **Pitfall:** Using only `!`-prefixed exclusions (e.g. `- "!README.md"`) in the `render:` list breaks the build entirely — no files are rendered, `docs/index.xml` is never created, and the post-render hook fails.
+
+### Static files in `project.resources` (not top-level `resource:`)
+
+To include a static file (e.g. `dashboard.html`) in the rendered output, it must be listed under `project.resources` in `_quarto.yml`:
+
+```yaml
+project:
+  resources:
+    - dashboard.html
+```
+
+Top-level `resource:` is **silently ignored** by Quarto — the file won't be copied to `docs/`. Verify by running `quarto render` locally and checking `docs/` before pushing.
 
 ### `quarto preview` overwrites the postprocessed feed
 
