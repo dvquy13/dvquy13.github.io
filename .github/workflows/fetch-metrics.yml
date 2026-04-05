@@ -42,8 +42,6 @@ jobs:
           " > /tmp/merged-metrics.json
           cd analytics && METRICS_JSONL=../metrics.jsonl uv run scripts/push-and-notify.py < /tmp/merged-metrics.json
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
       - name: Commit metrics.jsonl if changed

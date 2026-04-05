@@ -1,28 +1,10 @@
-telegram:
-  bot_token_env: TELEGRAM_BOT_TOKEN
-  chat_id_env: TELEGRAM_CHAT_ID
-
 discord:
   webhook_url_env: DISCORD_WEBHOOK_URL
   dashboard_url: https://dashboard.dvquys.com
 
 alerts:
-  - type: failure
-
   - type: daily_digest
     title: "dvquy13.github.io"
     labels:
       ga4_total_users: "Visitors (last 30d)"
       giscus_total_reactions: "Total post reactions"
-
-  - type: metric_change
-    metric: ga4_total_users
-    label: "Visitors (last 30d)"
-    direction: increase
-    min_delta: 10
-
-  - type: metric_change
-    metric: giscus_total_reactions
-    label: "Total post reactions"
-    direction: any
-    min_delta: 1
