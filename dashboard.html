@@ -136,7 +136,10 @@ Chart.register(ChartDataLabels)
 //
 // title:     Dashboard heading shown in <h1> and <title>.
 //
-// jsonl:     Path to metrics.jsonl (relative to this HTML file). Default: './metrics.jsonl'.
+// supabase:  Supabase connection for reading metric history.
+//   url:     Your Supabase project URL (https://<ref>.supabase.co).
+//   key:     Your Supabase anon key (safe to embed — public read-only).
+//   table:   Table name (default: 'metrics_snapshots').
 //
 // snapshots: Number of aggregated time units shown in charts (default: 7).
 //            The filter dropdowns in the header let users override this at runtime.
@@ -160,7 +163,7 @@ Chart.register(ChartDataLabels)
 //
 // ── Maintenance rules (do not break these) ─────────────────────────────────────
 // 1. METRICS_JSONL_INLINE: keep set to a valid JSONL string for local file:// preview.
-//    Set to null in production (GitHub Pages / Netlify) so metrics.jsonl is fetched over HTTP.
+//    Set to null in production so Supabase is queried instead.
 //    When writing demo data, use PAST timestamps only — future timestamps cause fmtRelative
 //    to show negative values (guard exists but the data should be correct regardless).
 //
@@ -171,7 +174,7 @@ Chart.register(ChartDataLabels)
 // 3. Chart.js datalabel configs MUST include layout: { padding: { left: 16, right: 16 } }
 //    (or similar). Without it, first/last labels are clipped at canvas edges.
 //
-// 4. The Refresh button calls loadData() only — it re-fetches metrics.jsonl from the server.
+// 4. The Refresh button calls loadData() only — re-queries Supabase for latest data.
 //    Do NOT make it trigger GitHub Actions workflow_dispatch. Reason: requires a PAT with
 //    `workflow` scope embedded in static HTML (security risk), and the pipeline takes 3–10 min
 //    with no synchronous feedback. A separate "Trigger CI" button is acceptable if needed,
@@ -179,7 +182,11 @@ Chart.register(ChartDataLabels)
 //
 const CONFIG = {
   title:     'dvquys.com — Metrics',
-  jsonl:     './metrics.jsonl',
+  supabase: {
+    url:   'https://olssvguaeagsmkfmsvvo.supabase.co',
+    key:   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9sc3N2Z3VhZWFnc21rZm1zdnZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzOTE1MzMsImV4cCI6MjA5MDk2NzUzM30.k3Uv8O5QmGeZ1w42I2g3AbJ5XYE0nsQoewFAJUJOKWo',
+    table: 'metrics_snapshots',
+  },
   snapshots: 30,
   aggUnit:   'day',
   metrics: {
@@ -534,21 +541,25 @@ function render(history, rawHistory, unit) {
 }
 
 // ── Load ───────────────────────────────────────────────────────────────────────
-// Inline JSONL data — set to null in production (served over HTTP) so metrics.jsonl
-// is fetched dynamically. Populated here only for local file:// preview.
+// Inline JSONL data — set to null in production so Supabase is queried instead.
+// Populated here only for local file:// preview.
 const METRICS_JSONL_INLINE = null
 
 async function loadData() {
-  let text
   if (METRICS_JSONL_INLINE) {
-    text = METRICS_JSONL_INLINE
+    const text = METRICS_JSONL_INLINE
+    fullHistory = text.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
   } else {
-    const res = await fetch(CONFIG.jsonl)
-    if (!res.ok) throw new Error(`HTTP ${res.status} loading ${CONFIG.jsonl}`)
-    text = await res.text()
+    const { url, key, table } = CONFIG.supabase
+    const res = await fetch(
+      `${url}/rest/v1/${table}?order=fetched_at.asc&select=fetched_at,metrics`,
+      { headers: { apikey: key, Authorization: `Bearer ${key}` } }
+    )
+    if (!res.ok) throw new Error(`HTTP ${res.status} loading from Supabase`)
+    const rows = await res.json()
+    fullHistory = rows.map(r => ({ fetched_at: r.fetched_at, metrics: r.metrics }))
   }
-  fullHistory = text.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
-  if (fullHistory.length === 0) throw new Error('metrics.jsonl is empty')
+  if (fullHistory.length === 0) throw new Error('no snapshots in database')
 
   // Initialise filter controls — prefer persisted values, fall back to config defaults
   const nSel = document.getElementById('filter-n')
