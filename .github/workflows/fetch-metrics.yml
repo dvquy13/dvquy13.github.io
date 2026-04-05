@@ -29,13 +29,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Fetch posts published (last 28d)
+        run: cd analytics && uv run scripts/fetch-posts-published.py > /tmp/posts-metrics.json
+
       - name: Merge metrics and push to Supabase
         run: |
           python3 -c "
           import json
           ga4 = json.load(open('/tmp/ga4-metrics.json'))
           giscus = json.load(open('/tmp/giscus-metrics.json'))
-          merged = {**ga4, 'metrics': {**ga4['metrics'], **giscus['metrics']}}
+          posts = json.load(open('/tmp/posts-metrics.json'))
+          merged = {**ga4, 'metrics': {**ga4['metrics'], **giscus['metrics'], **posts['metrics']}}
           print(json.dumps(merged))
           " > /tmp/merged-metrics.json
           cd analytics && uv run scripts/push-and-notify.py < /tmp/merged-metrics.json
