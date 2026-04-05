@@ -3,158 +3,573 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>dvquys.com — Dashboard</title>
+  <title>dvquys.com — Metrics</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2/dist/chartjs-plugin-datalabels.min.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: "DM Sans", sans-serif;
-      background: #f9f9f7;
-      color: #1a1a1a;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 64px 24px 48px;
+    :root {
+      --accent:       #0062a8;
+      --accent-hover: #00508c;
+      --bg-page:      #ffffff;
+      --text-primary: #0f172a;
+      --text-muted:   #64748b;
+      --text-faint:   #cbd5e1;
+      --up:           #22c55e;
+      --down:         #ef4444;
     }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-page); color: var(--text-primary); font-family: 'Google Sans Flex', ui-sans-serif, system-ui, sans-serif; }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem 3rem; }
 
-    header {
-      text-align: center;
-      margin-bottom: 52px;
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; }
+    h1 { font-size: 1.875rem; font-weight: 700; letter-spacing: -0.02em; }
+    .header-meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .header-right { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .badge { font-size: 0.7rem; background: #f1f5f9; color: var(--text-muted); padding: 0.25rem 0.625rem; border-radius: 9999px; white-space: nowrap; }
+    .btn { padding: 0.375rem 0.875rem; border-radius: 0.5rem; font-size: 0.875rem; cursor: pointer; border: none; font-family: inherit; transition: background 120ms, color 120ms, border-color 120ms; }
+    .btn-secondary { background: #fff; border: 1px solid #cbd5e1; color: var(--text-muted); }
+    .btn-secondary:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* Tooltip */
+    [data-tooltip] { position: relative; }
+    [data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute; bottom: calc(100% + 8px); right: 0;
+      background: var(--text-primary); color: var(--bg-page);
+      font-size: 0.7rem; line-height: 1.4; white-space: nowrap;
+      padding: 0.3rem 0.6rem; border-radius: 0.375rem;
+      pointer-events: none; opacity: 0; transition: opacity 120ms;
     }
-
-    header a {
-      font-size: 13px;
-      font-weight: 500;
-      color: #0057a3;
-      text-decoration: none;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
+    [data-tooltip]:hover::after { opacity: 1; }
+    select.btn {
+      appearance: none; -webkit-appearance: none;
+      padding-right: 1.625rem;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2364748b' d='M5 7L1 3h8z'/%3E%3C/svg%3E") no-repeat right 0.5rem center;
     }
-    header a:hover { text-decoration: underline; }
+    select.btn:hover { color: var(--accent); border-color: var(--accent); }
 
-    h1 {
-      font-size: 26px;
-      font-weight: 600;
-      margin-top: 10px;
-      letter-spacing: -0.02em;
+    /* Sections */
+    .section { margin-bottom: 2rem; }
+    .section-title { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .metric-grid { display: grid; grid-template-columns: 1fr; gap: 3.5rem; }
+
+    /* Metric card — full width, no background */
+    .metric-card { display: flex; flex-direction: column; gap: 0.2rem; }
+    .metric-label { font-size: 1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+    .metric-period { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin-left: 0.4rem; }
+    a.metric-link { text-decoration: none; transition: color 120ms; }
+    a.metric-link:hover { color: var(--accent); }
+    .metric-value-row { display: flex; align-items: baseline; gap: 0.5rem; }
+    .metric-value { font-size: 2rem; font-weight: 700; line-height: 1.1; color: var(--text-primary); }
+    .metric-value.err { font-size: 0.75rem; font-weight: 400; color: var(--down); line-height: 1.4; }
+    .metric-delta { display: inline-block; font-size: 0.75rem; font-weight: 500; cursor: default; position: relative; }
+    .metric-delta.up   { color: var(--up); }
+    .metric-delta.down { color: var(--down); }
+    .metric-delta.flat { color: var(--text-faint); }
+    .metric-delta::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 4px); left: 0;
+      background: #1e293b; color: #f8fafc;
+      font-size: 0.65rem; font-weight: 400; white-space: nowrap;
+      padding: 0.2rem 0.45rem; border-radius: 0.3rem;
+      opacity: 0; pointer-events: none; transition: opacity 120ms;
     }
+    .metric-delta:hover::after { opacity: 1; }
+    .metric-chart-wrap { height: 160px; position: relative; margin-top: 0.4rem; }
+    .metric-chart-wrap canvas { position: absolute; inset: 0; width: 100% !important; height: 160px !important; }
+    .metric-time-labels { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-muted); margin-top: 0.4rem; }
 
-    .subtitle {
-      font-size: 14px;
-      color: #666;
-      margin-top: 6px;
-    }
+    /* Debug / audit section */
+    .debug-section { margin-top: 2.5rem; padding-top: 1.5rem; }
+    .debug-panel { margin-top: 1rem; overflow-x: auto; }
+    .debug-table { width: 100%; border-collapse: collapse; font-size: 0.7rem; font-family: ui-monospace, 'SF Mono', 'Roboto Mono', monospace; }
+    .debug-table th { text-align: left; padding: 0.3rem 0.6rem; color: var(--text-muted); border-bottom: 1px solid var(--text-faint); white-space: nowrap; font-weight: 600; }
+    .debug-table td { padding: 0.25rem 0.6rem; color: var(--text-muted); border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
+    .debug-table tbody tr:hover td { background: #f8fafc; }
 
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      width: 100%;
-      max-width: 560px;
-      margin-bottom: 52px;
-    }
-
-    .card {
-      background: #fff;
-      border: 1px solid #e8e8e4;
-      border-radius: 10px;
-      padding: 28px 24px 24px;
-    }
-
-    .card-label {
-      font-size: 12px;
-      font-weight: 500;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 10px;
-    }
-
-    .card-value {
-      font-size: 42px;
-      font-weight: 600;
-      letter-spacing: -0.03em;
-      line-height: 1;
-      color: #111;
-    }
-
-    .card-note {
-      font-size: 12px;
-      color: #aaa;
-      margin-top: 8px;
-    }
-
-    .chart-section {
-      width: 100%;
-      max-width: 560px;
-      margin-bottom: 40px;
-    }
-
-    .chart-section h2 {
-      font-size: 13px;
-      font-weight: 500;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 16px;
-    }
-
-    .chart-placeholder {
-      background: #fff;
-      border: 1px solid #e8e8e4;
-      border-radius: 10px;
-      height: 160px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #bbb;
-      font-size: 13px;
-    }
-
-    footer {
-      font-size: 12px;
-      color: #aaa;
-      text-align: center;
-    }
-
-    footer a { color: #aaa; text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
+    /* Footer */
+    .footer { font-size: 0.7rem; color: var(--text-faint); text-align: center; margin-top: 2rem; line-height: 1.7; }
   </style>
 </head>
 <body>
-  <header>
-    <a href="https://dvquys.com">← dvquys.com</a>
-    <h1>Dashboard</h1>
-    <p class="subtitle">Blog analytics</p>
-  </header>
+<div class="container">
 
-  <div class="cards">
-    <div class="card">
-      <div class="card-label">Visitors</div>
-      <div class="card-value">191</div>
-      <div class="card-note">Last 30 days</div>
+  <div class="header">
+    <div>
+      <h1 id="dashboard-title">Metrics</h1>
+      <div class="header-meta" id="header-meta">Loading…</div>
     </div>
-    <div class="card">
-      <div class="card-label">Reactions</div>
-      <div class="card-value">32</div>
-      <div class="card-note">All time, across all posts</div>
+    <div class="header-right">
+      <span class="badge" id="period-badge" style="display:none"></span>
+      <select id="filter-n" class="btn btn-secondary" onchange="applyFilters()">
+        <option value="7">7</option>
+        <option value="14">14</option>
+        <option value="30">30</option>
+        <option value="60">60</option>
+        <option value="90">90</option>
+      </select>
+      <select id="filter-unit" class="btn btn-secondary" onchange="applyFilters()">
+        <option value="hour">hours</option>
+        <option value="day">days</option>
+        <option value="week">weeks</option>
+        <option value="month">months</option>
+      </select>
+      <button class="btn btn-secondary" onclick="loadData()" data-tooltip="Reloads metrics.jsonl — shows last scheduled fetch, not live data">↻ Refresh</button>
     </div>
   </div>
 
-  <div class="chart-section">
-    <h2>Trend</h2>
-    <div class="chart-placeholder">
-      Historical data coming soon
-    </div>
-  </div>
+  <div id="dashboard"></div>
 
-  <footer>
-    Updated 2026-04-05 03:00 UTC &nbsp;·&nbsp;
-    <a href="https://github.com/dvquy13/dvquy13.github.io">Source</a>
-  </footer>
+  <div class="footer">Updated daily via GitHub Actions</div>
+
+</div>
+<script>
+Chart.defaults.font.family = "'Google Sans Flex', ui-sans-serif, system-ui, sans-serif"
+Chart.register(ChartDataLabels)
+
+// ── Project config ─────────────────────────────────────────────────────────────
+// Copy this file to your project's analytics/ dir and edit this block only.
+//
+// title:     Dashboard heading shown in <h1> and <title>.
+//
+// jsonl:     Path to metrics.jsonl (relative to this HTML file). Default: './metrics.jsonl'.
+//
+// snapshots: Number of aggregated time units shown in charts (default: 7).
+//            The filter dropdowns in the header let users override this at runtime.
+//
+// aggUnit:   Aggregation granularity — 'hour' | 'day' | 'week' | 'month' (default: 'day').
+//            Each unit bucket keeps the LAST snapshot in that period (most recent wins).
+//
+// metrics:   Optional per-key overrides. Keys not listed here are auto-rendered
+//            using the raw key as label (underscores → spaces) and 'int' format.
+//
+//            Per-metric fields:
+//              label:  Display name (string). Default: key with underscores → spaces.
+//              fmt:    'int' (default) | 'money' (prefix $ + 2 decimal places).
+//              period: Short tag shown after label, e.g. 'lifetime', '28d', 'live'. Optional.
+//              url:    Makes the metric label a clickable link (opens in new tab). Optional.
+//              type:   'line' (default) | 'bar'. Controls the trendline chart style.
+//
+// sections:  Optional grouping. If omitted, all metrics render in one flat grid.
+//            Each section: { title: string, keys: string[] }.
+//            Keys not assigned to any section appear under an 'Other' section automatically.
+//
+// ── Maintenance rules (do not break these) ─────────────────────────────────────
+// 1. METRICS_JSONL_INLINE: keep set to a valid JSONL string for local file:// preview.
+//    Set to null in production (GitHub Pages / Netlify) so metrics.jsonl is fetched over HTTP.
+//    When writing demo data, use PAST timestamps only — future timestamps cause fmtRelative
+//    to show negative values (guard exists but the data should be correct regardless).
+//
+// 2. Never reintroduce calendar-day deduplication (groupByDay or similar) that collapses
+//    snapshots to one per day. This destroys hourly trendline resolution.
+//    The aggregateHistory() function already handles dedup by aggUnit — use that instead.
+//
+// 3. Chart.js datalabel configs MUST include layout: { padding: { left: 16, right: 16 } }
+//    (or similar). Without it, first/last labels are clipped at canvas edges.
+//
+// 4. The Refresh button calls loadData() only — it re-fetches metrics.jsonl from the server.
+//    Do NOT make it trigger GitHub Actions workflow_dispatch. Reason: requires a PAT with
+//    `workflow` scope embedded in static HTML (security risk), and the pipeline takes 3–10 min
+//    with no synchronous feedback. A separate "Trigger CI" button is acceptable if needed,
+//    but keep it clearly labeled and separate from the page refresh.
+//
+const CONFIG = {
+  title:     'dvquys.com — Metrics',
+  jsonl:     './metrics.jsonl',
+  snapshots: 30,
+  aggUnit:   'day',
+  metrics: {
+    ga4_total_users:        { label: 'Visitors',  fmt: 'int', period: '30d',      url: 'https://analytics.google.com/analytics/web/#/p464728949/' },
+    giscus_total_reactions: { label: 'Reactions', fmt: 'int', period: 'all time', url: 'https://github.com/dvquy13/icy-touch-comments/discussions' },
+  },
+  sections: [],
+}
+
+// ── Runtime state ──────────────────────────────────────────────────────────────
+let fullHistory = []
+
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+const cs = getComputedStyle(document.documentElement)
+const T = { accent: cs.getPropertyValue('--accent').trim(), textMuted: cs.getPropertyValue('--text-muted').trim() }
+
+function keyToLabel(key) { return key.replace(/_/g, ' ') }
+function metaCfg(key) { return CONFIG.metrics[key] || {} }
+
+function fmtValue(v, fmt) {
+  if (v === null || v === undefined) return '—'
+  if (fmt === 'money') return `$${Number(v).toFixed(2)}`
+  return Number(v).toLocaleString()
+}
+
+function fmtShort(v, fmt) {
+  if (v === null || v === undefined) return ''
+  if (fmt === 'money') return v >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${v}`
+  return v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v)
+}
+
+function fmtDelta(current, previous, fmt) {
+  if (previous === null || previous === undefined || current === null) return null
+  const diff = current - previous
+  if (diff === 0) return { text: '→ no change', cls: 'flat' }
+  const abs = Math.abs(diff)
+  const s = fmt === 'money' ? `$${abs.toFixed(2)}` : abs.toLocaleString()
+  return { text: (diff > 0 ? '↑ ' : '↓ ') + s, cls: diff > 0 ? 'up' : 'down' }
+}
+
+function fmtTime(iso) {
+  return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+function fmtRelative(iso) {
+  const secs = Math.floor((Date.now() - new Date(iso)) / 1000)
+  if (secs < 0)     return 'just now'
+  if (secs < 60)    return `${secs}s ago`
+  if (secs < 3600)  return `${Math.floor(secs / 60)}m ago`
+  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`
+  return `${Math.floor(secs / 86400)}d ago`
+}
+
+// ── Aggregation helpers ────────────────────────────────────────────────────────
+function getUnitKey(isoDate, unit) {
+  const d = new Date(isoDate)
+  const Y = d.getFullYear()
+  const M = String(d.getMonth() + 1).padStart(2, '0')
+  const D = String(d.getDate()).padStart(2, '0')
+  const H = String(d.getHours()).padStart(2, '0')
+  if (unit === 'hour')  return `${Y}-${M}-${D}T${H}`
+  if (unit === 'day')   return `${Y}-${M}-${D}`
+  if (unit === 'week') {
+    const day = d.getDay() || 7
+    const mon = new Date(d)
+    mon.setDate(d.getDate() - (day - 1))
+    const WY = mon.getFullYear()
+    const WM = String(mon.getMonth() + 1).padStart(2, '0')
+    const WD = String(mon.getDate()).padStart(2, '0')
+    return `${WY}-${WM}-${WD}`
+  }
+  if (unit === 'month') return `${Y}-${M}`
+  return `${Y}-${M}-${D}`
+}
+
+function aggregateHistory(history, unit, n) {
+  const groups = {}
+  for (const snap of history) {
+    const key = getUnitKey(snap.fetched_at, unit)
+    if (!groups[key] || snap.fetched_at > groups[key].fetched_at) {
+      groups[key] = snap
+    }
+  }
+  const sorted = Object.values(groups).sort((a, b) => a.fetched_at.localeCompare(b.fetched_at))
+  return sorted.slice(-n)
+}
+
+function fmtUnitLabel(isoDate, unit) {
+  const d = new Date(isoDate)
+  if (unit === 'hour')  return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric' })
+  if (unit === 'day')   return d.toLocaleString(undefined, { month: 'short', day: 'numeric' })
+  if (unit === 'week')  return d.toLocaleString(undefined, { month: 'short', day: 'numeric' })
+  if (unit === 'month') return d.toLocaleString(undefined, { month: 'short', year: 'numeric' })
+  return d.toLocaleString(undefined, { month: 'short', day: 'numeric' })
+}
+
+function fmtPeriodRange(aggregated, unit) {
+  if (!aggregated.length) return ''
+  const count = aggregated.length
+  const labels = { hour: 'hour', day: 'day', week: 'week', month: 'month' }
+  const base = labels[unit] || unit
+  const plural = count !== 1 ? base + 's' : base
+  if (count === 1) return `1 ${base}`
+  const first = fmtUnitLabel(aggregated[0].fetched_at, unit)
+  const last  = fmtUnitLabel(aggregated[count - 1].fetched_at, unit)
+  if (first === last) return `1 ${base}`
+  return `${first} – ${last} · ${count} ${plural}`
+}
+
+// ── Chart registry ─────────────────────────────────────────────────────────────
+const _charts = {}
+
+function renderBarChart(canvasId, values, fmt) {
+  const canvas = document.getElementById(canvasId)
+  if (!canvas) return
+  if (_charts[canvasId]) _charts[canvasId].destroy()
+  const nonNull = values.filter(v => v !== null && v !== undefined)
+  if (!nonNull.length) return
+  const max = Math.max(...nonNull) || 1
+
+  _charts[canvasId] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: values.map((_, i) => i),
+      datasets: [{
+        data: values,
+        backgroundColor: T.accent,
+        borderRadius: 3,
+        borderSkipped: false,
+        barPercentage: 0.6,
+      }],
+    },
+    options: {
+      responsive: false,
+      animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'end',
+          offset: 2,
+          color: T.textMuted,
+          font: { size: 9, weight: '500' },
+          formatter: (v) => fmtShort(v, fmt),
+          display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0,
+          clamp: true,
+        },
+      },
+      scales: {
+        x: { display: false },
+        y: { display: false, min: 0, max: max * 1.4 },
+      },
+      layout: { padding: { top: 20, left: 16, right: 16 } },
+    },
+  })
+}
+
+function renderLineChart(canvasId, values, fmt) {
+  const canvas = document.getElementById(canvasId)
+  if (!canvas) return
+  if (_charts[canvasId]) _charts[canvasId].destroy()
+  const nonNull = values.filter(v => v !== null && v !== undefined)
+  if (nonNull.length < 2) return
+  const min = Math.min(...nonNull), max = Math.max(...nonNull)
+  const pad = (max - min) * 0.15 || max * 0.1 || 1
+
+  _charts[canvasId] = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: values.map((_, i) => i),
+      datasets: [{
+        data: values,
+        borderColor: T.accent,
+        backgroundColor: T.accent + '18',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 2,
+        pointBackgroundColor: T.accent,
+        spanGaps: true,
+        borderWidth: 2,
+      }],
+    },
+    options: {
+      responsive: false,
+      animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          offset: 1,
+          color: T.textMuted,
+          font: { size: 9, weight: '500' },
+          formatter: (v) => fmtShort(v, fmt),
+          display: 'auto',
+        },
+      },
+      scales: {
+        x: { display: false },
+        y: { display: false, min: min - pad, max: max + pad * 3 },
+      },
+      layout: { padding: { top: 20, left: 16, right: 16 } },
+    },
+  })
+}
+
+// ── Data utils ─────────────────────────────────────────────────────────────────
+function discoverKeys(latest) { return Object.keys(latest.metrics || {}) }
+
+function buildSections(keys) {
+  if (CONFIG.sections && CONFIG.sections.length > 0) {
+    const defined = new Set(CONFIG.sections.flatMap(s => s.keys))
+    const rest = keys.filter(k => !defined.has(k))
+    return [...CONFIG.sections, ...(rest.length ? [{ title: 'Other', keys: rest }] : [])]
+  }
+  return [{ title: null, keys }]
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────────
+function renderCard(key, history, latest, previous, unit) {
+  const cfg      = metaCfg(key)
+  const fmt      = cfg.fmt    || 'int'
+  const label    = cfg.label  || keyToLabel(key)
+  const period   = cfg.period || null
+  const url      = cfg.url    || null
+
+  const result   = latest.metrics?.[key]
+  const currVal  = result?.value ?? null
+  const prevVal  = previous?.metrics?.[key]?.value ?? null
+  const hasError = !result || result.status === 'error'
+  const delta    = fmtDelta(currVal, prevVal, fmt)
+  const values   = history.map(h => h.metrics?.[key]?.value ?? null)
+  const timestamps = history.map(h => h.fetched_at)
+  const canvasId = `line-${key}`
+
+  const currTime = latest?.fetched_at   ? fmtTime(latest.fetched_at)   : null
+  const prevTime = previous?.fetched_at ? fmtTime(previous.fetched_at) : null
+  const tip = (currTime && prevTime) ? `${prevTime} → ${currTime}` : 'vs previous snapshot'
+
+  const periodHtml = period ? `<span class="metric-period">· ${period}</span>` : ''
+  const labelHtml  = url
+    ? `<a class="metric-label metric-link" href="${url}" target="_blank" rel="noopener">${label}${periodHtml} ↗</a>`
+    : `<div class="metric-label">${label}${periodHtml}</div>`
+
+  const deltaHtml = (!hasError && delta)
+    ? `<span class="metric-delta ${delta.cls}" data-tip="${tip}">${delta.text}</span>`
+    : ''
+
+  const firstTime = timestamps.length ? fmtUnitLabel(timestamps[0], unit) : ''
+  const lastTime  = timestamps.length ? fmtUnitLabel(timestamps[timestamps.length - 1], unit) : ''
+
+  const card = document.createElement('div')
+  card.className = 'metric-card'
+  card.innerHTML = `
+    ${labelHtml}
+    <div class="metric-value-row">
+      <span class="metric-value${hasError ? ' err' : ''}">${hasError ? (result?.error ?? 'No data') : fmtValue(currVal, fmt)}</span>
+      ${deltaHtml}
+    </div>
+    <div class="metric-chart-wrap"><canvas id="${canvasId}" width="900" height="160"></canvas></div>
+    <div class="metric-time-labels"><span>${firstTime}</span><span>${lastTime}</span></div>
+  `
+  if (!hasError) requestAnimationFrame(() =>
+    cfg.type === 'bar'
+      ? renderBarChart(canvasId, values, fmt)
+      : renderLineChart(canvasId, values, fmt)
+  )
+  return card
+}
+
+function renderDebugSection(aggregated, rawHistory, unit) {
+  const windowStart = aggregated.length ? aggregated[0].fetched_at : null
+  const windowEnd   = aggregated.length ? aggregated[aggregated.length - 1].fetched_at : null
+  const raw = rawHistory.filter(s =>
+    (!windowStart || s.fetched_at >= windowStart) &&
+    (!windowEnd   || s.fetched_at <= windowEnd)
+  )
+  const keys = aggregated.length ? discoverKeys(aggregated[aggregated.length - 1]) : []
+  const count = raw.length
+
+  const debugEl = document.createElement('div')
+  debugEl.className = 'debug-section'
+
+  const headerRow = keys.map(k => `<th>${metaCfg(k).label || keyToLabel(k)}</th>`).join('')
+  const bodyRows = raw.map(snap => {
+    const cells = keys.map(k => `<td>${snap.metrics?.[k]?.value ?? '—'}</td>`).join('')
+    return `<tr><td>${fmtTime(snap.fetched_at)}</td>${cells}</tr>`
+  }).join('')
+
+  debugEl.innerHTML = `
+    <button class="btn btn-secondary" data-count="${count}"
+            onclick="toggleDebug(this)" style="border:none;padding-left:0;background:transparent;color:var(--text-muted);transition:color 120ms" onmouseenter="this.style.color='var(--accent)'" onmouseleave="this.style.color='var(--text-muted)'">▸ Raw data (${count} snapshot${count !== 1 ? 's' : ''})</button>
+    <div class="debug-panel" style="display:none">
+      <table class="debug-table">
+        <thead><tr><th>timestamp</th>${headerRow}</tr></thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>
+  `
+  return debugEl
+}
+
+function toggleDebug(btn) {
+  const panel = btn.nextElementSibling
+  const isOpen = panel.style.display !== 'none'
+  panel.style.display = isOpen ? 'none' : ''
+  const count = btn.dataset.count
+  btn.textContent = `${isOpen ? '▸' : '▾'} Raw data (${count} snapshot${count > 1 ? 's' : ''})`
+}
+
+function render(history, rawHistory, unit) {
+  const latest   = history[history.length - 1]
+  const previous = history.length > 1 ? history[history.length - 2] : null
+
+  document.getElementById('dashboard-title').textContent = CONFIG.title
+  document.title = CONFIG.title
+  document.getElementById('header-meta').textContent =
+    `Updated ${fmtRelative(latest.fetched_at)} · ${fmtTime(latest.fetched_at)}`
+
+  const badge = document.getElementById('period-badge')
+  badge.textContent = fmtPeriodRange(history, unit)
+  badge.style.display = ''
+
+  const keys = discoverKeys(latest)
+  const sections = buildSections(keys)
+  const dashboard = document.getElementById('dashboard')
+  dashboard.innerHTML = ''
+
+  for (const section of sections) {
+    const sectionEl = document.createElement('div')
+    sectionEl.className = 'section'
+    if (section.title) {
+      const titleEl = document.createElement('div')
+      titleEl.className = 'section-title'
+      titleEl.textContent = section.title
+      sectionEl.appendChild(titleEl)
+    }
+    const grid = document.createElement('div')
+    grid.className = 'metric-grid'
+    for (const key of keys.filter(k => section.keys ? section.keys.includes(k) : true)) {
+      if (!latest.metrics?.[key]) continue
+      grid.appendChild(renderCard(key, history, latest, previous, unit))
+    }
+    sectionEl.appendChild(grid)
+    dashboard.appendChild(sectionEl)
+  }
+
+  dashboard.appendChild(renderDebugSection(history, rawHistory, unit))
+}
+
+// ── Load ───────────────────────────────────────────────────────────────────────
+// Inline JSONL data — set to null in production (served over HTTP) so metrics.jsonl
+// is fetched dynamically. Populated here only for local file:// preview.
+const METRICS_JSONL_INLINE = null
+
+async function loadData() {
+  let text
+  if (METRICS_JSONL_INLINE) {
+    text = METRICS_JSONL_INLINE
+  } else {
+    const res = await fetch(CONFIG.jsonl)
+    if (!res.ok) throw new Error(`HTTP ${res.status} loading ${CONFIG.jsonl}`)
+    text = await res.text()
+  }
+  fullHistory = text.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+  if (fullHistory.length === 0) throw new Error('metrics.jsonl is empty')
+
+  // Initialise filter controls — prefer persisted values, fall back to config defaults
+  const nSel = document.getElementById('filter-n')
+  const uSel = document.getElementById('filter-unit')
+  nSel.value = localStorage.getItem('metric-filter-n') ?? String(CONFIG.snapshots ?? 7)
+  if (![...nSel.options].some(o => o.selected && o.value === nSel.value)) nSel.value = '7'
+  uSel.value = localStorage.getItem('metric-filter-unit') ?? (CONFIG.aggUnit ?? 'day')
+
+  applyFilters()
+}
+
+function applyFilters() {
+  const n    = parseInt(document.getElementById('filter-n').value)
+  const unit = document.getElementById('filter-unit').value
+  localStorage.setItem('metric-filter-n', String(n))
+  localStorage.setItem('metric-filter-unit', unit)
+  const aggregated = aggregateHistory(fullHistory, unit, n)
+  render(aggregated, fullHistory, unit)
+}
+
+loadData()
+</script>
 </body>
 </html>

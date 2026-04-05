@@ -4,67 +4,46 @@
 # dependencies = ["pyyaml"]
 # ///
 """
-Read fetch output JSON from stdin, write snapshot to Supabase, send Telegram alerts.
+Read fetch output JSON from stdin, append snapshot to a JSONL file, send Telegram alerts.
 
 Usage:
     uv run scripts/fetch-metrics.py | uv run scripts/push-and-notify.py
 
-Env vars required:
-    SUPABASE_URL              — e.g. https://wzacvfhfpqhdutqfcofz.supabase.co
-    SUPABASE_SERVICE_ROLE_KEY — service role key (bypasses RLS for INSERT)
-    TELEGRAM_BOT_TOKEN        — optional; skipped if absent
-    TELEGRAM_CHAT_ID          — optional; skipped if absent
+Env vars:
+    METRICS_JSONL      — path to metrics JSONL file (default: metrics.jsonl in analytics/ dir)
+    TELEGRAM_BOT_TOKEN — optional; skipped if absent
+    TELEGRAM_CHAT_ID   — optional; skipped if absent
 """
 
 import json
 import os
 import sys
-import urllib.error
-import urllib.parse
 import urllib.request
 from pathlib import Path
 
 import yaml
 
 
-# ── Supabase ───────────────────────────────────────────────────────────────────
+# ── JSONL storage ──────────────────────────────────────────────────────────────
 
-def supabase_headers(key: str) -> dict:
-    return {
-        "apikey": key,
-        "Authorization": f"Bearer {key}",
-        "Content-Type": "application/json",
-    }
-
-
-def supabase_get_latest(supabase_url: str, key: str) -> dict | None:
-    """Return the most recent metrics_snapshots row, or None if table is empty."""
-    url = (
-        supabase_url.rstrip("/")
-        + "/rest/v1/metrics_snapshots"
-        "?order=fetched_at.desc&limit=1&select=fetched_at,metrics"
-    )
-    req = urllib.request.Request(url, headers=supabase_headers(key))
-    with urllib.request.urlopen(req) as resp:
-        rows = json.loads(resp.read())
-    return rows[0] if rows else None
+def jsonl_get_latest(path: Path) -> dict | None:
+    """Return the last snapshot in the JSONL file, or None if empty/missing."""
+    if not path.exists():
+        return None
+    last = None
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                last = line
+    return json.loads(last) if last else None
 
 
-def supabase_insert(supabase_url: str, key: str, snapshot: dict) -> None:
-    """INSERT one row into metrics_snapshots."""
-    url = supabase_url.rstrip("/") + "/rest/v1/metrics_snapshots"
-    payload = json.dumps({
-        "fetched_at": snapshot["fetched_at"],
-        "metrics": snapshot["metrics"],
-    }).encode()
-    req = urllib.request.Request(
-        url,
-        data=payload,
-        headers={**supabase_headers(key), "Prefer": "return=minimal"},
-        method="POST",
-    )
-    with urllib.request.urlopen(req) as resp:
-        _ = resp.read()  # consume response
+def jsonl_append(path: Path, snapshot: dict) -> None:
+    """Append one snapshot as a JSON line."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a") as f:
+        f.write(json.dumps({"fetched_at": snapshot["fetched_at"], "metrics": snapshot["metrics"]}) + "\n")
 
 
 # ── Telegram ───────────────────────────────────────────────────────────────────
@@ -158,8 +137,7 @@ def main():
 
     # 2. Load alerts config
     script_dir = Path(__file__).parent
-    alerts_path = script_dir / ".." / "configs" / "alerts.yaml"
-    alerts_path = alerts_path.resolve()
+    alerts_path = (script_dir / ".." / "alerts.yaml").resolve()
     if not alerts_path.exists():
         print(f"[push-and-notify] alerts config not found: {alerts_path}", file=sys.stderr)
         sys.exit(1)
@@ -171,26 +149,15 @@ def main():
     chat_id = os.environ.get(tg_cfg.get("chat_id_env", "TELEGRAM_CHAT_ID"), "")
     alert_rules = alerts_cfg.get("alerts", [])
 
-    # 3. Supabase: get previous snapshot + insert current
-    supabase_url = os.environ.get("SUPABASE_URL", "").rstrip("/")
-    supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+    # 3. JSONL: read previous snapshot, append current
+    default_jsonl = (script_dir / ".." / "metrics.jsonl").resolve()
+    jsonl_path = Path(os.environ.get("METRICS_JSONL", str(default_jsonl)))
 
-    previous = None
-    if supabase_url and supabase_key:
-        try:
-            previous = supabase_get_latest(supabase_url, supabase_key)
-            print(f"[push-and-notify] previous snapshot: {(previous or {}).get('fetched_at', 'none')}", file=sys.stderr)
-        except Exception as e:
-            print(f"[push-and-notify] WARNING: could not fetch previous snapshot: {e}", file=sys.stderr)
+    previous = jsonl_get_latest(jsonl_path)
+    print(f"[push-and-notify] previous snapshot: {(previous or {}).get('fetched_at', 'none')}", file=sys.stderr)
 
-        try:
-            supabase_insert(supabase_url, supabase_key, snapshot)
-            print(f"[push-and-notify] inserted snapshot fetched_at={snapshot['fetched_at']}", file=sys.stderr)
-        except Exception as e:
-            print(f"[push-and-notify] ERROR: failed to insert snapshot: {e}", file=sys.stderr)
-            sys.exit(1)
-    else:
-        print("[push-and-notify] SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set — skipping DB write", file=sys.stderr)
+    jsonl_append(jsonl_path, snapshot)
+    print(f"[push-and-notify] appended snapshot fetched_at={snapshot['fetched_at']} to {jsonl_path}", file=sys.stderr)
 
     # 4. Evaluate alerts
     messages = check_alerts(alert_rules, snapshot, previous)

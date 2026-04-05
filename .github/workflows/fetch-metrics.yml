@@ -31,15 +31,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate dashboard HTML
+      - name: Merge metrics and append to history
         run: |
-          python3 analytics/scripts/generate-dashboard-html.py \
-            /tmp/ga4-metrics.json /tmp/giscus-metrics.json > dashboard.html
+          python3 -c "
+          import json
+          ga4 = json.load(open('/tmp/ga4-metrics.json'))
+          giscus = json.load(open('/tmp/giscus-metrics.json'))
+          merged = {**ga4, 'metrics': {**ga4['metrics'], **giscus['metrics']}}
+          print(json.dumps(merged))
+          " > /tmp/merged-metrics.json
+          cd analytics && METRICS_JSONL=../metrics.jsonl uv run scripts/push-and-notify.py < /tmp/merged-metrics.json
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
-      - name: Commit dashboard if changed
+      - name: Commit metrics.jsonl if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add dashboard.html
+          git add metrics.jsonl
           git diff --staged --quiet && echo "No changes." || \
-            (git commit -m "chore: update analytics dashboard" && git push)
+            (git commit -m "chore: update metrics history" && git push)
