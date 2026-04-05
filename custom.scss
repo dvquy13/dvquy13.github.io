@@ -14,13 +14,13 @@ html {
 /* Change listing's post metadata's reading time */
 
 :root {
-  font-family: "Be Vietnam Pro", Inter, sans-serif;
+  font-family: "DM Sans", Inter, sans-serif;
   font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
 }
 
 @supports (font-variation-settings: normal) {
   :root {
-    font-family: "Be Vietnam Pro", InterVariable, sans-serif;
+    font-family: "DM Sans", InterVariable, sans-serif;
   }
 }
 
