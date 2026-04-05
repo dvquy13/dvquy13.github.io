@@ -109,6 +109,7 @@ def evaluate_alerts(alert_cfg: list, current: dict, previous: dict | None) -> li
                 "type": "daily_digest",
                 "title": rule.get("title", "Metrics"),
                 "date": current.get("fetched_at", "")[:10],
+                "prev_fetched_at": (previous or {}).get("fetched_at"),
                 "metrics": metrics,
             })
 
@@ -173,6 +174,11 @@ def _format_telegram(alert: dict) -> str:
                 else:
                     delta_str = " (no change)"
             lines.append(f"• {m['name']}: {m['value']}{delta_str}")
+        prev_ts = alert.get("prev_fetched_at")
+        if prev_ts:
+            lines.append(f"\n<i>Δ vs snapshot from {prev_ts[:16].replace('T', ' ')} UTC</i>")
+        else:
+            lines.append("\n<i>No prior snapshot — first run</i>")
         return "\n".join(lines)
 
     if alert["type"] == "metric_change":
@@ -251,6 +257,17 @@ def _format_discord_payload(alert: dict, dashboard_url: str | None) -> dict:
         }
         if dashboard_url:
             embed["url"] = dashboard_url
+        prev_ts = alert.get("prev_fetched_at")
+        if prev_ts:
+            try:
+                from datetime import datetime, timezone
+                dt = datetime.fromisoformat(prev_ts).astimezone(timezone.utc)
+                unix = int(dt.timestamp())
+                embed["description"] = f"Δ vs <t:{unix}:R>"
+            except Exception:
+                embed["description"] = f"Δ vs snapshot from {prev_ts[:16].replace('T', ' ')} UTC"
+        else:
+            embed["description"] = "No prior snapshot — first run"
         return {"embeds": [embed]}
 
     if alert["type"] == "metric_change":
