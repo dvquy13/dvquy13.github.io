@@ -59,7 +59,18 @@
 
     /* Metric card — full width, no background */
     .metric-card { display: flex; flex-direction: column; gap: 0.2rem; }
-    .metric-label { font-size: 1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+    .metric-label { font-size: 1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.35rem; }
+    .metric-info { font-size: 0.7rem; color: var(--text-faint); cursor: default; position: relative; line-height: 1; flex-shrink: 0; }
+    .metric-info::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 6px); left: 0;
+      background: #1e293b; color: #f8fafc;
+      font-size: 0.65rem; font-weight: 400; line-height: 1.45;
+      white-space: nowrap; text-transform: none; letter-spacing: 0;
+      padding: 0.25rem 0.5rem; border-radius: 0.3rem;
+      opacity: 0; pointer-events: none; transition: opacity 120ms;
+    }
+    .metric-info:hover::after { opacity: 1; }
     .metric-period { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin-left: 0.4rem; }
     a.metric-link { text-decoration: none; transition: color 120ms; }
     a.metric-link:hover { color: var(--accent); }
@@ -190,7 +201,7 @@ const CONFIG = {
   snapshots: 30,
   aggUnit:   'day',
   metrics: {
-    ga4_total_users:        { label: 'Visitors',  fmt: 'int', period: '30d',      url: 'https://analytics.google.com/analytics/web/#/p464728949/' },
+    ga4_total_users:        { label: 'Visitors',  fmt: 'int', period: '30d',      url: 'https://analytics.google.com/analytics/web/#/p464728949/', tooltip: 'Unique devices/browsers via GA4 cookie · rolling 30-day window' },
     giscus_total_reactions: { label: 'Reactions', fmt: 'int', period: 'all time', url: 'https://github.com/dvquy13/icy-touch-comments/discussions' },
     giscus_total_comments:  { label: 'Comments',  fmt: 'int', period: 'all time', url: 'https://github.com/dvquy13/icy-touch-comments/discussions' },
     posts_published_28d:    { label: 'Posts',     fmt: 'int', period: '28d',      url: 'https://dvquys.com/#listing-posts' },
@@ -431,10 +442,12 @@ function renderCard(key, history, latest, previous, unit) {
   const prevTime = previous?.fetched_at ? fmtTime(previous.fetched_at) : null
   const tip = (currTime && prevTime) ? `${prevTime} → ${currTime}` : 'vs previous snapshot'
 
-  const periodHtml = period ? `<span class="metric-period">· ${period}</span>` : ''
-  const labelHtml  = url
-    ? `<a class="metric-label metric-link" href="${url}" target="_blank" rel="noopener">${label}${periodHtml} ↗</a>`
-    : `<div class="metric-label">${label}${periodHtml}</div>`
+  const periodHtml  = period ? `<span class="metric-period">· ${period}</span>` : ''
+  const tooltip     = cfg.tooltip || null
+  const infoHtml    = tooltip ? `<span class="metric-info" data-tip="${tooltip}">ⓘ</span>` : ''
+  const labelHtml   = url
+    ? `<a class="metric-label metric-link" href="${url}" target="_blank" rel="noopener">${label}${periodHtml} ↗${infoHtml}</a>`
+    : `<div class="metric-label">${label}${periodHtml}${infoHtml}</div>`
 
   const deltaHtml = (!hasError && delta)
     ? `<span class="metric-delta ${delta.cls}" data-tip="${tip}">${delta.text}</span>`
