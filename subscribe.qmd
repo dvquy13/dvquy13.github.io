@@ -1,0 +1,56 @@
+---
+title: "Subscribe"
+---
+
+I write about machine learning, RecSys, and whatever I'm working through — a few posts a year, no filler.
+
+Drop your email and I'll send you a note when something new goes up.
+
+<div class="newsletter-form" style="margin-top: 1.5rem;">
+  <input
+    type="email"
+    id="sub-email"
+    placeholder="you@example.com"
+    style="padding: 0.45rem 0.75rem; font-size: 0.95rem; border: 1px solid #ccc; border-radius: 4px; width: 260px; max-width: 100%;"
+  />
+  <button
+    onclick="doSubscribe()"
+    id="sub-btn"
+    style="margin-left: 0.5rem; padding: 0.45rem 1rem; font-size: 0.95rem; background: #0057a3; color: #fff; border: none; border-radius: 4px; cursor: pointer;"
+  >
+    Subscribe
+  </button>
+  <p id="sub-msg" style="margin-top: 0.6rem; min-height: 1.2em; font-size: 0.9rem; color: #555;"></p>
+</div>
+
+<script>
+const SUBSCRIBE_URL = "https://olssvguaeagsmkfmsvvo.supabase.co/functions/v1/subscribe";
+
+async function doSubscribe() {
+  const emailEl = document.getElementById("sub-email");
+  const msgEl   = document.getElementById("sub-msg");
+  const btn     = document.getElementById("sub-btn");
+  const email   = emailEl.value.trim();
+  if (!email) { msgEl.textContent = "Please enter your email."; return; }
+  btn.disabled = true;
+  msgEl.textContent = "Subscribing…";
+  try {
+    const res  = await fetch(SUBSCRIBE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      msgEl.textContent = "Done! You're subscribed.";
+      emailEl.value = "";
+    } else {
+      msgEl.textContent = data.error || "Something went wrong. Please try again.";
+      btn.disabled = false;
+    }
+  } catch {
+    msgEl.textContent = "Network error. Please try again.";
+    btn.disabled = false;
+  }
+}
+</script>

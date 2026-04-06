@@ -68,6 +68,23 @@ This strips `color: null` and `background-color: null` from `docs/index.xml` aft
 
 **Local:** `make analytics` (display), `make analytics-push` (push to Supabase + Telegram alerts when configured).
 
+## Newsletter
+
+Subscribers stored in `newsletter_subscribers` (Supabase, same project as metrics). Two Edge Functions handle the public API:
+
+- `supabase/functions/subscribe` — upserts email (idempotent, no duplicate leak)
+- `supabase/functions/unsubscribe` — deletes by `unsubscribe_token` (idempotent)
+
+Both deployed with `--no-verify-jwt` (public endpoints, no auth needed). CORS locked to `dvquys.com`.
+
+Send flow: `analytics/scripts/send-newsletter.py <post.qmd> [--dry-run]`
+1. Parses QMD frontmatter + body → converts to HTML via `markdown` lib
+2. Rewrites relative image `src` to absolute URLs (post URL base) — required for email clients
+3. Fetches all subscribers from Supabase REST API (service role key)
+4. Sends via Resend batch API (100/batch); `hello@dvquys.com` sender (mailbox need not exist)
+
+**Cloudflare / User-Agent gotcha**: Resend's API sits behind Cloudflare WAF, which blocks `Python-urllib/3.x`. The script sets `User-Agent: dvquys-newsletter/1.0` to pass through.
+
 ## Gotchas
 
 ### `quarto publish` is incompatible with `output-dir: docs`
@@ -93,6 +110,10 @@ Quarto's `github` highlight theme emits `color: null;` and `background-color: nu
 **Why postprocess instead of a custom theme:** A custom theme file (copying `github-light.theme` with nulls replaced) would need to be maintained across Quarto upgrades, offers no visual benefit (null only affects RSS, not the rendered site), and couples us to Pandoc's theme format. The postprocess script is targeted and upgrade-proof.
 
 **Why not upgrade Quarto:** The bug is not fixed in any version. Upgrading would not help.
+
+### Quarto listing pages: body content renders above the listing
+
+In a listing page (`index.qmd`), any body content in the `.qmd` file renders **above** the listing, regardless of its position in the file. To place content below the listing (e.g. a newsletter signup section), render it hidden (`display: none`), then use JS on `DOMContentLoaded` to call `document.getElementById("listing-listing").after(section)`.
 
 ### Excluding `.md` files from rendering (`.quartoignore` does not work)
 

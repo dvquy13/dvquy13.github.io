@@ -11,7 +11,7 @@ Usage:
 
 Env vars:
     SUPABASE_URL              — Supabase project URL (required)
-    SUPABASE_SERVICE_ROLE_KEY — Supabase service role key for writes (required)
+    SUPABASE_SECRET_KEY       — Supabase secret key for writes (falls back to SUPABASE_SERVICE_ROLE_KEY)
 
 Notifiers (all optional — skipped if not configured in alerts.yaml):
     Telegram: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_TOPIC_ID
@@ -335,11 +335,11 @@ def main():
 
     # 3. Supabase: read previous snapshot, insert current
     supabase_url = os.environ.get("SUPABASE_URL", "")
-    supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+    supabase_key = os.environ.get("SUPABASE_SECRET_KEY") or os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
     supabase_table = alerts_cfg.get("supabase", {}).get("table", "metrics_snapshots")
 
     if not supabase_url or not supabase_key:
-        print("[push-and-notify] SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY not set — skipping storage", file=sys.stderr)
+        print("[push-and-notify] SUPABASE_URL/SUPABASE_SECRET_KEY not set — skipping storage", file=sys.stderr)
         previous = None
     else:
         previous = supabase_get_latest(supabase_url, supabase_key, supabase_table)

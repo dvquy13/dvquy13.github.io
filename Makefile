@@ -1,4 +1,7 @@
-.PHONY: run build validate analytics analytics-push fetch-metrics
+-include .env
+export
+
+.PHONY: run build validate analytics analytics-push fetch-metrics newsletter-deploy newsletter-send
 .ONESHELL:
 
 run:
@@ -37,3 +40,11 @@ po=json.load(open('/tmp/dvq-posts-metrics.json')); \
 merged={**ga4,'metrics':{**ga4['metrics'],**gi['metrics'],**po['metrics']}}; \
 print(json.dumps(merged)) \
 		" | uv run scripts/push-and-notify.py
+
+newsletter-deploy:
+	supabase functions deploy subscribe --no-verify-jwt
+	supabase functions deploy unsubscribe --no-verify-jwt
+
+# Usage: make newsletter-send POST=posts/my-post/index.qmd [DRYRUN=--dry-run]
+newsletter-send:
+	cd analytics && uv run scripts/send-newsletter.py ../$(POST) $(DRYRUN)

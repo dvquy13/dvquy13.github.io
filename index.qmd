@@ -12,3 +12,71 @@ listing:
   fields: [title, subtitle, date, reading-time, categories]
   feed: true
 ---
+
+<div id="newsletter-section" style="margin-top: 3rem; padding-top: 0; display: none;">
+<p><strong>Get new posts by email</strong></p>
+<div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+  <input
+    type="email"
+    id="idx-email"
+    placeholder="you@example.com"
+    style="padding: 0.4rem 0.7rem; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px; width: 230px; max-width: 100%;"
+  />
+  <button
+    onclick="idxSubscribe()"
+    id="idx-btn"
+    style="padding: 0.4rem 0.9rem; font-size: 0.9rem; background: #0057a3; color: #fff; border: none; border-radius: 4px; cursor: pointer;"
+  >
+    Subscribe
+  </button>
+</div>
+<p id="idx-msg" style="margin-top: 0.5rem; min-height: 1em; font-size: 0.85rem; color: #555;"></p>
+</div>
+
+<script>
+(function () {
+  const SUBSCRIBE_URL = "https://olssvguaeagsmkfmsvvo.supabase.co/functions/v1/subscribe";
+  window.idxSubscribe = async function () {
+    const emailEl = document.getElementById("idx-email");
+    const msgEl   = document.getElementById("idx-msg");
+    const btn     = document.getElementById("idx-btn");
+    const email   = emailEl.value.trim();
+    if (!email) { msgEl.textContent = "Please enter your email."; return; }
+    btn.disabled = true;
+    msgEl.textContent = "Subscribing…";
+    try {
+      const res  = await fetch(SUBSCRIBE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        msgEl.textContent = "Done! You're subscribed.";
+        emailEl.value = "";
+      } else {
+        msgEl.textContent = data.error || "Something went wrong. Please try again.";
+        btn.disabled = false;
+      }
+    } catch {
+      msgEl.textContent = "Network error. Please try again.";
+      btn.disabled = false;
+    }
+  };
+
+  // Move the newsletter section to after the listing (Quarto renders body content above the listing)
+  function placeNewsletter() {
+    const section  = document.getElementById("newsletter-section");
+    const listing  = document.getElementById("listing-listing");
+    if (section && listing) {
+      listing.after(section);
+      section.style.display = "";
+    }
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", placeNewsletter);
+  } else {
+    placeNewsletter();
+  }
+})();
+</script>

@@ -1,0 +1,35 @@
+---
+title: "Unsubscribe"
+toc: false
+---
+
+<p id="unsub-msg" style="font-size: 1rem; color: #555;">Processing your request…</p>
+
+<script>
+(async function () {
+  const msgEl = document.getElementById("unsub-msg");
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get("token");
+
+  if (!token) {
+    msgEl.textContent = "No unsubscribe token found. The link may be invalid or already used.";
+    return;
+  }
+
+  try {
+    const res  = await fetch("https://olssvguaeagsmkfmsvvo.supabase.co/functions/v1/unsubscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      msgEl.textContent = "You've been unsubscribed. No more emails from me.";
+    } else {
+      msgEl.textContent = data.error || "Something went wrong. Please try again.";
+    }
+  } catch {
+    msgEl.textContent = "Network error. Please try again or reply to any of my emails.";
+  }
+})();
+</script>

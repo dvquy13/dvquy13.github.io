@@ -20,6 +20,8 @@ website:
         href: about.qmd
       - text: "Blog"
         href: index.qmd
+      - text: "Newsletter"
+        href: subscribe.qmd
       - icon: linkedin
         text: "LinkedIn"
         href: https://www.linkedin.com/in/dvquy/

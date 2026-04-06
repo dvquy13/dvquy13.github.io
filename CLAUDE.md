@@ -20,6 +20,8 @@ Two metrics tracked:
 
 History stored in Supabase (`metrics_snapshots` table, project `dvquys-metrics`, ref `olssvguaeagsmkfmsvvo`). Dashboard fetches directly from Supabase REST API using the anon key embedded in `dashboard.html`. CI requires secrets `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`.
 
+Supabase has migrated to new-style API keys (`sb_publishable_...` / `sb_secret_...`). Scripts prefer `SUPABASE_SECRET_KEY` with fallback to `SUPABASE_SERVICE_ROLE_KEY`. Edge Functions still receive the old key auto-injected by Supabase's runtime — no change needed there.
+
 Dashboard at `dvquys.com/dashboard` (→ `dashboard.dvquys.com` via Cloudflare redirect). Updated daily by `fetch-metrics.yml` CI at 08:00 GMT+7.
 
 **Local dashboard preview**: `dashboard.html` fetches from Supabase (CORS-open), so it works directly from `file://` or via `python3 -m http.server 8080`.
@@ -28,6 +30,13 @@ Dashboard at `dvquys.com/dashboard` (→ `dashboard.dvquys.com` via Cloudflare r
 
 **Quarto resources gotcha**: static files must be listed under `project.resources` in `_quarto.yml` (not top-level `resource:`). Top-level `resource:` is silently ignored.
 
+## Newsletter
+
+Subscribers stored in Supabase (`newsletter_subscribers` table). Edge Functions at `supabase/functions/subscribe` and `supabase/functions/unsubscribe` handle signups/removals. Send script: `analytics/scripts/send-newsletter.py`. Sending domain `dvquys.com` verified in Resend; From address is `hello@dvquys.com` (mailbox doesn't need to exist — Resend only needs the domain verified).
+
+`make newsletter-send POST=posts/my-post/index.qmd [DRYRUN=--dry-run]`
+
 ## Conventions
 
 - **Never use spaces in static asset filenames** (images, GIFs, PDFs in `*/static/`). Use hyphens. Spaces cause W3C RSS validation errors — Quarto URL-encodes them (`%20`) in qmd references, which the validator rejects as invalid URI characters.
+- **Never set `toc: false` in page frontmatter** — it adds the `fullcontent` CSS class which breaks column alignment with the rest of the site. Instead, omit `toc:` and let pages inherit `toc: true` from `_quarto.yml`; pages with no headings render without a visible TOC anyway.
