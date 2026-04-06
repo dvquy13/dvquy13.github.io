@@ -34,7 +34,6 @@ website:
       - icon: rss
         text: "RSS"
         href: index.xml
-  google-analytics: "G-NH6GYY9FZV"
   cookie-consent:
     type: implied
   favicon: avatar.png
@@ -57,6 +56,7 @@ format:
       # Chosen so that we have maximum 75 characters in the text body for readability
       body-width: 550px
     header-includes: |
+      <!-- GA4: consent default must precede gtag.js load -->
       <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -66,6 +66,13 @@ format:
         'ad_user_data': 'denied',
         'ad_personalization': 'denied'
       });
+      </script>
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-NH6GYY9FZV"></script>
+      <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-NH6GYY9FZV', {'anonymize_ip': true});
       </script>
       <script>
       document.addEventListener('click', function(e) {
