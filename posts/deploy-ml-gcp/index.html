@@ -137,6 +137,16 @@ cookieconsent.run({
   
 <style>html{ scroll-behavior: smooth; }</style>
 <script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', {
+  'analytics_storage': 'granted',
+  'ad_storage': 'denied',
+  'ad_user_data': 'denied',
+  'ad_personalization': 'denied'
+});
+</script>
+<script>
 document.addEventListener('click', function(e) {
   if (e.target && e.target.id === 'open_preferences_center') {
     e.preventDefault();
