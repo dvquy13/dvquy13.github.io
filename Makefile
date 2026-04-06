@@ -1,4 +1,4 @@
-.PHONY: run build validate analytics analytics-push
+.PHONY: run build validate analytics analytics-push fetch-metrics
 .ONESHELL:
 
 run:
@@ -11,6 +11,11 @@ build:
 
 validate:
 	bash scripts/validate-rss.sh
+
+fetch-metrics:
+	gh workflow run fetch-metrics.yml
+	@sleep 3
+	gh run watch $$(gh run list --workflow=fetch-metrics.yml --limit=1 --json databaseId -q '.[0].databaseId') --exit-status
 
 analytics:
 	cd analytics && \
