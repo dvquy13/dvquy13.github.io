@@ -6,7 +6,7 @@ Refer to posts/ and project/ *.qmd files for my blog posts and especially for my
 
 In general I admire and want to follow Paul Graham's writing style in his essays and Tim Urban's style in his blog Wait But Why.
 
-See `ARCHITECTURE.md` for CI/publish architecture and gotchas.
+See `notes/ARCHITECTURE.md` for CI/publish architecture and gotchas. See `notes/UTM_CONVENTION.md` for UTM tagging convention.
 
 ## Analytics
 

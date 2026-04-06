@@ -117,7 +117,7 @@ In a listing page (`index.qmd`), any body content in the `.qmd` file renders **a
 
 ### Excluding `.md` files from rendering (`.quartoignore` does not work)
 
-`.quartoignore` has no effect on preventing `.md` files from being rendered in a Quarto website project. Files like `README.md`, `CLAUDE.md`, and `ARCHITECTURE.md` will still be rendered to HTML and published.
+`.quartoignore` has no effect on preventing `.md` files from being rendered in a Quarto website project. Files like `README.md`, `CLAUDE.md`, and `notes/ARCHITECTURE.md` will still be rendered to HTML and published.
 
 The correct approach is to restrict the `render:` list in `_quarto.yml` to only `.qmd` files:
 
