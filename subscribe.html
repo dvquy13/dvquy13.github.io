@@ -6,10 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2024-09-22">
-<meta name="keywords" content="llm, rag, chatbot, llamaindex">
 
-<title>Building a Conversational Assistant for Restaurant Discovery and Booking – DvQ</title>
+<title>Subscribe – DvQ</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -25,25 +23,25 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../../">
-<link href="../../avatar.png" rel="icon" type="image/png">
-<script src="../../site_libs/cookie-consent/cookie-consent.js"></script>
-<link href="../../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
-<script src="../../site_libs/quarto-html/quarto.js"></script>
-<script src="../../site_libs/quarto-html/popper.min.js"></script>
-<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-86daaaaad7353f9cc0c554efc1dd6d94.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-f0c34403cb83ba439cf53f093db8e26c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./avatar.png" rel="icon" type="image/png">
+<script src="site_libs/cookie-consent/cookie-consent.js"></script>
+<link href="site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-86daaaaad7353f9cc0c554efc1dd6d94.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-f0c34403cb83ba439cf53f093db8e26c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -115,17 +113,17 @@ document.addEventListener('click', function(e) {
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wdth,wght@75..125,100..700&amp;family=Google+Sans+Code:wght@400;700&amp;family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Roboto+Mono:ital,wght@0,100..700;1,100..700&amp;display=swap" rel="stylesheet">
 
 
-<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+  <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../../index.html">
+    <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">DvQ</span>
     </a>
   </div>
@@ -136,15 +134,15 @@ document.addEventListener('click', function(e) {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html"> 
+    <a class="nav-link" href="./about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../index.html"> 
+    <a class="nav-link" href="./index.html"> 
 <span class="menu-text">Blog</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../subscribe.html"> 
+    <a class="nav-link active" href="./subscribe.html" aria-current="page"> 
 <span class="menu-text">Newsletter</span></a>
   </li>  
   <li class="nav-item">
@@ -163,7 +161,7 @@ document.addEventListener('click', function(e) {
 <span class="menu-text">X</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../index.xml"> <i class="bi bi-rss" role="img">
+    <a class="nav-link" href="./index.xml"> <i class="bi bi-rss" role="img">
 </i> 
 <span class="menu-text">RSS</span></a>
   </li>  
@@ -175,147 +173,74 @@ document.addEventListener('click', function(e) {
     </nav>
 </header>
 <!-- content -->
-<header id="title-block-header" class="quarto-title-block default page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-body">
-      <h1 class="title">Building a Conversational Assistant for Restaurant Discovery and Booking</h1>
-            <p class="subtitle lead">Lessons from Creating a Chatbot Using RAG, LLMs, and Advanced Retrieval Techniques</p>
-                                <div class="quarto-categories">
-                <div class="quarto-category">tech</div>
-                <div class="quarto-category">llm</div>
-              </div>
-                  </div>
-  </div>
-    
-  
-  <div class="quarto-title-meta">
-
-      
-      <div>
-      <div class="quarto-title-meta-heading">Published</div>
-      <div class="quarto-title-meta-contents">
-        <p class="date">September 22, 2024</p>
-      </div>
-    </div>
-    
-      
-    </div>
-    
-
-  <div>
-    <div class="keywords">
-      <div class="block-title">Keywords</div>
-      <p>llm, rag, chatbot, llamaindex</p>
-    </div>
-  </div>
-  
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#demo" id="toc-demo" class="nav-link active" data-scroll-target="#demo">Demo</a></li>
-  <li><a href="#problem-statement" id="toc-problem-statement" class="nav-link" data-scroll-target="#problem-statement">Problem Statement</a></li>
-  <li><a href="#approach" id="toc-approach" class="nav-link" data-scroll-target="#approach">Approach</a></li>
-  <li><a href="#evaluation" id="toc-evaluation" class="nav-link" data-scroll-target="#evaluation">Evaluation</a></li>
-  <li><a href="#learningsremarks" id="toc-learningsremarks" class="nav-link" data-scroll-target="#learningsremarks">Learnings/Remarks</a></li>
-  <li><a href="#challenges" id="toc-challenges" class="nav-link" data-scroll-target="#challenges">Challenges</a></li>
-  <li><a href="#future-improvements" id="toc-future-improvements" class="nav-link" data-scroll-target="#future-improvements">Future Improvements</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
-<main class="content quarto-banner-title-block" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
-
-
-
-
-<div class="callout callout-style-simple callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Subscribe</h1>
 </div>
-<div class="callout-title-container flex-fill">
-<a href="https://github.com/dvquy13/review-rec-bot">Project Details</a>
-</div>
-</div>
-<div class="callout-body-container callout-body">
-
-</div>
-</div>
-<section id="demo" class="level2">
-<h2 class="anchored" data-anchor-id="demo">Demo</h2>
-<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/4trTuAV3RnY?si=s7s5pjbgoSopGJja" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
-</section>
-<section id="problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="problem-statement">Problem Statement</h2>
-<p>Listing/reservation businesses like Yelp offer value to users by providing useful information to make them find out where to go next. Good search and recommendation systems go a long way, but they are still far from delivering the ultimate experience where users can interact naturally with the system for complex queries or have a conversation to drill down their needs.</p>
-</section>
-<section id="approach" class="level2">
-<h2 class="anchored" data-anchor-id="approach">Approach</h2>
-<p>Build a chatbot assistant to assist users in <strong>discovering places to go and booking</strong>.</p>
-<p>Workflow:</p>
-<ol type="1">
-<li>Download <a href="https://www.yelp.com/dataset">Yelp reviews data</a>. Sample <strong>5,240 reviews from 100 businesses</strong>.</li>
-<li>Set up development environment including experimentation tracking via MLflow, observability with Arize Phoenix</li>
-<li>Build MVP version using LlamaIndex, Qdrant</li>
-<li>Build synthetic evaluation datasets with 30 questions for retrieval and response. Manual response dataset are gradually built up and added based on error analysis</li>
-<li>Conduct error analysis and look at the model’s output to come up with new iteration ideas. Run a total of 10 experiments to improve the RAG, with notable attempts including: Replacing Llama-8.1B with GPT-4o-mini, Fine-tuning Embedding Model, Hybrid Retrievers, Semantic Chunking, BGE Reranker, Query Expansion</li>
-<li>Build RAG Agent based on OpenAI API with Query Engine tool and Reservation Service tool. Chatbot UI is built with Chainlit.</li>
-</ol>
-</section>
-<section id="evaluation" class="level2">
-<h2 class="anchored" data-anchor-id="evaluation">Evaluation</h2>
-<p>Evaluation results can be found <a href="https://drive.google.com/file/d/1GU0gnChJBBlB-xfaMEcnmGiHhUFKzfqb/view?usp=sharing">here</a>.</p>
-<p>Two proposed key metrics are <strong>Retrieval Hit Rate</strong> and <strong>Response Correctness</strong>.</p>
-<p>Retrieval is a critical component in any RAG system. Along with data prep, retrieval sits at the top of the pipeline so any improvements in these fronts is more likely to improve the overall system. <strong>Hit rate</strong> is chosen as a key metric because since we can employ rerank as a subsequent step, we have room to optimize for the ranking issues.&nbsp;</p>
-<p>For response, <strong>Correctness</strong> measures both how relevant the answer is with respect to the query and how correct it is compared to the referenced answer. It’s therefore a better indicator than pure relevance, which is just based on the query and hence easier to get right.</p>
-<p>For reference, Response Correctness on synthetic dataset has improved <strong>+166%</strong> from 1.75 / 5.00 from MVP version to <strong>4.67 / 5.00</strong> on the current version. The current <strong>Retrieval Hit Rate @ 50</strong> reaches <strong>73%</strong>, not directly comparable but at MVP version <strong>Retrieval Hit Rate @ 10</strong> was 20%.</p>
-<p>As next steps, while there is not much room to improve Response Correctness, we ought to increase Retrieval Hit Rate to 90% which should be doable since this dataset only contains a small amount of data.</p>
-</section>
-<section id="learningsremarks" class="level2">
-<h2 class="anchored" data-anchor-id="learningsremarks">Learnings/Remarks</h2>
-<ul>
-<li>Using question-style query leads to 5-20% uplift in retrieval hit rate compared to using keyword search</li>
-<li>BM25 Retriever alone results in 200% increase in retrieval effectiveness including hit rate, average precision, MRR and NDCG</li>
-<li>Fine-tuning small embedding model like Snowflake/snowflake-arctic-embed-m-v1.5 yield +80% retrieval effectiveness, especially rankings of the retrieved nodes</li>
-<li>Using GPT-4o-mini as response synthesizer significantly improve the quality of response in all aspects (especially correctness from 2.6 to 3.8) compared to Llama 3.1-8B-Instruct</li>
-<li>Using TreeSummarize with custom prompt yields a +10% uplift on response correctness evaluation, from 3.97 to 4.37. Based on eyeballing we also see a way better response that is recommendation-like</li>
-</ul>
-</section>
-<section id="challenges" class="level2">
-<h2 class="anchored" data-anchor-id="challenges">Challenges</h2>
-<section id="challenge-1-auto-retrieval-not-reliable" class="level5">
-<h5 class="anchored" data-anchor-id="challenge-1-auto-retrieval-not-reliable">Challenge 1: Auto-retrieval not reliable</h5>
-<p>While theoretically both precision and recall should be greatly improved if we are able to apply the right filters for User questions instead of relying on embedding/keyword matching, my first attempt to apply auto-retrieval with ChromaDB did not yield promising results. There were at least two syntactic issues which broke the agentic workflow. Even after fixing those two the unreliable nature of this approach is still there and I also witnessed a -10% degradation in Retrieval Hit Rate.</p>
-<p>In the end I forfeited the feature but nevertheless look forward to a way to re-applying this technique.</p>
-</section>
-<section id="challenges-2-indexing-pipeline-takes-too-long" class="level5">
-<h5 class="anchored" data-anchor-id="challenges-2-indexing-pipeline-takes-too-long">Challenges 2: Indexing pipeline takes too long</h5>
-<p>Indexing 70K nodes from 30K reviews for 400 businesses takes more than 6 hours!</p>
-</section>
-</section>
-<section id="future-improvements" class="level2">
-<h2 class="anchored" data-anchor-id="future-improvements">Future Improvements</h2>
-<ul>
-<li>Guardrail system inputs and outputs</li>
-<li>Experiment with Contextual Compression and Filters</li>
-<li>Fine tune LLM Re-ranker (FlagEmbedding BGE Reranker)</li>
-<li>Try ColBERT as a new retriever (may be add to the list of retrievers)</li>
-<li>Try different loss function in training embeddings</li>
-<li>Improve the diversity by implement custom re-ranker that weight downs the reviews from the already seen biz_id</li>
-</ul>
-<p><br> If you find this article helpful, please cite this writeup as:</p>
-<blockquote class="blockquote">
-<p>Quy, Dinh. (Sep 2024). Building a Conversational Assistant for Restaurant Discovery and Booking. dvquys.com. https://dvquys.com/projects/review-rec-bot/.</p>
-</blockquote>
 
 
-</section>
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>I write about machine learning, RecSys, and whatever I’m working through — a few posts a year, no filler.</p>
+<p>Drop your email and I’ll send you a note when something new goes up.</p>
+<div class="newsletter-form" style="margin-top: 1.5rem;">
+<input type="email" id="sub-email" placeholder="you@example.com" style="padding: 0.45rem 0.75rem; font-size: 0.95rem; border: 1px solid #ccc; border-radius: 4px; width: 260px; max-width: 100%;"> <button onclick="doSubscribe()" id="sub-btn" style="margin-left: 0.5rem; padding: 0.45rem 1rem; font-size: 0.95rem; background: #0057a3; color: #fff; border: none; border-radius: 4px; cursor: pointer;"> Subscribe </button>
+<p id="sub-msg" style="margin-top: 0.6rem; min-height: 1.2em; font-size: 0.9rem; color: #555;">
+</p>
+</div>
+<script>
+const SUBSCRIBE_URL = "https://olssvguaeagsmkfmsvvo.supabase.co/functions/v1/subscribe";
+
+async function doSubscribe() {
+  const emailEl = document.getElementById("sub-email");
+  const msgEl   = document.getElementById("sub-msg");
+  const btn     = document.getElementById("sub-btn");
+  const email   = emailEl.value.trim();
+  if (!email) { msgEl.textContent = "Please enter your email."; return; }
+  btn.disabled = true;
+  msgEl.textContent = "Subscribing…";
+  try {
+    const res  = await fetch(SUBSCRIBE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      msgEl.textContent = "Done! You're subscribed.";
+      emailEl.value = "";
+    } else {
+      msgEl.textContent = data.error || "Something went wrong. Please try again.";
+      btn.disabled = false;
+    }
+  } catch {
+    msgEl.textContent = "Network error. Please try again.";
+    btn.disabled = false;
+  }
+}
+</script>
+
+
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -740,10 +665,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
-<script src="https://giscus.app/client.js" data-repo="dvquy13/icy-touch-comments" data-repo-id="R_kgDONEpzPA" data-category="General" data-category-id="DIC_kwDONEpzPM4Cjn8n" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="https://cdn.jsdelivr.net/gh/dvquy13/dvquy13.github.io@main/giscus-theme.css" data-lang="en" crossorigin="anonymous" data-loading="lazy" async="">
-</script>
-<input type="hidden" id="giscus-base-theme" value="https://cdn.jsdelivr.net/gh/dvquy13/dvquy13.github.io@main/giscus-theme.css">
-<input type="hidden" id="giscus-alt-theme" value="https://cdn.jsdelivr.net/gh/dvquy13/dvquy13.github.io@main/giscus-theme.css">
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -762,5 +683,5 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
 </body></html>
