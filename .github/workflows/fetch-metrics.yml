@@ -29,6 +29,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Fetch Giscus comments
+        run: cd analytics && uv run scripts/fetch-giscus-comments.py > /tmp/giscus-comments-metrics.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Fetch posts published (last 28d)
         run: cd analytics && uv run scripts/fetch-posts-published.py > /tmp/posts-metrics.json
 
@@ -38,8 +43,9 @@ jobs:
           import json
           ga4 = json.load(open('/tmp/ga4-metrics.json'))
           giscus = json.load(open('/tmp/giscus-metrics.json'))
+          giscus_comments = json.load(open('/tmp/giscus-comments-metrics.json'))
           posts = json.load(open('/tmp/posts-metrics.json'))
-          merged = {**ga4, 'metrics': {**ga4['metrics'], **giscus['metrics'], **posts['metrics']}}
+          merged = {**ga4, 'metrics': {**ga4['metrics'], **giscus['metrics'], **giscus_comments['metrics'], **posts['metrics']}}
           print(json.dumps(merged))
           " > /tmp/merged-metrics.json
           cd analytics && uv run scripts/push-and-notify.py < /tmp/merged-metrics.json
