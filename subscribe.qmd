@@ -2,7 +2,7 @@
 title: "Subscribe"
 ---
 
-I write about machine learning, RecSys, and whatever I'm working through — a few posts a year, no filler.
+I write about building end-to-end ML products/services like RecSys and my journey building SaaS as a solo developer.
 
 Drop your email and I'll send you a note when something new goes up.
 

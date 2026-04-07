@@ -3,8 +3,12 @@
 
 Hi, I'm Quy—an Applied Data Scientist. I'm from Hanoi, Vietnam 🇻🇳. Currently living in Singapore 🇸🇬.
 
-I blog about [RecSys](/#category=recsys), [ML](/#category=machine%20learning), [Productivity](/#category=productivity) and other random things. You can find some of my side projects [here](/projects.html).
+I love building products that help people make better decisions.
+
+My projects:
+
+- [Calens](https://www.calens.dev): a Chrome extension for Google Calendar Analytics.
+- [qrec](https://github.com/dvquy13/qrec): Open-source Project for Claude Code history management
+- [RecSys End-to-End Implementation Series](index.qmd#category=implement-recsys-series)
 
 I used to teach a RecSys course for practitioners at [FullStackDataScience](https://fullstackdatascience.com/courses/igds).
-
-I build [Calens](https://www.calens.dev)—a Chrome extension for Google Calendar Analytics.

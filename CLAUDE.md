@@ -22,7 +22,7 @@ History stored in Supabase (`metrics_snapshots` table, project `dvquys-metrics`,
 
 Supabase has migrated to new-style API keys (`sb_publishable_...` / `sb_secret_...`). Scripts prefer `SUPABASE_SECRET_KEY` with fallback to `SUPABASE_SERVICE_ROLE_KEY`. Edge Functions still receive the old key auto-injected by Supabase's runtime — no change needed there.
 
-Dashboard at `dvquys.com/dashboard` (→ `dashboard.dvquys.com` via Cloudflare redirect). Updated daily by `fetch-metrics.yml` CI at 08:00 GMT+7.
+Dashboard at `dvquys.com/dashboard` (→ `dashboard.dvquys.com` via Cloudflare redirect). Updated daily by `fetch-metrics.yml` CI at 03:13 GMT+7 (20:13 UTC prev day) — early so GitHub Actions queue delays still land before wake-up.
 
 **Local dashboard preview**: `dashboard.html` fetches from Supabase (CORS-open), so it works directly from `file://` or via `python3 -m http.server 8080`.
 
