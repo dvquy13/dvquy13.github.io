@@ -107,8 +107,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', {
+  'analytics_storage': 'granted',
+  'ad_storage': 'denied',
+  'ad_user_data': 'denied',
+  'ad_personalization': 'denied'
+});
 gtag('js', new Date());
-gtag('config', 'G-NH6GYY9FZV', {'anonymize_ip': true});
+gtag('config', 'G-NH6GYY9FZV', {'anonymize_ip': true, 'debug_mode': true});
 </script>
 <!-- Inter (fallback) -->
 <link rel="preconnect" href="https://rsms.me/">
