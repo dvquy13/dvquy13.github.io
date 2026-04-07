@@ -33,6 +33,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../">
 <link href="../../avatar.png" rel="icon" type="image/png">
+<script src="../../site_libs/cookie-consent/cookie-consent.js"></script>
+<link href="../../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
 <script src="../../site_libs/quarto-html/quarto.js"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -72,31 +74,34 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<style>html{ scroll-behavior: smooth; }</style>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-NH6GYY9FZV"></script>
-<script>
+
+<script type="text/plain" cookie-consent="tracking">
+
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
-gtag('consent', 'default', {
-  'analytics_storage': 'granted',
-  'ad_storage': 'granted',
-  'ad_user_data': 'granted',
-  'ad_personalization': 'granted'
-});
 gtag('js', new Date());
-// Manually extract UTM params from URL and pass to config
-// to bypass any auto-extraction issues
-(function() {
-  var p = new URLSearchParams(window.location.search);
-  var cfg = {'anonymize_ip': true, 'debug_mode': true};
-  if (p.get('utm_source')) cfg.campaign_source = p.get('utm_source');
-  if (p.get('utm_medium')) cfg.campaign_medium = p.get('utm_medium');
-  if (p.get('utm_campaign')) cfg.campaign = p.get('utm_campaign');
-  if (p.get('utm_term')) cfg.campaign_term = p.get('utm_term');
-  if (p.get('utm_content')) cfg.campaign_content = p.get('utm_content');
-  gtag('config', 'G-NH6GYY9FZV', cfg);
-})();
+gtag('config', 'G-NH6GYY9FZV', { 'anonymize_ip': true});
 </script>
+
+<script type="text/javascript" charset="UTF-8">
+document.addEventListener('DOMContentLoaded', function () {
+cookieconsent.run({
+  "notice_banner_type":"simple",
+  "consent_type":"implied",
+  "palette":"light",
+  "language":"en",
+  "page_load_consent_levels":["strictly-necessary","functionality","tracking","targeting"],
+  "notice_banner_reject_button_hide":false,
+  "preferences_center_close_button_hide":false,
+  "website_name":""
+  ,
+"language":"en"
+  });
+});
+</script> 
+  
+<style>html{ scroll-behavior: smooth; }</style>
 <!-- Inter (fallback) -->
 <link rel="preconnect" href="https://rsms.me/">
 <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
@@ -679,6 +684,19 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="https://cdn.jsdelivr.net/gh/dvquy13/dvquy13.github.io@main/giscus-theme.css">
 <input type="hidden" id="giscus-alt-theme" value="https://cdn.jsdelivr.net/gh/dvquy13/dvquy13.github.io@main/giscus-theme.css">
 </div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+
+<div class="cookie-consent-footer"><a href="#" id="open_preferences_center">Cookie Preferences</a></div></div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
 <script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
 (function() {
   let previousOnload = window.onload;

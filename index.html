@@ -33,6 +33,8 @@ ul.task-list li input[type="checkbox"] {
 <link href="./avatar.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-listing/list.min.js"></script>
 <script src="site_libs/quarto-listing/quarto-listing.js"></script>
+<script src="site_libs/cookie-consent/cookie-consent.js"></script>
+<link href="site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -98,31 +100,34 @@ ul.task-list li input[type="checkbox"] {
     }
   })
   </script>
-<style>html{ scroll-behavior: smooth; }</style>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-NH6GYY9FZV"></script>
-<script>
+
+<script type="text/plain" cookie-consent="tracking">
+
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
-gtag('consent', 'default', {
-  'analytics_storage': 'granted',
-  'ad_storage': 'granted',
-  'ad_user_data': 'granted',
-  'ad_personalization': 'granted'
-});
 gtag('js', new Date());
-// Manually extract UTM params from URL and pass to config
-// to bypass any auto-extraction issues
-(function() {
-  var p = new URLSearchParams(window.location.search);
-  var cfg = {'anonymize_ip': true, 'debug_mode': true};
-  if (p.get('utm_source')) cfg.campaign_source = p.get('utm_source');
-  if (p.get('utm_medium')) cfg.campaign_medium = p.get('utm_medium');
-  if (p.get('utm_campaign')) cfg.campaign = p.get('utm_campaign');
-  if (p.get('utm_term')) cfg.campaign_term = p.get('utm_term');
-  if (p.get('utm_content')) cfg.campaign_content = p.get('utm_content');
-  gtag('config', 'G-NH6GYY9FZV', cfg);
-})();
+gtag('config', 'G-NH6GYY9FZV', { 'anonymize_ip': true});
 </script>
+
+<script type="text/javascript" charset="UTF-8">
+document.addEventListener('DOMContentLoaded', function () {
+cookieconsent.run({
+  "notice_banner_type":"simple",
+  "consent_type":"implied",
+  "palette":"light",
+  "language":"en",
+  "page_load_consent_levels":["strictly-necessary","functionality","tracking","targeting"],
+  "notice_banner_reject_button_hide":false,
+  "preferences_center_close_button_hide":false,
+  "website_name":""
+  ,
+"language":"en"
+  });
+});
+</script> 
+  
+<style>html{ scroll-behavior: smooth; }</style>
 <!-- Inter (fallback) -->
 <link rel="preconnect" href="https://rsms.me/">
 <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
@@ -296,7 +301,7 @@ window.Quarto = {
 
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="bGlmZSUyQ3Byb2R1Y3Rpdml0eQ==" data-listing-date-sort="1767916800000" data-listing-file-modified-sort="1775535724707" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1189">
+<div class="quarto-post image-right" data-index="0" data-categories="bGlmZSUyQ3Byb2R1Y3Rpdml0eQ==" data-listing-date-sort="1767916800000" data-listing-file-modified-sort="1775553059564" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1189">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./posts/the-30m-promise/index.html" class="no-external">The 30-Minute Promise</a>
@@ -324,7 +329,7 @@ Jan 9, 2026
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748822400000" data-listing-file-modified-sort="1775535724720" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="21" data-listing-word-count-sort="4029">
+<div class="quarto-post image-right" data-index="1" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748822400000" data-listing-file-modified-sort="1775553059577" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="21" data-listing-word-count-sort="4029">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c7/index.html" class="no-external">Implement a RecSys, Chapter 7:<br> Building the API Layer</a>
@@ -352,7 +357,7 @@ Jun 2, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748736000000" data-listing-file-modified-sort="1775535724718" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3309">
+<div class="quarto-post image-right" data-index="2" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748736000000" data-listing-file-modified-sort="1775553059576" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3309">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c6/index.html" class="no-external">Implement a RecSys, Chapter 6:<br> Preparing for Serving</a>
@@ -380,7 +385,7 @@ Jun 1, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748649600000" data-listing-file-modified-sort="1775535724716" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="29" data-listing-word-count-sort="5800">
+<div class="quarto-post image-right" data-index="3" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748649600000" data-listing-file-modified-sort="1775553059573" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="29" data-listing-word-count-sort="5800">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c5/index.html" class="no-external">Implement a RecSys, Chapter 5:<br> Design Session-based Recommendation System</a>
@@ -408,7 +413,7 @@ May 31, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748563200000" data-listing-file-modified-sort="1775535724714" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2845">
+<div class="quarto-post image-right" data-index="4" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748563200000" data-listing-file-modified-sort="1775553059570" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2845">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c4/index.html" class="no-external">Implement a RecSys, Chapter 4:<br> Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation</a>
@@ -436,7 +441,7 @@ May 30, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="5" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748217600000" data-listing-file-modified-sort="1775535724713" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3388">
+<div class="quarto-post image-right" data-index="5" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748217600000" data-listing-file-modified-sort="1775553059569" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3388">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c3/index.html" class="no-external">Implement a RecSys, Chapter 3:<br> Negative Sampling</a>
@@ -464,7 +469,7 @@ May 26, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="6" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748131200000" data-listing-file-modified-sort="1775535724709" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3085">
+<div class="quarto-post image-right" data-index="6" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748131200000" data-listing-file-modified-sort="1775553059566" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3085">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c2/index.html" class="no-external">Implement a RecSys, Chapter 2:<br> Understanding the Data and Feature Engineering</a>
@@ -492,7 +497,7 @@ May 25, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="7" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748044800000" data-listing-file-modified-sort="1775535724709" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2091">
+<div class="quarto-post image-right" data-index="7" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748044800000" data-listing-file-modified-sort="1775553059566" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2091">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c1/index.html" class="no-external">Implement a RecSys, Chapter 1:<br> Introduction and Project Overview</a>
@@ -520,7 +525,7 @@ May 24, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="8" data-categories="dGVjaCUyQ2xsbQ==" data-listing-date-sort="1726963200000" data-listing-file-modified-sort="1775535724757" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="714">
+<div class="quarto-post image-right" data-index="8" data-categories="dGVjaCUyQ2xsbQ==" data-listing-date-sort="1726963200000" data-listing-file-modified-sort="1775553059614" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="714">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/review-rec-bot/index.html" class="no-external">Building a Conversational Assistant for Restaurant Discovery and Booking</a>
@@ -548,7 +553,7 @@ Sep 22, 2024
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="9" data-categories="dGVjaCUyQ21hY2hpbmUlMjBsZWFybmluZw==" data-listing-date-sort="1718928000000" data-listing-file-modified-sort="1775535724763" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="54">
+<div class="quarto-post image-right" data-index="9" data-categories="dGVjaCUyQ21hY2hpbmUlMjBsZWFybmluZw==" data-listing-date-sort="1718928000000" data-listing-file-modified-sort="1775553059620" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="54">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/reviews-parsing-mlsys/index.html" class="no-external">Let’s build an ML system</a>
@@ -576,7 +581,7 @@ Jun 21, 2024
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="10" data-categories="dGVjaCUyQ3NlYXJjaA==" data-listing-date-sort="1685577600000" data-listing-file-modified-sort="1775535724706" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="57" data-listing-word-count-sort="11257">
+<div class="quarto-post image-right" data-index="10" data-categories="dGVjaCUyQ3NlYXJjaA==" data-listing-date-sort="1685577600000" data-listing-file-modified-sort="1775553059564" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="57" data-listing-word-count-sort="11257">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./posts/site-search-elasticsearch/index.html" class="no-external">A Hierarchical approach with Elasticsearch: Lessons from 22 Months of Iteration</a>
@@ -604,7 +609,7 @@ Jun 1, 2023
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="11" data-categories="dGVjaCUyQ21hY2hpbmUlMjBsZWFybmluZw==" data-listing-date-sort="1581897600000" data-listing-file-modified-sort="1775535724706" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2721">
+<div class="quarto-post image-right" data-index="11" data-categories="dGVjaCUyQ21hY2hpbmUlMjBsZWFybmluZw==" data-listing-date-sort="1581897600000" data-listing-file-modified-sort="1775553059562" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2721">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./posts/deploy-ml-gcp/index.html" class="no-external">From Model to Production: Deploying Your Machine Learning Solution on Google Cloud</a>
@@ -1060,6 +1065,19 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+
+<div class="cookie-consent-footer"><a href="#" id="open_preferences_center">Cookie Preferences</a></div></div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
 
 
 
