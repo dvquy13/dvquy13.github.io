@@ -47,4 +47,10 @@ https://dvquys.com/posts/deploy-ml-gcp/?utm_source=reddit&utm_medium=social&utm_
 
 Save this as a report in GA4 Explorations for quick access.
 
-**Verify a new UTM link:** paste it in GA4 → Realtime → check "Event: session_start" with the expected parameters before publishing.
+**Verify a new UTM link:**
+1. Open the UTM URL in **Chrome Incognito** (NOT Safari Private — it strips `utm_*` params)
+2. Stay 30+ seconds, scroll a bit (triggers `user_engagement`)
+3. Wait ~15-30 minutes
+4. Check **Reports → Acquisition → Traffic acquisition** (Today) for the new `source / medium` row
+
+Do NOT use **Realtime → "First user source/medium"** for verification — it has aggregation delays and frequently shows empty/`(direct)` even when attribution is working. The Reports view is the source of truth.
