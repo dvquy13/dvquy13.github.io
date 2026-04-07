@@ -459,7 +459,7 @@
     "href": "about.html",
     "title": "DvQ",
     "section": "",
-    "text": "Hi, I’m Quy—an Applied Data Scientist. I’m from Hanoi, Vietnam 🇻🇳. Currently living in Singapore 🇸🇬.\nI blog about RecSys, ML, Productivity and other random things. You can find some of my side projects here.\nI used to teach a RecSys course for practitioners at FullStackDataScience.\nI build Calens—a Chrome extension for Google Calendar Analytics."
+    "text": "Hi, I’m Quy—an Applied Data Scientist. I’m from Hanoi, Vietnam 🇻🇳. Currently living in Singapore 🇸🇬.\nI love building products that help people make better decisions.\nMy projects:\n\nCalens: a Chrome extension for Google Calendar Analytics.\nqrec: Open-source Project for Claude Code history management\nRecSys End-to-End Implementation Series\n\nI used to teach a RecSys course for practitioners at FullStackDataScience."
   },
   {
     "objectID": "index.html",
@@ -802,6 +802,6 @@
     "href": "subscribe.html",
     "title": "Subscribe",
     "section": "",
-    "text": "I write about machine learning, RecSys, and whatever I’m working through — a few posts a year, no filler.\nDrop your email and I’ll send you a note when something new goes up.\n\n  Subscribe"
+    "text": "I write about building end-to-end ML products/services like RecSys and my journey building SaaS as a solo developer.\nDrop your email and I’ll send you a note when something new goes up.\n\n  Subscribe"
   }
 ]
