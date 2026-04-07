@@ -74,12 +74,23 @@ window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('consent', 'default', {
   'analytics_storage': 'granted',
-  'ad_storage': 'denied',
-  'ad_user_data': 'denied',
-  'ad_personalization': 'denied'
+  'ad_storage': 'granted',
+  'ad_user_data': 'granted',
+  'ad_personalization': 'granted'
 });
 gtag('js', new Date());
-gtag('config', 'G-NH6GYY9FZV', {'anonymize_ip': true, 'debug_mode': true});
+// Manually extract UTM params from URL and pass to config
+// to bypass any auto-extraction issues
+(function() {
+  var p = new URLSearchParams(window.location.search);
+  var cfg = {'anonymize_ip': true, 'debug_mode': true};
+  if (p.get('utm_source')) cfg.campaign_source = p.get('utm_source');
+  if (p.get('utm_medium')) cfg.campaign_medium = p.get('utm_medium');
+  if (p.get('utm_campaign')) cfg.campaign = p.get('utm_campaign');
+  if (p.get('utm_term')) cfg.campaign_term = p.get('utm_term');
+  if (p.get('utm_content')) cfg.campaign_content = p.get('utm_content');
+  gtag('config', 'G-NH6GYY9FZV', cfg);
+})();
 </script>
 <!-- Inter (fallback) -->
 <link rel="preconnect" href="https://rsms.me/">
