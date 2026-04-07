@@ -1,0 +1,46 @@
+[
+  {
+    "id": "eval-01",
+    "name": "Rich references → PASS round 1",
+    "description": "User provides topic + goal + detailed references. Skill develops questions, wanders with back-and-forth, organizes, sharpens, and both reviewers are satisfied on the first round.",
+    "prompt": "Write a post about debugging ML models. Goal: help ML engineers stop wasting time tuning hyperparameters before they've audited their data. References: my notes at notes/ml-debug-notes.md and posts/the-30m-promise/index.qmd for voice.",
+    "expect": [
+      "Skill reads dvq.md before writing anything",
+      "Phase 1 generates specific reader-centric questions (e.g. 'Why do engineers default to tuning?' not 'What is debugging?')",
+      "Phase 2 wander sketches contain at least one concrete detail per question drawn from references",
+      "Phase 3 organized draft opens with a specific scene, not an abstract claim",
+      "Phase 4 sharpened draft has no hedges ('it's worth noting', 'one could argue', etc.)",
+      "Two review agents launch in a single parallel message (paul-graham + dvq)",
+      "Skill evaluates both reviews against the three principles and decides PASS",
+      "File saved to posts/debugging-ml-models/index.qmd (or similar slug)",
+      "Frontmatter includes draft: true"
+    ]
+  },
+  {
+    "id": "eval-02",
+    "name": "Sparse input — skill brainstorms with user to find anchors",
+    "description": "User gives only a topic with no references. Skill should treat Phase 0 and Phase 2 as collaborative — asking follow-up questions to surface concrete experiences and anchors before wandering.",
+    "prompt": "Write a post about the value of boredom for creative work.",
+    "expect": [
+      "Skill asks for references or personal experiences via AskUserQuestion during Phase 0",
+      "If user has no references, skill asks follow-up questions during Phase 2 to find concrete anchors (e.g. 'Can you recall a specific time boredom led to an idea?')",
+      "Phase 2 wander does not proceed until at least one concrete personal anchor is established",
+      "Questions phase generates specific questions grounded in whatever anchors emerged",
+      "Final draft is grounded in at least one real specific situation, not generic observations"
+    ]
+  },
+  {
+    "id": "eval-03",
+    "name": "Voice consistency — dvq reviewer catches off-voice passages",
+    "description": "Draft contains hedged, corporate-sounding phrases. The dvq reviewer flags them specifically. Skill applies targeted fixes and the next round passes voice check.",
+    "prompt": "Write a post about how I approach 1:1 meetings as an IC. Goal: show that ICs can drive 1:1s to surface blockers early, not just give status updates. References: posts/the-30m-promise/index.qmd.",
+    "expect": [
+      "dvq reviewer flags at least 2 specific off-voice phrases with quotes",
+      "Skill applies targeted fixes to flagged phrases — does not rewrite the whole post",
+      "Final draft uses first-person throughout",
+      "At least one section explicitly documents what did NOT work before the insight",
+      "No section begins with 'In conclusion', 'It is important to note', or 'As we can see'",
+      "Final draft reads like a person talking, not a document"
+    ]
+  }
+]
