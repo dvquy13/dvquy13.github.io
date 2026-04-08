@@ -18,6 +18,10 @@ These apply to any writing task in this repo.
 
 See `notes/ARCHITECTURE.md` for CI/publish architecture and gotchas. See `notes/UTM_CONVENTION.md` for UTM tagging convention.
 
+### Writing Conventions
+
+Do not use emdash everywhere, and when you do, use emdash without any space before and after it.
+
 ## Analytics
 
 Metrics pipeline lives in `analytics/`. See `~/.claude/skills/metric-extractor/SKILL.md` for full pipeline docs.
