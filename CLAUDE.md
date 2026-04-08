@@ -6,6 +6,16 @@ Refer to posts/ and project/ *.qmd files for my blog posts and especially for my
 
 In general I admire and want to follow Paul Graham's writing style in his essays and Tim Urban's style in his blog Wait But Why.
 
+## Writing Principles
+
+These apply to any writing task in this repo.
+
+**Write Simply** — Prose should be frictionless. The goal is *saltintesta*: ideas leap into the reader's head; they barely notice the words. Simple writing keeps you honest — if you have nothing to say, saying it simply makes that obvious. Cut fancy words, unnecessary complexity, and anything clumsy. If a sentence seems too complicated, it is.
+
+**Write Like You Talk** — Every sentence should pass the friend test: "Is this the way I'd say this to a friend?" If not, say it out loud — and use that instead. Informal language is the athletic clothing of ideas. The harder the subject, the more important it is to keep the language simple.
+
+**Write Like DvQ** — Conversational first-person. Specific and grounded in lived experience. Honest about failures — what didn't work always comes before what did. No hedges, no filler transitions, no advice from a distance. Read `.claude/agents/dvq.md` for the full voice profile.
+
 See `notes/ARCHITECTURE.md` for CI/publish architecture and gotchas. See `notes/UTM_CONVENTION.md` for UTM tagging convention.
 
 ## Analytics
