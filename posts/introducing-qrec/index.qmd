@@ -1,0 +1,61 @@
+---
+title: "The Sessions I Kept Losing"
+subtitle: "How I built a session recall engine for Claude Code — and discovered it was something else entirely"
+date: "2026-04-07"
+categories:
+  - tech
+keywords: "qrec, claude code, session recall, local LLM, SQLite, hybrid search, context management"
+draft: true
+---
+
+Every Claude Code session starts fresh. That's mostly fine. But somewhere around my hundredth session, I noticed a pattern: I'd solved a problem two weeks ago, and now I was solving it again. Not the same problem — a related one, where knowing what I'd decided before would've saved me an hour. But that earlier session was gone. Not archived. Deleted from disk. Claude Code clears sessions after 30 days.
+
+I checked once. I had 1,087 JSONL session files on my machine. One directory alone — ClaudeProbe — had 394 sessions sitting there. Months of decisions and debugging and things I'd figured out, inaccessible to any search I tried to run on my own history.
+
+That's when I started building qrec.
+
+## The tools I tried first
+
+Two tools already exist for this. qmd indexes your Claude sessions and serves a search API. claude-mem hooks into your sessions and lets Claude query its own history. I tried both and didn't stick with either.
+
+With qmd, the CLI felt slow because it loaded models on every query. I wanted to skip the markdown conversion step (Claude Code stores sessions as JSONL already, so converting felt like an unnecessary hop), and I wanted a web UI, and I wanted to experiment with the retrieval pipeline. At some point there were enough things I wanted to change that building felt more practical than forking. I'll note I was partly wrong: I found out later that `qmd serve` runs a background server, which would've helped with the speed. But the other reasons still stood.
+
+With claude-mem, I installed it via two plugin commands and genuinely couldn't tell what was happening. Something was downloading model weights and indexing my history in the background, but the process was invisible. When a tool is running on your private session history, you should be able to watch it happen. That became the thing I was most determined to do differently.
+
+## The bets I made
+
+I started with a clear constraint: nothing leaves your machine. Summaries and tags are generated on-device by a local model (Qwen3-1.7B). I evaluated smaller models first — the 0.5B hallucinated, the 1.5B was accurate enough. Zero API calls, zero tokens spent. Search runs against SQLite using both BM25 lexical matching and vector KNN, fused together, at around 50ms per query. A persistent daemon keeps the embedding model loaded so queries stay fast.
+
+The part I spent the most time on was the onboarding UI. When you first install qrec, the dashboard shows you the embedding model downloading (progress bar, kilobytes ticking up), then your sessions being indexed (42 of 225, 19%), then "Run your first search." The activity feed — enrichment runs, index scans, model loads — stays visible as long as the daemon is running. All of this came directly from the claude-mem frustration: I wanted every step visible, so someone who just installed qrec could see exactly what was happening to their data. Not trust it. See it.
+
+## What I got wrong
+
+The eval setup seemed reasonable. Sample sessions, have Claude Haiku generate queries from each one, then check whether the source session appears in the top 10 results (Recall@10). Scores look healthy.
+
+The problem is contamination. Haiku generates queries by reading the session content, so it naturally uses the same vocabulary the session uses. Real users don't write queries that match how sessions are written. When I searched "heatmap grid over extend," the most relevant session was rank 8. That session used "overflows," "expansion," "overflows the grid width" — not "over extend." BM25 had zero token overlap. Semantic search didn't bridge the gap. The ten results scored between 0.0138 and 0.0164 — essentially noise. The eval said things were fine. The search wasn't.
+
+There's also a freshness problem: labels go stale. "Session A is correct for query Q" was true at 300 sessions. At 486, a newer session might be more relevant, and the eval now penalizes the system for surfacing the better answer.
+
+I know what a better setup looks like — freeze a snapshot for regression testing, use LLM-as-judge on the live index for real quality measurement. I haven't built it yet.
+
+## The thing I didn't design for
+
+At some point I was in a long Claude Code session about to hit the context limit. The usual path is to wait for compaction — slow, burns tokens. Instead I opened a new session and typed: "pick up context from the previous session." I pointed Claude at qrec.
+
+It worked.
+
+qrec strips tool results and thinking blocks from session transcripts, keeping a clean user-assistant exchange with one-liner tool summaries where the tool calls were. A 200-turn session becomes a readable thread. In this case Claude came back with the exact decision we'd been circling around — which database schema to use for the session index — and we continued from there without re-explaining anything.
+
+I'd been thinking of qrec as a recall engine: you search for something you forgot. This was different. I wasn't searching. I was handing off state to the next session. It's not "search your past sessions" — it's "carry context across session boundaries without burning tokens."
+
+While writing this post, I was doing the handoff thing constantly. Five sessions from March 21st in the qrec index start with "pick up context from the latest session" and a recall skill call. I used qrec to write the introduction to qrec.
+
+## Where things stand
+
+This project took 135.6 hours across 18 active days, with peak weeks of 68 and 53 hours in March.
+
+![Time spent on qrec](static/qrec-gridlens.png)
+
+Most of it went into things I didn't plan for. The eval framework took weeks to get to a state I'm still not happy with. The demo video took an entire weekend in Remotion — 8 scenes, ElevenLabs voiceover, Clawd mascot pixel art drawn from scratch — and I had to use qrec to keep track of what I'd done between sessions just to finish it.
+
+The next thing is better eval. Then better ranking — query expansion to bridge vocabulary gaps, maybe a lightweight personalized reranker once there's enough usage data. The search quality problem isn't solved. The current eval might be telling me it is, which is the more important problem to fix.
