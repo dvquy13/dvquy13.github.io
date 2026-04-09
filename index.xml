@@ -37,13 +37,6 @@ TLDR
 </div>
 <p>Every Claude Code session starts fresh. That’s mostly fine at first. But the more I worked with it, delegating more, going deeper, the more I noticed decisions quietly slipping away. A design choice I’d reasoned through two weeks ago, a debugging path I’d finally worked out, etc. By the time a related problem came up in a new session, the reasoning behind the earlier decision was gone<sup>1</sup>, and I was either re-deriving it from scratch or, worse, not realizing I’d already been here.</p>
 <p>At the moment of writing this post, I had over a thousand JSONL session files on my machine. They were all technically readable—you could locate them at <code>~/.claude/projects/</code>. Each file is raw JSONL packed with tool calls, thinking blocks, and execution noise. Weeks of decisions and debugging were right there, but I was not willing to spend the tokens and time to trawl through them every single time.</p>
-<p>This post is about the 135.6 hours I spent across 18 active days building a tool to fix that.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://dvquys.com/posts/introducing-qrec/static/qrec-gridlens.png" class="img-fluid figure-img" style="width:70.0%"></p>
-<figcaption>Time spent on qrec</figcaption>
-</figure>
-</div>
 <section id="the-tools-i-tried-first" class="level2">
 <h2 class="anchored" data-anchor-id="the-tools-i-tried-first">The tools I tried first</h2>
 <p>I’d heard about existing tools—<a href="https://github.com/tobi/QMD">QMD</a> and <a href="https://github.com/thedotmack/claude-mem">claude-mem</a>—so I gave them a try first. QMD indexes markdown, so I built a Claude Code plugin with SessionEnd hook that converts Claude Code JSONL sessions into Markdown and lets QMD handle the indexing. But in the end I didn’t stick with QMD. The CLI felt slow—it loaded models on every query<sup>2</sup>—and I realized I wanted to “add more features”: skip the Markdown conversion step, add a web UI, experiment with the retrieval pipeline. At some point, building anew felt more practical than forking.</p>

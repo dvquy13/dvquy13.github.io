@@ -382,7 +382,7 @@
     "href": "posts/introducing-qrec/index.html",
     "title": "Helping Claude Code Remember",
     "section": "",
-    "text": "TLDR\n\n\n\nThis post is a story about an open-source tool named qrec that I built to help manage my Claude Code workflow. You can find it on GitHub. Here’s a short video of what it does:\nEvery Claude Code session starts fresh. That’s mostly fine at first. But the more I worked with it, delegating more, going deeper, the more I noticed decisions quietly slipping away. A design choice I’d reasoned through two weeks ago, a debugging path I’d finally worked out, etc. By the time a related problem came up in a new session, the reasoning behind the earlier decision was gone1, and I was either re-deriving it from scratch or, worse, not realizing I’d already been here.\nAt the moment of writing this post, I had over a thousand JSONL session files on my machine. They were all technically readable—you could locate them at ~/.claude/projects/. Each file is raw JSONL packed with tool calls, thinking blocks, and execution noise. Weeks of decisions and debugging were right there, but I was not willing to spend the tokens and time to trawl through them every single time.\nThis post is about the 135.6 hours I spent across 18 active days building a tool to fix that."
+    "text": "TLDR\n\n\n\nThis post is a story about an open-source tool named qrec that I built to help manage my Claude Code workflow. You can find it on GitHub. Here’s a short video of what it does:\nEvery Claude Code session starts fresh. That’s mostly fine at first. But the more I worked with it, delegating more, going deeper, the more I noticed decisions quietly slipping away. A design choice I’d reasoned through two weeks ago, a debugging path I’d finally worked out, etc. By the time a related problem came up in a new session, the reasoning behind the earlier decision was gone1, and I was either re-deriving it from scratch or, worse, not realizing I’d already been here.\nAt the moment of writing this post, I had over a thousand JSONL session files on my machine. They were all technically readable—you could locate them at ~/.claude/projects/. Each file is raw JSONL packed with tool calls, thinking blocks, and execution noise. Weeks of decisions and debugging were right there, but I was not willing to spend the tokens and time to trawl through them every single time."
   },
   {
     "objectID": "posts/introducing-qrec/index.html#the-tools-i-tried-first",
@@ -851,6 +851,6 @@
     "href": "subscribe.html",
     "title": "Subscribe",
     "section": "",
-    "text": "I write about building end-to-end ML products/services like RecSys and my journey building SaaS as a solo developer.\nDrop your email and I’ll send you a note when something new goes up.\n\n  Subscribe"
+    "text": "I write about end-to-end ML products/services like RecSys. I’m also learning to become a better builder everyday, and I will share my learnings here.\nDrop your email and I’ll send you a note when something new goes up.\n\n  Subscribe"
   }
 ]
