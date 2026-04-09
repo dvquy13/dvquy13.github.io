@@ -1,0 +1,74 @@
+---
+title: "Helping Claude Code Remember"
+subtitle: "The tool I built to stop re-explaining myself to Claude Code"
+date: "2026-04-09"
+categories:
+  - tech
+  - claude code
+keywords: "qrec, claude code, session recall, local LLM, SQLite, hybrid search, context management"
+---
+
+::: {.callout-note}
+## TLDR
+This post is a story about an open-source tool named qrec that I built to help manage my Claude Code workflow. You can find it on [GitHub](https://github.com/dvquy13/qrec). Here's a short video of what it does:
+
+<video src="https://github.com/user-attachments/assets/4228bb2a-d022-41fd-98da-be77929cfe2b" controls loop muted playsinline style="width:100%"></video>
+:::
+
+Every Claude Code session starts fresh. That's mostly fine at first. But the more I worked with it, delegating more, going deeper, the more I noticed decisions quietly slipping away. A design choice I'd reasoned through two weeks ago, a debugging path I'd finally worked out, etc. By the time a related problem came up in a new session, the reasoning behind the earlier decision was gone^[It was only while building qrec that I discovered the sessions were on my machine all along, just with a 30-day retention window before they're cleared from disk.], and I was either re-deriving it from scratch or, worse, not realizing I'd already been here.
+
+At the moment of writing this post, I had over a thousand JSONL session files on my machine. They were all technically readable—you could locate them at `~/.claude/projects/`. Each file is raw JSONL packed with tool calls, thinking blocks, and execution noise. Weeks of decisions and debugging were right there, but I was not willing to spend the tokens and time to trawl through them every single time.
+
+This post is about the 135.6 hours I spent across 18 active days building a tool to fix that.
+
+![Time spent on qrec](static/qrec-gridlens.png){width=70%}
+
+## The tools I tried first
+
+I'd heard about existing tools—[QMD](https://github.com/tobi/QMD) and [claude-mem](https://github.com/thedotmack/claude-mem)—so I gave them a try first. QMD indexes markdown, so I built a Claude Code plugin with SessionEnd hook that converts Claude Code JSONL sessions into Markdown and lets QMD handle the indexing. But in the end I didn't stick with QMD. The CLI felt slow—it loaded models on every query^[I was partly wrong on the speed complaint: I found out later that `qmd serve` runs a background server, which would've helped. But the other reasons still stood.]—and I realized I wanted to "add more features": skip the Markdown conversion step, add a web UI, experiment with the retrieval pipeline. At some point, building anew felt more practical than forking.
+
+With claude-mem, I installed it via two plugin commands and genuinely couldn't tell what was happening. Something was downloading model weights and indexing my history in the background, but the process was invisible. IMHO when a tool is running on your private session history, you should be able to easily see what's happening. That became the thing I was most determined to do differently.
+
+## The bets I made
+
+So the first thing I committed to was transparency. With qrec, I made the pipeline visible by default: when you first install it, you watch the model download, then watch your sessions index one by one.
+
+<video src="static/model-download.webm" autoplay muted playsinline controls style="width:100%"></video>
+
+The second decision was to run everything locally, which meant your session data never leaves your machine either. But the real motivation was more practical: qrec shouldn't eat into the same token budget you're trying to preserve for actual Claude Code work. Local models cost nothing per query.
+
+The same reasoning applied to search. I combined two approaches—one that matches keywords exactly, and one that understands meaning even when the words differ—because neither alone is reliable. Pure keyword search misses synonyms; pure semantic search misses specifics. To merge the two sets of results, I use Reciprocal Rank Fusion (RRF), a simple formula that rewards results ranking well in either signal without needing to normalize raw scores. More sophisticated approaches like LLM re-ranking are left out of this first version for two reasons: the main consumer of qrec search is an agent, not a human, and agents can scan all K results efficiently, so as long as the right session appears somewhere in the top K, the agent will find it; and without a trustworthy eval, there's no reliable signal to confirm re-ranking actually improves outcomes.
+
+## The eval problem
+
+I want to spend a standalone section on eval, because it's the most unresolved part of the project.
+
+I started with a sort-of LLM-as-judge approach to build the labeled dataset. The pipeline has two stages: first, Haiku reads each session and generates 2–5 queries in varied styles: full questions, keyword searches, action phrases. Then a second Haiku pass prunes and balances the styles. Those queries become the eval set; the source session is the correct answer.
+
+On paper, the numbers look reasonable. Across a 30-session baseline run, 91.7% of the time qrec returned the right session somewhere in the top 10 results. The two misses shared the same diagnosis: a larger session covering similar topics outscored the right answer, pushing it to rank 14 and 16 respectively.
+
+The problem is that those numbers are contaminated. Haiku generates queries by reading the session content, so it naturally uses the same vocabulary the session uses. We human may write queries that may be bizarre to LLM. One of my actual recall task given to qrec had the query being lazily typed "heatmap grid over extend" based on the context and the keywords I could retrieve at that time. For that the most relevant session ranked 8th. That session used "overflows", "expansion" and "overflows the grid width"—not "over extend". Exact keyword search had zero token overlap and semantic search didn't bridge the gap; all ten results scored very low, essentially noise.
+
+On the other hand, there's also a freshness problem: labels go stale. "Session A is correct for query Q" was true at 300 sessions. At 486, a newer session might be more relevant, and the eval now penalizes the system for surfacing the better answer. Binary labels—one correct session per query—can't distinguish between a system that's degrading and one that's actually improving by surfacing a better result.
+
+## The thing I didn't design for
+
+The tool is obviously early and needs a lot of improvements. However, I find myself using it more and almost every day as I notice that it offers help for new use cases.
+
+I remember one time when I was deep in a Claude Code session with 200-something turns in, and about to hit the context limit. The usual path is to wait for compaction, which causes you time and tokens. With qrec, I opened a new session and typed "pick up context from the previous session". It came back with the exact decision we'd been circling around—which database schema to use for the session index—and we continued from there while having our context filled up around 15%.
+
+<video src="static/context-handoff.webm" autoplay muted playsinline controls style="width:100%"></video>
+
+The reason this works is a by-product of how qrec preprocesses sessions. It strips tool results and thinking blocks, keeping a clean user-assistant thread with one-liner tool summaries where the tool calls were. A 200-turn session compresses to something readable. That compression is what makes the handoff token-efficient: you're not dumping raw JSONL into a new session.
+
+The enrichment step goes further: qrec summarizes each session and extracts key learnings. When the recall skill fires, it can surface not just the compressed thread but what Claude distilled as the key decisions and insights from that session. You're handing off meaning, not just transcript.
+
+## What's next
+
+Early as it is, I'd like to hear from others who have the same problem. If you work heavily with Claude Code and find yourself re-explaining context you've explained before, [qrec is on GitHub](https://github.com/dvquy13/qrec). I'd be curious what breaks for you and whether what I built for my own workflow translates to others'.
+
+On the technical side, the eval framework is where I'm most stuck. One direction I'm thinking about: separating regression testing—a frozen snapshot to catch if a code change breaks something—from live quality measurement, where an LLM judge evaluates each result freshly against a fixed query bank. That way the moving index isn't a problem; the judge decides relevance at eval time, not at label-creation time. But I'm not sure that's the right framing either, and I'd rather get it wrong slowly than build something that gives false confidence again. The search quality problem isn't solved: the eval just hasn't been reliable enough to see it clearly.
+
+Claude Code's own memory system has also been evolving. The newer dreaming feature runs background processes a few times a day: reviewing recent sessions, extracting patterns, updating memory files, pruning stale entries. That closes some of the gap. But it's still curated by Claude, still scoped per-project, and the 200-line ceiling on what loads at startup hasn't changed. qrec fills a different niche: the full cross-project archive, indexed and searchable on demand, without spending tokens upfront. The two complement each other: dreaming keeps Claude's own notes sharp; qrec is there when you need to go looking.
+
+I'm also curious whether the broader pattern—local index, agent-first retrieval, session handoff—applies beyond Claude Code to other AI-heavy workflows. If you have thoughts on where this goes, pain points I haven't hit, or ideas for how to build better eval for a moving index, leave a comment below or reach out on [GitHub](https://github.com/dvquy13/qrec).

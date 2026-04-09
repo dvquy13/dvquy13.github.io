@@ -167,20 +167,9 @@ a.navbar-brand {
   line-height: 1.2;
 }
 
-// Left-align logo (override mx-auto centering)
-.navbar-brand-container {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-// Left-align nav items after logo (override ms-auto right-push)
+// Small gap between brand and nav items (overrides ms-auto's margin-left: auto)
 ul.navbar-nav.ms-auto {
   margin-left: 1rem !important;
-}
-
-// Push search icon to the far right
-#quarto-search {
-  margin-left: auto !important;
 }
 
 // Match search icon size to social icons
@@ -189,30 +178,65 @@ ul.navbar-nav.ms-auto {
   height: 22px !important;
 }
 
-// Prevent collapse from growing to fill all space (would push search right)
-#navbarCollapse {
-  flex-grow: 0 !important;
-}
-
-.navbar-container.container-fluid {
-  max-width: 885px;
-  margin-left: auto;
-  margin-right: auto;
-  // Align brand left edge with body-content-start:
-  // page-start → body-content-start = 35px (body-start-outset) + 35px (body-start) + 1.5em (gap)
-  padding-left: calc(70px + 1.5em);
-  justify-content: flex-start !important;
-}
-
 // Desktop: nav items that have an icon (social links) are icon-only — hide text label
 // :has(i) targets li elements containing a Bootstrap icon
 .navbar-nav .nav-item:has(i) .menu-text {
   display: none !important;
 }
 
+// Left-align logo (override mx-auto centering)
+.navbar-brand-container {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+// Prevent collapse from growing to fill all space (would push search right)
+#navbarCollapse {
+  flex-grow: 0 !important;
+}
+
+// Push search icon to the far right
+#quarto-search {
+  margin-left: auto !important;
+}
+
+// -----------------------------------------------------------------------
+// Navbar brand alignment
+//
+// body-content-start from viewport left (page-columns ≥992px grid):
+//   = 1.5em + 5fr + 35px + 35px + 1.5em
+//   = 3em + 70px + 5fr
+//   = 119.5px + (W - 984.5px) / 2       [with W = viewport, 984.5 = all fixed+body]
+//   = 119.5px + (500.5px - body-width) / 2 + (W - 885px) / 2
+//
+// Since the navbar container is max-width: 885px centered, its left edge = (W - 885) / 2.
+// The brand padding relative to the container left edge = body-content-start - container-left
+//   = 119.5px + (500.5px - body-width) / 2 + (W - 885) / 2 - (W - 885) / 2
+//   = 119.5px + (500.5px - body-width) / 2
+//
+// With body-width: 600px → 119.5 + (500.5 - 600) / 2 = 69.75px ≈ 70px
+// With body-width: 550px → 119.5 + (500.5 - 550) / 2 = 94.75px  (≈ calc(70px + 1.5em))
+//
+// To update: change $body-width below to match grid.body-width in _quarto.yml.
+// The padding is computed automatically from the formula.
+// -----------------------------------------------------------------------
+$body-width: 600px;
+$navbar-brand-padding: 119.5px + (500.5px - $body-width) / 2;
+
+.navbar-container.container-fluid {
+  max-width: 885px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: $navbar-brand-padding;
+  justify-content: flex-start !important;
+}
+
 // Mobile: hamburger+logo left-aligned with body content, search pushed to far right
 @media (max-width: 767.98px) {
   .navbar-container.container-fluid {
+    display: flex !important;
+    max-width: none !important;
+    margin: 0 !important;
     // body-content-start = 1.5rem from viewport; navbar has 1rem left padding
     // so container needs 0.5rem to land the toggler at body-content-start
     padding-left: 0.5rem !important;

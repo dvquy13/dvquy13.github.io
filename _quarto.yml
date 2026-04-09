@@ -8,6 +8,8 @@ project:
   resources:
     - dashboard.html
     - metrics.jsonl
+    - posts/introducing-qrec/static/context-handoff.webm
+    - posts/introducing-qrec/static/model-download.webm
 
 website:
   title: "DvQ"
@@ -48,14 +50,14 @@ format:
     css: styles.css
     mainfont: "DM Sans, InterVariable, sans-serif"
     highlight-style: github
-    fontsize: 15px
+    fontsize: 16.5px
     linestretch: 1.7
     linkcolor: "#0057a3"
     smooth-scroll: true
     monofont: "Google Sans Code, Roboto Mono"
     grid:
       # Chosen so that we have maximum 75 characters in the text body for readability
-      body-width: 550px
+      body-width: 600px
     header-includes: |
       <!-- Inter (fallback) -->
       <link rel="preconnect" href="https://rsms.me/">

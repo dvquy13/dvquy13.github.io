@@ -6,7 +6,33 @@ Refer to posts/ and project/ *.qmd files for my blog posts and especially for my
 
 In general I admire and want to follow Paul Graham's writing style in his essays and Tim Urban's style in his blog Wait But Why.
 
+## Writing Principles
+
+These apply to any writing task in this repo.
+
+**Write Simply** — Prose should be frictionless. The goal is *saltintesta*: ideas leap into the reader's head; they barely notice the words. Simple writing keeps you honest — if you have nothing to say, saying it simply makes that obvious. Cut fancy words, unnecessary complexity, and anything clumsy. If a sentence seems too complicated, it is.
+
+**Write Like You Talk** — Every sentence should pass the friend test: "Is this the way I'd say this to a friend?" If not, say it out loud — and use that instead. Informal language is the athletic clothing of ideas. The harder the subject, the more important it is to keep the language simple. The root failure mode of AI-generated prose is that it *performs* ideas—dramatic fragments, theatrical pauses, restatements for emphasis—instead of talking through them. DvQ talks through ideas. Each sentence assumes the previous one and sets up the next, the way a story actually comes out of your mouth.
+
+**Write Like DvQ** — Conversational first-person. Specific and grounded in lived experience. Honest about failures — what didn't work always comes before what did. No hedges, no filler transitions, no advice from a distance.
+
+### Anti-patterns (flag and reject these)
+
+- **Short punchy fragments for dramatic effect** — `It worked.` / `Not archived. Deleted from disk.` / `So I built one.` These read as AI slop. Integrate them into the surrounding sentence.
+- **Invented facts or names** — Never fabricate product names, project names, file paths, or statistics. If uncertain, omit or ask.
+- **Redundant restatement** — Don't repeat what context already established. If the intro already introduces qrec, don't write "That's when I started building qrec."
+- **Insider-y specifics that serve the author, not the reader** — Dropping a session count from one project to sound credible rather than to make a point the reader cares about.
+
+### Positive patterns (do these)
+
+- **Footnotes for asides** — Self-corrections and tangential facts go in `^[...]` footnotes, not inline. Keeps the main thread moving.
+- **Flowing sentences** — Each sentence assumes the previous one and sets up the next. Prose reads as continuous thought, not a list of observations.
+
 See `notes/ARCHITECTURE.md` for CI/publish architecture and gotchas. See `notes/UTM_CONVENTION.md` for UTM tagging convention.
+
+### Writing Conventions
+
+Do not use emdash everywhere, and when you do, use emdash without any space before and after it.
 
 ## Analytics
 
