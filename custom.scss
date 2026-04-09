@@ -199,8 +199,9 @@ ul.navbar-nav.ms-auto {
   margin-left: auto;
   margin-right: auto;
   // Align brand left edge with body-content-start:
-  // page-start → body-content-start = 35px (body-start-outset) + 35px (body-start) + 1.5em (gap)
-  padding-left: calc(70px + 1.5em);
+  // padding = 3em + 70px + (885 - 6em - 285 - body-width) / 2
+  // With body-width: 600px → 3em + 70px + (600 - 6em) / 2 = 70px (em terms cancel)
+  padding-left: 70px;
   justify-content: flex-start !important;
 }
 
