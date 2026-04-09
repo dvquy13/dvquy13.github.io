@@ -19,10 +19,6 @@ Every Claude Code session starts fresh. That's mostly fine at first. But the mor
 
 At the moment of writing this post, I had over a thousand JSONL session files on my machine. They were all technically readable—you could locate them at `~/.claude/projects/`. Each file is raw JSONL packed with tool calls, thinking blocks, and execution noise. Weeks of decisions and debugging were right there, but I was not willing to spend the tokens and time to trawl through them every single time.
 
-This post is about the 135.6 hours I spent across 18 active days building a tool to fix that.
-
-![Time spent on qrec](static/qrec-gridlens.png){width=70%}
-
 ## The tools I tried first
 
 I'd heard about existing tools—[QMD](https://github.com/tobi/QMD) and [claude-mem](https://github.com/thedotmack/claude-mem)—so I gave them a try first. QMD indexes markdown, so I built a Claude Code plugin with SessionEnd hook that converts Claude Code JSONL sessions into Markdown and lets QMD handle the indexing. But in the end I didn't stick with QMD. The CLI felt slow—it loaded models on every query^[I was partly wrong on the speed complaint: I found out later that `qmd serve` runs a background server, which would've helped. But the other reasons still stood.]—and I realized I wanted to "add more features": skip the Markdown conversion step, add a web UI, experiment with the retrieval pipeline. At some point, building anew felt more practical than forking.

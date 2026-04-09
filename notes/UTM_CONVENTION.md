@@ -15,7 +15,7 @@
 | Dev.to        | `devto`      | `crosspost`  | post slug      |
 | Hashnode      | `hashnode`   | `crosspost`  | post slug      |
 | Reddit        | `reddit`     | `social`     | post slug      |
-| Twitter / X   | `twitter`    | `social`     | post slug      |
+| Twitter / X   | `x`          | `social`     | post slug      |
 | LinkedIn      | `linkedin`   | `social`     | post slug      |
 | Newsletter    | `newsletter` | `email`      | post slug      |
 | Hacker News   | `hackernews` | `social`     | post slug      |
