@@ -6,10 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2024-06-21">
-<meta name="keywords" content="k8s, ml system, mlflow, jenkins, kserve, mlserver">
+<meta name="dcterms.date" content="2026-04-09">
+<meta name="keywords" content="qrec, claude code, session recall, local LLM, SQLite, hybrid search, context management">
 
-<title>Let’s build an ML system – DvQ</title>
+<title>Helping Claude Code Remember – DvQ</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -44,9 +44,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../../site_libs/bootstrap/bootstrap-523f8d39d20c08acddd94979ac9c558b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
-<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
-<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -109,6 +106,9 @@ cookieconsent.run({
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wdth,wght@75..125,100..700&amp;family=Google+Sans+Code:wght@400;700&amp;family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Roboto+Mono:ital,wght@0,100..700;1,100..700&amp;display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"Helping Claude Code Remember","author":{"@type":"Person","name":"Quy Dinh","url":"https://dvquys.com"},"publisher":{"@type":"Person","name":"Quy Dinh","url":"https://dvquys.com"},"datePublished":"2026-04-09","description":"The tool I built to stop re-explaining myself to Claude Code","keywords":"qrec, claude code, session recall, local LLM, SQLite, hybrid search, context management","url":"https://dvquys.com/posts/introducing-qrec/"}
+</script>
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -174,11 +174,11 @@ cookieconsent.run({
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Let’s build an ML system</h1>
-            <p class="subtitle lead">End-to-end set up and deploy on Kubernetes</p>
+      <h1 class="title">Helping Claude Code Remember</h1>
+            <p class="subtitle lead">The tool I built to stop re-explaining myself to Claude Code</p>
                                 <div class="quarto-categories">
                 <div class="quarto-category">tech</div>
-                <div class="quarto-category">machine learning</div>
+                <div class="quarto-category">claude code</div>
               </div>
                   </div>
   </div>
@@ -190,7 +190,7 @@ cookieconsent.run({
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">June 21, 2024</p>
+        <p class="date">April 9, 2026</p>
       </div>
     </div>
     
@@ -201,7 +201,7 @@ cookieconsent.run({
   <div>
     <div class="keywords">
       <div class="block-title">Keywords</div>
-      <p>k8s, ml system, mlflow, jenkins, kserve, mlserver</p>
+      <p>qrec, claude code, session recall, local LLM, SQLite, hybrid search, context management</p>
     </div>
   </div>
   
@@ -213,50 +213,93 @@ cookieconsent.run({
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#architecture" id="toc-architecture" class="nav-link active" data-scroll-target="#architecture">Architecture</a></li>
-  <li><a href="#demo" id="toc-demo" class="nav-link" data-scroll-target="#demo">Demo</a></li>
+  <li><a href="#the-tools-i-tried-first" id="toc-the-tools-i-tried-first" class="nav-link active" data-scroll-target="#the-tools-i-tried-first">The tools I tried first</a></li>
+  <li><a href="#the-bets-i-made" id="toc-the-bets-i-made" class="nav-link" data-scroll-target="#the-bets-i-made">The bets I made</a></li>
+  <li><a href="#the-eval-problem" id="toc-the-eval-problem" class="nav-link" data-scroll-target="#the-eval-problem">The eval problem</a></li>
+  <li><a href="#the-thing-i-didnt-design-for" id="toc-the-thing-i-didnt-design-for" class="nav-link" data-scroll-target="#the-thing-i-didnt-design-for">The thing I didn’t design for</a></li>
+  <li><a href="#whats-next" id="toc-whats-next" class="nav-link" data-scroll-target="#whats-next">What’s next</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content">
+<main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
 
 
-<p>This project focuses on applying engineering practices to build a Machine Learning System using Kubernetes and deploy on Google Cloud Platform.</p>
-<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<a href="https://github.com/dvquy13/reviews-parsing-mlsys">Project Details</a>
+TLDR
 </div>
 </div>
 <div class="callout-body-container callout-body">
-
+<p>This post is a story about an open-source tool named qrec that I built to help manage my Claude Code workflow. You can find it on <a href="https://github.com/dvquy13/qrec">GitHub</a>. Here’s a short video of what it does:</p>
+<video src="https://github.com/user-attachments/assets/4228bb2a-d022-41fd-98da-be77929cfe2b" controls="" loop="" muted="" playsinline="" style="width:100%">
+</video>
 </div>
 </div>
-<section id="architecture" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="architecture">Architecture</h2>
-<div class="column-page">
-<p><a href="./architecture.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="./architecture.svg" class="img-fluid"></a></p>
+<p>Every Claude Code session starts fresh. That’s mostly fine at first. But the more I worked with it, delegating more, going deeper, the more I noticed decisions quietly slipping away. A design choice I’d reasoned through two weeks ago, a debugging path I’d finally worked out, etc. By the time a related problem came up in a new session, the reasoning behind the earlier decision was gone<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, and I was either re-deriving it from scratch or, worse, not realizing I’d already been here.</p>
+<p>At the moment of writing this post, I had over a thousand JSONL session files on my machine. They were all technically readable—you could locate them at <code>~/.claude/projects/</code>. Each file is raw JSONL packed with tool calls, thinking blocks, and execution noise. Weeks of decisions and debugging were right there, but I was not willing to spend the tokens and time to trawl through them every single time.</p>
+<p>This post is about the 135.6 hours I spent across 18 active days building a tool to fix that.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="static/qrec-gridlens.png" class="img-fluid figure-img" style="width:70.0%"></p>
+<figcaption>Time spent on qrec</figcaption>
+</figure>
 </div>
+<section id="the-tools-i-tried-first" class="level2">
+<h2 class="anchored" data-anchor-id="the-tools-i-tried-first">The tools I tried first</h2>
+<p>I’d heard about existing tools—<a href="https://github.com/tobi/QMD">QMD</a> and <a href="https://github.com/thedotmack/claude-mem">claude-mem</a>—so I gave them a try first. QMD indexes markdown, so I built a Claude Code plugin with SessionEnd hook that converts Claude Code JSONL sessions into Markdown and lets QMD handle the indexing. But in the end I didn’t stick with QMD. The CLI felt slow—it loaded models on every query<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>—and I realized I wanted to “add more features”: skip the Markdown conversion step, add a web UI, experiment with the retrieval pipeline. At some point, building anew felt more practical than forking.</p>
+<p>With claude-mem, I installed it via two plugin commands and genuinely couldn’t tell what was happening. Something was downloading model weights and indexing my history in the background, but the process was invisible. IMHO when a tool is running on your private session history, you should be able to easily see what’s happening. That became the thing I was most determined to do differently.</p>
 </section>
-<section id="demo" class="level2">
-<h2 class="anchored" data-anchor-id="demo">Demo</h2>
-<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/O-8_Q1GgJpM?si=VA9XK7fBDAl6ngH3" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
-<p><br> If you find this article helpful, please cite this writeup as:</p>
-<blockquote class="blockquote">
-<p>Quy, Dinh. (Jun 2024). Let’s build an ML system. dvquys.com. https://dvquys.com/projects/reviews-parsing-mlsys/.</p>
-</blockquote>
+<section id="the-bets-i-made" class="level2">
+<h2 class="anchored" data-anchor-id="the-bets-i-made">The bets I made</h2>
+<p>So the first thing I committed to was transparency. With qrec, I made the pipeline visible by default: when you first install it, you watch the model download, then watch your sessions index one by one.</p>
+<video src="static/model-download.webm" autoplay="" muted="" playsinline="" controls="" style="width:100%">
+</video>
+<p>The second decision was to run everything locally, which meant your session data never leaves your machine either. But the real motivation was more practical: qrec shouldn’t eat into the same token budget you’re trying to preserve for actual Claude Code work. Local models cost nothing per query.</p>
+<p>The same reasoning applied to search. I combined two approaches—one that matches keywords exactly, and one that understands meaning even when the words differ—because neither alone is reliable. Pure keyword search misses synonyms; pure semantic search misses specifics. To merge the two sets of results, I use Reciprocal Rank Fusion (RRF), a simple formula that rewards results ranking well in either signal without needing to normalize raw scores. More sophisticated approaches like LLM re-ranking are left out of this first version for two reasons: the main consumer of qrec search is an agent, not a human, and agents can scan all K results efficiently, so as long as the right session appears somewhere in the top K, the agent will find it; and without a trustworthy eval, there’s no reliable signal to confirm re-ranking actually improves outcomes.</p>
+</section>
+<section id="the-eval-problem" class="level2">
+<h2 class="anchored" data-anchor-id="the-eval-problem">The eval problem</h2>
+<p>I want to spend a standalone section on eval, because it’s the most unresolved part of the project.</p>
+<p>I started with a sort-of LLM-as-judge approach to build the labeled dataset. The pipeline has two stages: first, Haiku reads each session and generates 2–5 queries in varied styles: full questions, keyword searches, action phrases. Then a second Haiku pass prunes and balances the styles. Those queries become the eval set; the source session is the correct answer.</p>
+<p>On paper, the numbers look reasonable. Across a 30-session baseline run, 91.7% of the time qrec returned the right session somewhere in the top 10 results. The two misses shared the same diagnosis: a larger session covering similar topics outscored the right answer, pushing it to rank 14 and 16 respectively.</p>
+<p>The problem is that those numbers are contaminated. Haiku generates queries by reading the session content, so it naturally uses the same vocabulary the session uses. We human may write queries that may be bizarre to LLM. One of my actual recall task given to qrec had the query being lazily typed “heatmap grid over extend” based on the context and the keywords I could retrieve at that time. For that the most relevant session ranked 8th. That session used “overflows”, “expansion” and “overflows the grid width”—not “over extend”. Exact keyword search had zero token overlap and semantic search didn’t bridge the gap; all ten results scored very low, essentially noise.</p>
+<p>On the other hand, there’s also a freshness problem: labels go stale. “Session A is correct for query Q” was true at 300 sessions. At 486, a newer session might be more relevant, and the eval now penalizes the system for surfacing the better answer. Binary labels—one correct session per query—can’t distinguish between a system that’s degrading and one that’s actually improving by surfacing a better result.</p>
+</section>
+<section id="the-thing-i-didnt-design-for" class="level2">
+<h2 class="anchored" data-anchor-id="the-thing-i-didnt-design-for">The thing I didn’t design for</h2>
+<p>The tool is obviously early and needs a lot of improvements. However, I find myself using it more and almost every day as I notice that it offers help for new use cases.</p>
+<p>I remember one time when I was deep in a Claude Code session with 200-something turns in, and about to hit the context limit. The usual path is to wait for compaction, which causes you time and tokens. With qrec, I opened a new session and typed “pick up context from the previous session”. It came back with the exact decision we’d been circling around—which database schema to use for the session index—and we continued from there while having our context filled up around 15%.</p>
+<video src="static/context-handoff.webm" autoplay="" muted="" playsinline="" controls="" style="width:100%">
+</video>
+<p>The reason this works is a by-product of how qrec preprocesses sessions. It strips tool results and thinking blocks, keeping a clean user-assistant thread with one-liner tool summaries where the tool calls were. A 200-turn session compresses to something readable. That compression is what makes the handoff token-efficient: you’re not dumping raw JSONL into a new session.</p>
+<p>The enrichment step goes further: qrec summarizes each session and extracts key learnings. When the recall skill fires, it can surface not just the compressed thread but what Claude distilled as the key decisions and insights from that session. You’re handing off meaning, not just transcript.</p>
+</section>
+<section id="whats-next" class="level2">
+<h2 class="anchored" data-anchor-id="whats-next">What’s next</h2>
+<p>Early as it is, I’d like to hear from others who have the same problem. If you work heavily with Claude Code and find yourself re-explaining context you’ve explained before, <a href="https://github.com/dvquy13/qrec">qrec is on GitHub</a>. I’d be curious what breaks for you and whether what I built for my own workflow translates to others’.</p>
+<p>On the technical side, the eval framework is where I’m most stuck. One direction I’m thinking about: separating regression testing—a frozen snapshot to catch if a code change breaks something—from live quality measurement, where an LLM judge evaluates each result freshly against a fixed query bank. That way the moving index isn’t a problem; the judge decides relevance at eval time, not at label-creation time. But I’m not sure that’s the right framing either, and I’d rather get it wrong slowly than build something that gives false confidence again. The search quality problem isn’t solved: the eval just hasn’t been reliable enough to see it clearly.</p>
+<p>Claude Code’s own memory system has also been evolving. The newer dreaming feature runs background processes a few times a day: reviewing recent sessions, extracting patterns, updating memory files, pruning stale entries. That closes some of the gap. But it’s still curated by Claude, still scoped per-project, and the 200-line ceiling on what loads at startup hasn’t changed. qrec fills a different niche: the full cross-project archive, indexed and searchable on demand, without spending tokens upfront. The two complement each other: dreaming keeps Claude’s own notes sharp; qrec is there when you need to go looking.</p>
+<p>I’m also curious whether the broader pattern—local index, agent-first retrieval, session handoff—applies beyond Claude Code to other AI-heavy workflows. If you have thoughts on where this goes, pain points I haven’t hit, or ideas for how to build better eval for a moving index, leave a comment below or reach out on <a href="https://github.com/dvquy13/qrec">GitHub</a>.</p>
 
 
 </section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>It was only while building qrec that I discovered the sessions were on my machine all along, just with a 30-day retention window before they’re cleared from disk.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>I was partly wrong on the speed complaint: I found out later that <code>qmd serve</code> runs a background server, which would’ve helped. But the other reasons still stood.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -697,38 +740,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>
   </div>
 </footer>
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
-(function() {
-  let previousOnload = window.onload;
-  window.onload = () => {
-    if (previousOnload) {
-      previousOnload();
-    }
-    lightboxQuarto.on('slide_before_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      const href = trigger.getAttribute('href');
-      if (href !== null) {
-        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
-        if (imgEl !== null) {
-          const srcAttr = imgEl.getAttribute("src");
-          if (srcAttr && srcAttr.startsWith("data:")) {
-            slideConfig.href = srcAttr;
-          }
-        }
-      } 
-    });
-  
-    lightboxQuarto.on('slide_after_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(slideNode);
-      }
-    });
-  
-  };
-  
-})();
-          </script>
 
 
 
