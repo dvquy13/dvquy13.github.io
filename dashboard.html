@@ -76,7 +76,9 @@
     a.metric-link:hover { color: var(--accent); }
     .metric-value-row { display: flex; align-items: baseline; gap: 0.5rem; }
     .metric-value { font-size: 2rem; font-weight: 700; line-height: 1.1; color: var(--text-primary); }
-    .metric-value.err { font-size: 0.75rem; font-weight: 400; color: var(--down); line-height: 1.4; }
+    .metric-value.err  { font-size: 0.75rem; font-weight: 400; color: var(--down); line-height: 1.4; }
+    .metric-value.text { font-size: 0.875rem; font-weight: 400; line-height: 1.7; }
+    .ranking-chart-wrap { position: relative; margin-top: 0.4rem; }
     .metric-delta { display: inline-block; font-size: 0.75rem; font-weight: 500; cursor: default; position: relative; }
     .metric-delta.up   { color: var(--up); }
     .metric-delta.down { color: var(--down); }
@@ -204,9 +206,12 @@ const CONFIG = {
     ga4_total_users:        { label: 'Visitors',  fmt: 'int', period: '30d',      url: 'https://analytics.google.com/analytics/web/#/p464728949/', tooltip: 'Unique devices/browsers via GA4 cookie · rolling 30-day window' },
     giscus_total_reactions: { label: 'Reactions', fmt: 'int', period: 'all time', url: 'https://github.com/dvquy13/icy-touch-comments/discussions' },
     giscus_total_comments:  { label: 'Comments',  fmt: 'int', period: 'all time', url: 'https://github.com/dvquy13/icy-touch-comments/discussions' },
-    posts_published_28d:    { label: 'Posts',     fmt: 'int', period: '28d',      url: 'https://dvquys.com/#listing-posts' },
+    posts_published_28d:    { label: 'Posts',     fmt: 'int',  period: '28d',      url: 'https://dvquys.com/#listing-posts' },
+    ga4_top_sources:        { label: 'Top sources', fmt: 'ranking', period: '7d',  url: 'https://analytics.google.com/analytics/web/#/a334398785p464728949/reports/explorer?params=_u..nav%3Dmaui%26_r.explorerCard..seldim%3D%5B%22sessionSourceMedium%22%5D&ruid=lifecycle-traffic-acquisition-v2,business-objectives,generate-leads&collectionId=business-objectives&r=lifecycle-traffic-acquisition-v2' },
   },
-  sections: [],
+  sections: [
+    { title: null, keys: ['ga4_total_users', 'giscus_total_reactions', 'giscus_total_comments', 'posts_published_28d', 'ga4_top_sources'] },
+  ],
 }
 
 // ── Runtime state ──────────────────────────────────────────────────────────────
@@ -222,7 +227,14 @@ function metaCfg(key) { return CONFIG.metrics[key] || {} }
 
 function fmtValue(v, fmt) {
   if (v === null || v === undefined) return '—'
-  if (fmt === 'money') return `$${Number(v).toFixed(2)}`
+  if (fmt === 'money')   return `$${Number(v).toFixed(2)}`
+  if (fmt === 'text')    return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\n/g, '<br>')
+  if (fmt === 'ranking') {
+    try {
+      const entries = Array.isArray(v) ? v : JSON.parse(String(v))
+      return entries.map(([l, n], i) => `${i + 1}. ${l}: ${n}`).join(' · ')
+    } catch { return String(v) }
+  }
   return Number(v).toLocaleString()
 }
 
@@ -233,6 +245,7 @@ function fmtShort(v, fmt) {
 }
 
 function fmtDelta(current, previous, fmt) {
+  if (fmt === 'text' || fmt === 'ranking') return null
   if (previous === null || previous === undefined || current === null) return null
   const diff = current - previous
   if (diff === 0) return { text: '→ no change', cls: 'flat' }
@@ -409,6 +422,46 @@ function renderLineChart(canvasId, values, fmt) {
   })
 }
 
+function renderRankingChart(canvasId, entries) {
+  const canvas = document.getElementById(canvasId)
+  if (!canvas) return
+  if (_charts[canvasId]) _charts[canvasId].destroy()
+  if (!entries || !entries.length) return
+  const labels = entries.map(([l]) => l)
+  const values = entries.map(([, v]) => v)
+  const max = Math.max(...values) || 1
+
+  _charts[canvasId] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ data: values, backgroundColor: T.accent, borderRadius: 3, barPercentage: 0.55 }],
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: false,
+      animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'end',
+          color: T.textMuted,
+          font: { size: 10, weight: '500' },
+          formatter: (v) => v.toLocaleString(),
+          clamp: true,
+        },
+      },
+      scales: {
+        x: { display: false, min: 0, max: max * 1.4 },
+        y: { display: true, grid: { display: false }, ticks: { font: { size: 11 }, color: T.textMuted, maxRotation: 0 } },
+      },
+      layout: { padding: { right: 40, top: 4, bottom: 4 } },
+    },
+  })
+}
+
 // ── Data utils ─────────────────────────────────────────────────────────────────
 function discoverKeys(latest) { return Object.keys(latest.metrics || {}) }
 
@@ -456,22 +509,38 @@ function renderCard(key, history, latest, previous, unit) {
   const firstTime = timestamps.length ? fmtUnitLabel(timestamps[0], unit) : ''
   const lastTime  = timestamps.length ? fmtUnitLabel(timestamps[timestamps.length - 1], unit) : ''
 
+  const isText    = fmt === 'text'
+  const isRanking = fmt === 'ranking'
   const card = document.createElement('div')
   card.className = 'metric-card'
-  card.innerHTML = `
-    ${labelHtml}
-    <div class="metric-value-row">
-      <span class="metric-value${hasError ? ' err' : ''}">${hasError ? (result?.error ?? 'No data') : fmtValue(currVal, fmt)}</span>
-      ${deltaHtml}
-    </div>
-    <div class="metric-chart-wrap"><canvas id="${canvasId}" width="900" height="160"></canvas></div>
-    <div class="metric-time-labels"><span>${firstTime}</span><span>${lastTime}</span></div>
-  `
-  if (!hasError) requestAnimationFrame(() =>
-    cfg.type === 'bar'
-      ? renderBarChart(canvasId, values, fmt)
-      : renderLineChart(canvasId, values, fmt)
-  )
+
+  if (!hasError && isRanking) {
+    const entries = Array.isArray(currVal) ? currVal : (() => { try { return JSON.parse(currVal) } catch { return [] } })()
+    const chartH = Math.max(120, entries.length * 34 + 24)
+    card.innerHTML = `
+      ${labelHtml}
+      <div class="ranking-chart-wrap" style="height:${chartH}px">
+        <canvas id="${canvasId}" width="900" height="${chartH}"></canvas>
+      </div>
+    `
+    requestAnimationFrame(() => renderRankingChart(canvasId, entries))
+  } else {
+    const valueClass = hasError ? ' err' : isText ? ' text' : ''
+    card.innerHTML = `
+      ${labelHtml}
+      <div class="metric-value-row">
+        <span class="metric-value${valueClass}">${hasError ? (result?.error ?? 'No data') : fmtValue(currVal, fmt)}</span>
+        ${deltaHtml}
+      </div>
+      ${!isText ? `<div class="metric-chart-wrap"><canvas id="${canvasId}" width="900" height="160"></canvas></div>
+      <div class="metric-time-labels"><span>${firstTime}</span><span>${lastTime}</span></div>` : ''}
+    `
+    if (!hasError && !isText) requestAnimationFrame(() =>
+      cfg.type === 'bar'
+        ? renderBarChart(canvasId, values, fmt)
+        : renderLineChart(canvasId, values, fmt)
+    )
+  }
   return card
 }
 
