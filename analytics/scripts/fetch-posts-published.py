@@ -57,7 +57,7 @@ def count_recent_posts(posts_dir: Path, cutoff: date) -> int:
         if draft == "true":
             continue
 
-        raw_date = fm.get("date", "")
+        raw_date = fm.get("date", "").strip('"\'')
         try:
             post_date = date.fromisoformat(raw_date)
         except ValueError:
