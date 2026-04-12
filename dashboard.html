@@ -204,6 +204,8 @@ const CONFIG = {
   aggUnit:   'day',
   metrics: {
     ga4_total_users:        { label: 'Visitors',  fmt: 'int', period: '30d',      url: 'https://analytics.google.com/analytics/web/#/p464728949/', tooltip: 'Unique devices/browsers via GA4 cookie · rolling 30-day window' },
+    gsc_impressions_28d:    { label: 'Search impressions',  fmt: 'int', period: '28d', url: 'https://search.google.com/search-console/performance/search-analytics?resource_id=sc-domain%3Advquys.com' },
+    gsc_clicks_28d:         { label: 'Search clicks',       fmt: 'int', period: '28d', url: 'https://search.google.com/search-console/performance/search-analytics?resource_id=sc-domain%3Advquys.com' },
     giscus_total_reactions: { label: 'Reactions', fmt: 'int', period: 'all time', url: 'https://github.com/dvquy13/icy-touch-comments/discussions' },
     giscus_total_comments:  { label: 'Comments',  fmt: 'int', period: 'all time', url: 'https://github.com/dvquy13/icy-touch-comments/discussions' },
     posts_published_28d:    { label: 'Posts',     fmt: 'int',  period: '28d',      url: 'https://dvquys.com/#listing-posts' },
@@ -211,7 +213,7 @@ const CONFIG = {
     newsletter_subscriber_count: { label: 'Subscribers', fmt: 'int', period: 'all time' },
   },
   sections: [
-    { title: null, keys: ['newsletter_subscriber_count', 'ga4_total_users', 'giscus_total_reactions', 'giscus_total_comments', 'posts_published_28d', 'ga4_top_sources'] },
+    { title: null, keys: ['newsletter_subscriber_count', 'ga4_total_users', 'gsc_impressions_28d', 'gsc_clicks_28d', 'giscus_total_reactions', 'giscus_total_comments', 'posts_published_28d', 'ga4_top_sources'] },
   ],
 }
 

@@ -21,6 +21,11 @@ jobs:
           mkdir -p analytics/credentials
           echo '${{ secrets.GA4_SERVICE_ACCOUNT_JSON }}' > analytics/credentials/ga4-service-account.json
 
+      - name: Write Google ADC credentials
+        run: |
+          mkdir -p ~/.config/gcloud
+          echo '${{ secrets.GOOGLE_ADC_CREDENTIALS }}' > ~/.config/gcloud/application_default_credentials.json
+
       - name: Fetch GA4 metrics
         run: cd analytics && uv run scripts/fetch-metrics.py > /tmp/ga4-metrics.json
 

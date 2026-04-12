@@ -1,0 +1,25 @@
+{
+  "name": "gsc_impressions_28d",
+  "description": "Google Search Console total impressions on dvquys.com over the last 28 days",
+  "auth": {
+    "type": "oauth_adc",
+    "scopes": ["https://www.googleapis.com/auth/webmasters.readonly"],
+    "quota_project": "centered-flow-429008-d3"
+  },
+  "request": {
+    "url": "https://www.googleapis.com/webmasters/v3/sites/sc-domain%3Advquys.com/searchAnalytics/query",
+    "method": "POST",
+    "body": {
+      "startDate": "{{today-28d}}",
+      "endDate": "{{today}}",
+      "searchType": "web"
+    }
+  },
+  "extract": {
+    "type": "jsonpath",
+    "path": "rows.0.impressions",
+    "cast": "int",
+    "default_value": 0
+  },
+  "validate": { "min": 0, "max": 10000000 }
+}

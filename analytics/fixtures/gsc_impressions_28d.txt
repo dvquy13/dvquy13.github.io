@@ -1,0 +1,1 @@
+{"rows":[{"clicks":42,"impressions":999,"ctr":0.042,"position":12.3}],"responseAggregationType":"byProperty"}

@@ -40,8 +40,12 @@ Metrics pipeline lives in `analytics/`. See `~/.claude/skills/metric-extractor/S
 
 **All analytics scripts must be run from the `analytics/` directory** (the Makefile does `cd analytics` before invoking them). Credential paths in configs are relative to `analytics/`, not the project root.
 
-Metrics tracked (one fetch script per metric in `analytics/scripts/`):
+**GCP project for dvquys analytics:** `centered-flow-429008-d3` (service account: `dvquys-analytics@centered-flow-429008-d3.iam.gserviceaccount.com`). Used for GA4 service account auth and GSC `oauth_adc` quota project. Do not confuse with `calens-chrome-ext` (a different app).
+
+Metrics tracked:
 - **GA4 30d visitors** — `fetch-metrics.py` + `analytics/configs/ga4_total_users.json`; service account at `analytics/credentials/ga4-service-account.json`; property ID `464728949`
+- **GSC search impressions (28d)** — `fetch-metrics.py` + `analytics/configs/gsc_impressions_28d.json`; `oauth_adc`, quota project `centered-flow-429008-d3`
+- **GSC search clicks (28d)** — `fetch-metrics.py` + `analytics/configs/gsc_clicks_28d.json`; same auth
 - **Giscus reactions** — `fetch-giscus-reactions.py`; falls back to `gh auth token` if `GITHUB_TOKEN` not set
 - **Giscus comments** — `fetch-giscus-comments.py`
 - **Posts published (28d)** — `fetch-posts-published.py`
