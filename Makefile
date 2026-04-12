@@ -45,7 +45,10 @@ src=json.load(open('/tmp/dvq-ga4-sources.json')); \
 nl=json.load(open('/tmp/dvq-newsletter-metrics.json')); \
 merged={**ga4,'metrics':{**ga4['metrics'],**gi['metrics'],**po['metrics'],**src['metrics'],**nl['metrics']}}; \
 print(json.dumps(merged)) \
-		" | uv run scripts/push-and-notify.py
+		" | tee /tmp/dvq-merged-metrics.json | uv run scripts/push-and-notify.py && \
+		python3 scripts/stamp-dashboard.py \
+			--snapshot /tmp/dvq-merged-metrics.json \
+			--dashboard ../dashboard.html
 
 newsletter-deploy:
 	supabase functions deploy subscribe --no-verify-jwt
