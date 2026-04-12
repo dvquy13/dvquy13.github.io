@@ -90,8 +90,14 @@ def evaluate_alerts(alert_cfg: list, current: dict, previous: dict | None) -> li
 
         elif rule_type == "daily_digest":
             labels = rule.get("labels", {})
+            label_order = list(labels.keys())
             metrics = []
-            for name, curr_entry in current_metrics.items():
+            ordered_names = sorted(
+                current_metrics.keys(),
+                key=lambda k: label_order.index(k) if k in label_order else len(label_order),
+            )
+            for name in ordered_names:
+                curr_entry = current_metrics[name]
                 label = labels.get(name, name)
                 if curr_entry.get("status") != "ok":
                     metrics.append({"name": name, "label": label, "value": None, "delta": None, "status": "error", "error": curr_entry.get("error", "unknown")})

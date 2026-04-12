@@ -40,9 +40,13 @@ Metrics pipeline lives in `analytics/`. See `~/.claude/skills/metric-extractor/S
 
 **All analytics scripts must be run from the `analytics/` directory** (the Makefile does `cd analytics` before invoking them). Credential paths in configs are relative to `analytics/`, not the project root.
 
-Two metrics tracked:
-- **GA4 30d visitors** (`analytics/configs/ga4_total_users.json`) — service account key at `analytics/credentials/ga4-service-account.json`; property ID `464728949`
-- **Giscus total reactions** (`analytics/scripts/fetch-giscus-reactions.py`) — falls back to `gh auth token` if `GITHUB_TOKEN` not set
+Metrics tracked (one fetch script per metric in `analytics/scripts/`):
+- **GA4 30d visitors** — `fetch-metrics.py` + `analytics/configs/ga4_total_users.json`; service account at `analytics/credentials/ga4-service-account.json`; property ID `464728949`
+- **Giscus reactions** — `fetch-giscus-reactions.py`; falls back to `gh auth token` if `GITHUB_TOKEN` not set
+- **Giscus comments** — `fetch-giscus-comments.py`
+- **Posts published (28d)** — `fetch-posts-published.py`
+- **GA4 top 5 sources** — `fetch-ga4-top-sources.py`
+- **Newsletter subscribers** — `fetch-newsletter-subscribers.py`; queries `newsletter_subscribers` table via Supabase REST API
 
 History stored in Supabase (`metrics_snapshots` table, project `dvquys-metrics`, ref `olssvguaeagsmkfmsvvo`). Dashboard fetches directly from Supabase REST API using the anon key embedded in `dashboard.html`. CI requires secrets `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`.
 
@@ -53,6 +57,12 @@ Dashboard at `dvquys.com/dashboard` (→ `dashboard.dvquys.com` via Cloudflare r
 **Local dashboard preview**: `dashboard.html` fetches from Supabase (CORS-open), so it works directly from `file://` or via `python3 -m http.server 8080`.
 
 **alerts.yaml** lives at `analytics/alerts.yaml` (not `analytics/configs/`).
+
+**`.env` is at the project root**, not `analytics/`. Makefile loads it via `-include .env`. When running scripts directly from `analytics/`, source it manually: `export $(grep -v '^#' ../.env | xargs)`.
+
+**Discord daily digest field order** follows the `labels` key order in `alerts.yaml` — put the northstar metric first in `labels` to make it appear first in the embed.
+
+**Dashboard card render order** follows `sections[].keys` order in the `dashboard.html` CONFIG block — rearrange keys there to reorder cards.
 
 **Quarto resources gotcha**: static files must be listed under `project.resources` in `_quarto.yml` (not top-level `resource:`). Top-level `resource:` is silently ignored.
 

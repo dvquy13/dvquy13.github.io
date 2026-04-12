@@ -26,7 +26,8 @@ analytics:
 		uv run scripts/fetch-giscus-reactions.py > /tmp/dvq-giscus-metrics.json ; \
 		uv run scripts/fetch-posts-published.py > /tmp/dvq-posts-metrics.json ; \
 		uv run scripts/fetch-ga4-top-sources.py > /tmp/dvq-ga4-sources.json ; \
-		python3 scripts/display-dashboard.py /tmp/dvq-ga4-metrics.json /tmp/dvq-giscus-metrics.json /tmp/dvq-posts-metrics.json /tmp/dvq-ga4-sources.json
+		uv run scripts/fetch-newsletter-subscribers.py > /tmp/dvq-newsletter-metrics.json ; \
+		python3 scripts/display-dashboard.py /tmp/dvq-ga4-metrics.json /tmp/dvq-giscus-metrics.json /tmp/dvq-posts-metrics.json /tmp/dvq-ga4-sources.json /tmp/dvq-newsletter-metrics.json
 
 analytics-push:
 	cd analytics && \
@@ -34,13 +35,15 @@ analytics-push:
 		uv run scripts/fetch-giscus-reactions.py > /tmp/dvq-giscus-metrics.json && \
 		uv run scripts/fetch-posts-published.py > /tmp/dvq-posts-metrics.json && \
 		uv run scripts/fetch-ga4-top-sources.py > /tmp/dvq-ga4-sources.json && \
+		uv run scripts/fetch-newsletter-subscribers.py > /tmp/dvq-newsletter-metrics.json && \
 		python3 -c "\
 import json; \
 ga4=json.load(open('/tmp/dvq-ga4-metrics.json')); \
 gi=json.load(open('/tmp/dvq-giscus-metrics.json')); \
 po=json.load(open('/tmp/dvq-posts-metrics.json')); \
 src=json.load(open('/tmp/dvq-ga4-sources.json')); \
-merged={**ga4,'metrics':{**ga4['metrics'],**gi['metrics'],**po['metrics'],**src['metrics']}}; \
+nl=json.load(open('/tmp/dvq-newsletter-metrics.json')); \
+merged={**ga4,'metrics':{**ga4['metrics'],**gi['metrics'],**po['metrics'],**src['metrics'],**nl['metrics']}}; \
 print(json.dumps(merged)) \
 		" | uv run scripts/push-and-notify.py
 

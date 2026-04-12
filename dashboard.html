@@ -208,9 +208,10 @@ const CONFIG = {
     giscus_total_comments:  { label: 'Comments',  fmt: 'int', period: 'all time', url: 'https://github.com/dvquy13/icy-touch-comments/discussions' },
     posts_published_28d:    { label: 'Posts',     fmt: 'int',  period: '28d',      url: 'https://dvquys.com/#listing-posts' },
     ga4_top_sources:        { label: 'Top sources', fmt: 'ranking', period: '7d',  url: 'https://analytics.google.com/analytics/web/#/a334398785p464728949/reports/explorer?params=_u..nav%3Dmaui%26_r.explorerCard..seldim%3D%5B%22sessionSourceMedium%22%5D&ruid=lifecycle-traffic-acquisition-v2,business-objectives,generate-leads&collectionId=business-objectives&r=lifecycle-traffic-acquisition-v2' },
+    newsletter_subscriber_count: { label: 'Subscribers', fmt: 'int', period: 'all time' },
   },
   sections: [
-    { title: null, keys: ['ga4_total_users', 'giscus_total_reactions', 'giscus_total_comments', 'posts_published_28d', 'ga4_top_sources'] },
+    { title: null, keys: ['newsletter_subscriber_count', 'ga4_total_users', 'giscus_total_reactions', 'giscus_total_comments', 'posts_published_28d', 'ga4_top_sources'] },
   ],
 }
 
@@ -613,7 +614,7 @@ function render(history, rawHistory, unit) {
     }
     const grid = document.createElement('div')
     grid.className = 'metric-grid'
-    for (const key of keys.filter(k => section.keys ? section.keys.includes(k) : true)) {
+    for (const key of (section.keys ? section.keys.filter(k => keys.includes(k)) : keys)) {
       if (!latest.metrics?.[key]) continue
       grid.appendChild(renderCard(key, history, latest, previous, unit))
     }

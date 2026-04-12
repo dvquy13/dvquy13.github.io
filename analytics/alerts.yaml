@@ -6,6 +6,7 @@ alerts:
   - type: daily_digest
     title: "dvquy13.github.io"
     labels:
+      newsletter_subscriber_count: "Newsletter subscribers"
       ga4_total_users: "Visitors (last 30d)"
       giscus_total_reactions: "Total post reactions"
       posts_published_28d: "Posts published (last 28d)"
