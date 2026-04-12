@@ -58,6 +58,8 @@ Supabase has migrated to new-style API keys (`sb_publishable_...` / `sb_secret_.
 
 Dashboard at `dvquys.com/dashboard` (→ `dashboard.dvquys.com` via Cloudflare redirect). Updated daily by `fetch-metrics.yml` CI at 03:13 GMT+7 (20:13 UTC prev day) — early so GitHub Actions queue delays still land before wake-up.
 
+**Stamp architecture:** `dashboard.html` in `main` is a pure template (placeholder `<noscript>` block). CI stamps only `gh-pages/dashboard.html` (the deploy artifact) via worktree — never commits to `main`. This keeps `main` clean and eliminates `git pull` friction. `make analytics-push` stamps your local `dashboard.html` for local inspection, but that change should not be committed to `main`.
+
 **Local dashboard preview**: `dashboard.html` fetches from Supabase (CORS-open), so it works directly from `file://` or via `python3 -m http.server 8080`.
 
 **alerts.yaml** lives at `analytics/alerts.yaml` (not `analytics/configs/`).
