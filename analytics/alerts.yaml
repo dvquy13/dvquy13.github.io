@@ -10,3 +10,4 @@ alerts:
       giscus_total_reactions: "Total post reactions"
       posts_published_28d: "Posts published (last 28d)"
       giscus_total_comments: "Total comments"
+      ga4_top_sources: "Top 5 sources (last 7d)"

@@ -37,6 +37,9 @@ jobs:
       - name: Fetch posts published (last 28d)
         run: cd analytics && uv run scripts/fetch-posts-published.py > /tmp/posts-metrics.json
 
+      - name: Fetch GA4 top sources
+        run: cd analytics && uv run scripts/fetch-ga4-top-sources.py > /tmp/ga4-sources.json
+
       - name: Merge metrics and push to Supabase
         run: |
           python3 -c "
@@ -45,7 +48,8 @@ jobs:
           giscus = json.load(open('/tmp/giscus-metrics.json'))
           giscus_comments = json.load(open('/tmp/giscus-comments-metrics.json'))
           posts = json.load(open('/tmp/posts-metrics.json'))
-          merged = {**ga4, 'metrics': {**ga4['metrics'], **giscus['metrics'], **giscus_comments['metrics'], **posts['metrics']}}
+          sources = json.load(open('/tmp/ga4-sources.json'))
+          merged = {**ga4, 'metrics': {**ga4['metrics'], **giscus['metrics'], **giscus_comments['metrics'], **posts['metrics'], **sources['metrics']}}
           print(json.dumps(merged))
           " > /tmp/merged-metrics.json
           cd analytics && uv run scripts/push-and-notify.py < /tmp/merged-metrics.json

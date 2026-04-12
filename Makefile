@@ -25,19 +25,22 @@ analytics:
 		uv run scripts/fetch-metrics.py > /tmp/dvq-ga4-metrics.json ; \
 		uv run scripts/fetch-giscus-reactions.py > /tmp/dvq-giscus-metrics.json ; \
 		uv run scripts/fetch-posts-published.py > /tmp/dvq-posts-metrics.json ; \
-		python3 scripts/display-dashboard.py /tmp/dvq-ga4-metrics.json /tmp/dvq-giscus-metrics.json /tmp/dvq-posts-metrics.json
+		uv run scripts/fetch-ga4-top-sources.py > /tmp/dvq-ga4-sources.json ; \
+		python3 scripts/display-dashboard.py /tmp/dvq-ga4-metrics.json /tmp/dvq-giscus-metrics.json /tmp/dvq-posts-metrics.json /tmp/dvq-ga4-sources.json
 
 analytics-push:
 	cd analytics && \
 		uv run scripts/fetch-metrics.py > /tmp/dvq-ga4-metrics.json && \
 		uv run scripts/fetch-giscus-reactions.py > /tmp/dvq-giscus-metrics.json && \
 		uv run scripts/fetch-posts-published.py > /tmp/dvq-posts-metrics.json && \
+		uv run scripts/fetch-ga4-top-sources.py > /tmp/dvq-ga4-sources.json && \
 		python3 -c "\
 import json; \
 ga4=json.load(open('/tmp/dvq-ga4-metrics.json')); \
 gi=json.load(open('/tmp/dvq-giscus-metrics.json')); \
 po=json.load(open('/tmp/dvq-posts-metrics.json')); \
-merged={**ga4,'metrics':{**ga4['metrics'],**gi['metrics'],**po['metrics']}}; \
+src=json.load(open('/tmp/dvq-ga4-sources.json')); \
+merged={**ga4,'metrics':{**ga4['metrics'],**gi['metrics'],**po['metrics'],**src['metrics']}}; \
 print(json.dumps(merged)) \
 		" | uv run scripts/push-and-notify.py
 

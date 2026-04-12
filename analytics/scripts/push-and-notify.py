@@ -240,7 +240,9 @@ def _format_discord_payload(alert: dict, dashboard_url: str | None) -> dict:
             else:
                 val = m["value"]
                 delta = m["delta"]
-                if delta is None:
+                if isinstance(val, list):
+                    value = "\n".join(f"{i+1}. {src}: {n}" for i, (src, n) in enumerate(val))
+                elif delta is None:
                     value = f"**{val}**"
                 elif delta > 0:
                     value = f"**{val}** 🟢 +{delta:g}"
@@ -248,7 +250,8 @@ def _format_discord_payload(alert: dict, dashboard_url: str | None) -> dict:
                     value = f"**{val}** 🔻 {delta:g}"
                 else:
                     value = f"**{val}**"
-            fields.append({"name": m["label"], "value": value, "inline": True})
+            inline = "\n" not in str(value)
+            fields.append({"name": m["label"], "value": value, "inline": inline})
 
         embed: dict = {
             "title": f"{alert['title']} · Daily Digest · {alert['date']}",
