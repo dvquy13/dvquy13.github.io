@@ -330,6 +330,24 @@ div.quarto-post a {
   --mermaid-font-family: "Google Sans Flex", InterVariable, Inter, sans-serif;
 }
 
+/* Newsletter form */
+.newsletter-form-row p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0;
+
+  #sub-email {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  #sub-btn {
+    white-space: nowrap;
+  }
+}
+
 /* Cookie consent popup font override */
 .cc-nb-main-container,
 .cc-nb-main-container *,
