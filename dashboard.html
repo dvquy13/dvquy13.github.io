@@ -656,7 +656,7 @@ async function loadData() {
   } else {
     const { url, key, table } = CONFIG.supabase
     const res = await fetch(
-      `${url}/rest/v1/${table}?order=fetched_at.asc&select=fetched_at,metrics`,
+      `${url}/rest/v1/${table}?project=eq.dvquys.com&order=fetched_at.asc&select=fetched_at,metrics`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` } }
     )
     if (!res.ok) throw new Error(`HTTP ${res.status} loading from Supabase`)
