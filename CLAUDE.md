@@ -6,6 +6,13 @@ Refer to posts/ and project/ *.qmd files for my blog posts and especially for my
 
 In general I admire and want to follow Paul Graham's writing style in his essays and Tim Urban's style in his blog Wait But Why.
 
+## Deploy / Release
+
+**Deploy = `git push origin main`.** The `publish.yml` CI workflow triggers on every push to `main`: it renders the Quarto site and deploys `docs/` to the `gh-pages` branch, which serves `dvquys.com`. There is no separate release step or `make release` target.
+
+Local preview: `make run` (Quarto dev server on port 8183).
+Local build + RSS validation: `make build`.
+
 ## Writing Principles
 
 These apply to any writing task in this repo.
