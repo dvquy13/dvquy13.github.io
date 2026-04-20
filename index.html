@@ -43,7 +43,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-86daaaaad7353f9cc0c554efc1dd6d94.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-0486bf4d71863d7504df241f0d9b0004.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-15e887976019c504f529fbd391c9ff5c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -238,12 +238,42 @@ window.Quarto = {
 
 
 
+<style>
+#idx-email {
+  font-family: 'Figtree', sans-serif;
+}
+#idx-btn {
+  padding: 0.3rem 1rem;
+  font-size: 0.95rem;
+  background: #0057a3;
+  color: #fff;
+  border: 1px solid #0057a3;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Figtree', sans-serif;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.3s ease;
+  z-index: 0;
+}
+#idx-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: -1;
+}
+#idx-btn:hover { color: #0057a3; }
+#idx-btn:hover::before { transform: translateX(0); }
+</style>
 <div id="newsletter-section" style="margin-top: 3rem; padding-top: 0; display: none;">
 <p>
 <strong>Get new posts by email</strong>
 </p>
 <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-<p><input type="email" id="idx-email" placeholder="you@example.com" style="padding: 0.4rem 0.7rem; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px; width: 230px; max-width: 100%;"> <button onclick="idxSubscribe()" id="idx-btn" style="padding: 0.4rem 0.9rem; font-size: 0.9rem; background: #0057a3; color: #fff; border: none; border-radius: 4px; cursor: pointer;"> Subscribe </button></p>
+<p><input type="email" id="idx-email" placeholder="you@example.com" style="padding: 0.45rem 0.75rem; font-size: 0.95rem; border: 1px solid #ccc; border-radius: 4px;"> <button onclick="idxSubscribe()" id="idx-btn">Subscribe</button></p>
 </div>
 <p id="idx-msg" style="margin-top: 0.5rem; min-height: 1em; font-size: 0.85rem; color: #555;">
 </p>
@@ -301,7 +331,7 @@ window.Quarto = {
 
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="dGVjaCUyQ2NsYXVkZSUyMGNvZGU=" data-listing-date-sort="1775692800000" data-listing-file-modified-sort="1776604406506" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1468">
+<div class="quarto-post image-right" data-index="0" data-categories="dGVjaCUyQ2NsYXVkZSUyMGNvZGU=" data-listing-date-sort="1775692800000" data-listing-file-modified-sort="1776697437561" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1468">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./posts/introducing-qrec/index.html" class="no-external">Helping Claude Code Remember</a>
@@ -329,7 +359,7 @@ Apr 9, 2026
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="bGlmZSUyQ3Byb2R1Y3Rpdml0eQ==" data-listing-date-sort="1767916800000" data-listing-file-modified-sort="1776604406510" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1189">
+<div class="quarto-post image-right" data-index="1" data-categories="bGlmZSUyQ3Byb2R1Y3Rpdml0eQ==" data-listing-date-sort="1767916800000" data-listing-file-modified-sort="1776697437564" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1189">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./posts/the-30m-promise/index.html" class="no-external">The 30-Minute Promise</a>
@@ -357,7 +387,7 @@ Jan 9, 2026
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748822400000" data-listing-file-modified-sort="1776604406522" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="21" data-listing-word-count-sort="4029">
+<div class="quarto-post image-right" data-index="2" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748822400000" data-listing-file-modified-sort="1776697437577" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="21" data-listing-word-count-sort="4029">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c7/index.html" class="no-external">Implement a RecSys, Chapter 7:<br> Building the API Layer</a>
@@ -385,7 +415,7 @@ Jun 2, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748736000000" data-listing-file-modified-sort="1776604406522" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3309">
+<div class="quarto-post image-right" data-index="3" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748736000000" data-listing-file-modified-sort="1776697437577" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3309">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c6/index.html" class="no-external">Implement a RecSys, Chapter 6:<br> Preparing for Serving</a>
@@ -413,7 +443,7 @@ Jun 1, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748649600000" data-listing-file-modified-sort="1776604406519" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="29" data-listing-word-count-sort="5800">
+<div class="quarto-post image-right" data-index="4" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748649600000" data-listing-file-modified-sort="1776697437574" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="29" data-listing-word-count-sort="5800">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c5/index.html" class="no-external">Implement a RecSys, Chapter 5:<br> Design Session-based Recommendation System</a>
@@ -441,7 +471,7 @@ May 31, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="5" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748563200000" data-listing-file-modified-sort="1776604406516" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2845">
+<div class="quarto-post image-right" data-index="5" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748563200000" data-listing-file-modified-sort="1776697437572" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2845">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c4/index.html" class="no-external">Implement a RecSys, Chapter 4:<br> Offline Evaluation, MLflow Experiment Tracking, and Baseline Implementation</a>
@@ -469,7 +499,7 @@ May 30, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="6" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748217600000" data-listing-file-modified-sort="1776604406515" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3388">
+<div class="quarto-post image-right" data-index="6" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748217600000" data-listing-file-modified-sort="1776697437570" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3388">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c3/index.html" class="no-external">Implement a RecSys, Chapter 3:<br> Negative Sampling</a>
@@ -497,7 +527,7 @@ May 26, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="7" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748131200000" data-listing-file-modified-sort="1776604406512" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3085">
+<div class="quarto-post image-right" data-index="7" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748131200000" data-listing-file-modified-sort="1776697437566" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3085">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c2/index.html" class="no-external">Implement a RecSys, Chapter 2:<br> Understanding the Data and Feature Engineering</a>
@@ -525,7 +555,7 @@ May 25, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="8" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748044800000" data-listing-file-modified-sort="1776604406512" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2091">
+<div class="quarto-post image-right" data-index="8" data-categories="cmVjc3lzJTJDaW1wbGVtZW50LXJlY3N5cy1zZXJpZXM=" data-listing-date-sort="1748044800000" data-listing-file-modified-sort="1776697437566" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2091">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/implement-recsys/c1/index.html" class="no-external">Implement a RecSys, Chapter 1:<br> Introduction and Project Overview</a>
@@ -553,7 +583,7 @@ May 24, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="9" data-categories="dGVjaCUyQ2xsbQ==" data-listing-date-sort="1726963200000" data-listing-file-modified-sort="1776604406560" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="714">
+<div class="quarto-post image-right" data-index="9" data-categories="dGVjaCUyQ2xsbQ==" data-listing-date-sort="1726963200000" data-listing-file-modified-sort="1776697437619" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="714">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/review-rec-bot/index.html" class="no-external">Building a Conversational Assistant for Restaurant Discovery and Booking</a>
@@ -581,7 +611,7 @@ Sep 22, 2024
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="10" data-categories="dGVjaCUyQ21hY2hpbmUlMjBsZWFybmluZw==" data-listing-date-sort="1718928000000" data-listing-file-modified-sort="1776604406566" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="54">
+<div class="quarto-post image-right" data-index="10" data-categories="dGVjaCUyQ21hY2hpbmUlMjBsZWFybmluZw==" data-listing-date-sort="1718928000000" data-listing-file-modified-sort="1776697437625" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="54">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./projects/reviews-parsing-mlsys/index.html" class="no-external">Let’s build an ML system</a>
@@ -609,7 +639,7 @@ Jun 21, 2024
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="11" data-categories="dGVjaCUyQ3NlYXJjaA==" data-listing-date-sort="1685577600000" data-listing-file-modified-sort="1776604406509" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="57" data-listing-word-count-sort="11257">
+<div class="quarto-post image-right" data-index="11" data-categories="dGVjaCUyQ3NlYXJjaA==" data-listing-date-sort="1685577600000" data-listing-file-modified-sort="1776697437564" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="57" data-listing-word-count-sort="11257">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./posts/site-search-elasticsearch/index.html" class="no-external">A Hierarchical approach with Elasticsearch: Lessons from 22 Months of Iteration</a>
@@ -637,7 +667,7 @@ Jun 1, 2023
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="12" data-categories="dGVjaCUyQ21hY2hpbmUlMjBsZWFybmluZw==" data-listing-date-sort="1581897600000" data-listing-file-modified-sort="1776604406505" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2721">
+<div class="quarto-post image-right" data-index="12" data-categories="dGVjaCUyQ21hY2hpbmUlMjBsZWFybmluZw==" data-listing-date-sort="1581897600000" data-listing-file-modified-sort="1776697437559" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2721">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./posts/deploy-ml-gcp/index.html" class="no-external">From Model to Production: Deploying Your Machine Learning Solution on Google Cloud</a>
