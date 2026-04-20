@@ -13,6 +13,37 @@ listing:
   feed: true
 ---
 
+<style>
+#idx-email {
+  font-family: 'Figtree', sans-serif;
+}
+#idx-btn {
+  padding: 0.3rem 1rem;
+  font-size: 0.95rem;
+  background: #0057a3;
+  color: #fff;
+  border: 1px solid #0057a3;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Figtree', sans-serif;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.3s ease;
+  z-index: 0;
+}
+#idx-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: -1;
+}
+#idx-btn:hover { color: #0057a3; }
+#idx-btn:hover::before { transform: translateX(0); }
+</style>
+
 <div id="newsletter-section" style="margin-top: 3rem; padding-top: 0; display: none;">
 <p><strong>Get new posts by email</strong></p>
 <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
@@ -20,15 +51,9 @@ listing:
     type="email"
     id="idx-email"
     placeholder="you@example.com"
-    style="padding: 0.4rem 0.7rem; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px; width: 230px; max-width: 100%;"
+    style="padding: 0.45rem 0.75rem; font-size: 0.95rem; border: 1px solid #ccc; border-radius: 4px;"
   />
-  <button
-    onclick="idxSubscribe()"
-    id="idx-btn"
-    style="padding: 0.4rem 0.9rem; font-size: 0.9rem; background: #0057a3; color: #fff; border: none; border-radius: 4px; cursor: pointer;"
-  >
-    Subscribe
-  </button>
+  <button onclick="idxSubscribe()" id="idx-btn">Subscribe</button>
 </div>
 <p id="idx-msg" style="margin-top: 0.5rem; min-height: 1em; font-size: 0.85rem; color: #555;"></p>
 </div>
