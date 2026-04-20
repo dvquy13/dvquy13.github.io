@@ -26,10 +26,13 @@ else
     --data-urlencode "rawdata@$FEED")
 fi
 
-python3 - <<'EOF' "$RESPONSE"
-import sys, re
+TMPFILE=$(mktemp)
+printf '%s' "$RESPONSE" > "$TMPFILE"
+python3 - "$TMPFILE" <<'EOF'
+import sys, re, os
 
-content = sys.argv[1]
+content = open(sys.argv[1]).read()
+os.unlink(sys.argv[1])
 
 def extract_text(tag, xml):
     """Extract text content of all occurrences of a tag."""
