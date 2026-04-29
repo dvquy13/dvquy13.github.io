@@ -26,6 +26,7 @@ These apply to any writing task in this repo.
 ### Anti-patterns (flag and reject these)
 
 - **Short punchy fragments for dramatic effect** — `It worked.` / `Not archived. Deleted from disk.` / `So I built one.` These read as AI slop. Integrate them into the surrounding sentence.
+- **Declarative thesis opener with a state-then-undercut beat** — `Every Claude Code session starts fresh. That's mostly fine at first.` Stating the problem in oracle-like sentences and immediately qualifying them is AI's default opening move. Open by talking through the problem instead.
 - **Invented facts or names** — Never fabricate product names, project names, file paths, or statistics. If uncertain, omit or ask.
 - **Redundant restatement** — Don't repeat what context already established. If the intro already introduces qrec, don't write "That's when I started building qrec."
 - **Insider-y specifics that serve the author, not the reader** — Dropping a session count from one project to sound credible rather than to make a point the reader cares about.
