@@ -35,11 +35,13 @@ TLDR
 </video>
 </div>
 </div>
-<p>Every Claude Code session starts fresh. That’s mostly fine at first. But the more I worked with it, delegating more, going deeper, the more I noticed decisions quietly slipping away. A design choice I’d reasoned through two weeks ago, a debugging path I’d finally worked out, etc. By the time a related problem came up in a new session, the reasoning behind the earlier decision was gone<sup>1</sup>, and I was either re-deriving it from scratch or, worse, not realizing I’d already been here.</p>
-<p>At the moment of writing this post, I had over a thousand JSONL session files on my machine. They were all technically readable—you could locate them at <code>~/.claude/projects/</code>. Each file is raw JSONL packed with tool calls, thinking blocks, and execution noise. Weeks of decisions and debugging were right there, but I was not willing to spend the tokens and time to trawl through them every single time.</p>
+<p>How to help AI coding assistants remember?</p>
+<p>After a year of using AI coding assistant almost every day, what has been working for me can be described as a two-layer approach. The first layer is the project documentation itself, which I personally always insist that the agent maintain and keep up to date after each session. The second layer is unstructured and much richer in details, which I would call the conversation history. Ideally a good project documentation already solves the cold-start problem for the agent, but sometimes it’s not enough. As structured and curated the documents are, there are always times where we need to recall the details, which are buried deep in the conversation history.</p>
+<p>And the more I worked with it, delegating more, going deeper, the more I noticed I came up with strange details that are nowhere near obvious. Maybe the underlying rationales made sense at the moment they were implemented a few weeks ago to me (and god). Now, only god knows. If only we have access to the conversations we made somewhere in the past!</p>
+<p>Until I realized that just by looking closely at <code>~/.claude/projects/</code>, I already had over a thousand raw JSONL conversation files on my machine. They were all technically readable and the oldest ones were from 30 days ago. Each file is raw JSONL packed with tool calls, thinking blocks, and execution logs. Weeks of decisions and debugging were right there, they just need to be indexed.</p>
 <section id="the-tools-i-tried-first" class="level2">
 <h2 class="anchored" data-anchor-id="the-tools-i-tried-first">The tools I tried first</h2>
-<p>I’d heard about existing tools—<a href="https://github.com/tobi/QMD">QMD</a> and <a href="https://github.com/thedotmack/claude-mem">claude-mem</a>—so I gave them a try first. QMD indexes markdown, so I built a Claude Code plugin with SessionEnd hook that converts Claude Code JSONL sessions into Markdown and lets QMD handle the indexing. But in the end I didn’t stick with QMD. The CLI felt slow—it loaded models on every query<sup>2</sup>—and I realized I wanted to “add more features”: skip the Markdown conversion step, add a web UI, experiment with the retrieval pipeline. At some point, building anew felt more practical than forking.</p>
+<p>I’d heard about existing tools—<a href="https://github.com/tobi/QMD">QMD</a> and <a href="https://github.com/thedotmack/claude-mem">claude-mem</a>—so I gave them a try first. QMD indexes markdown, so I built a Claude Code plugin with SessionEnd hook that converts Claude Code JSONL sessions into Markdown and lets QMD handle the indexing. But in the end I didn’t stick with QMD. The CLI felt slow—it loaded models on every query<sup>1</sup>—and I realized I wanted to “add more features”: skip the Markdown conversion step, add a web UI, experiment with the retrieval pipeline. At some point, building anew felt more practical than forking.</p>
 <p>With claude-mem, I installed it via two plugin commands and genuinely couldn’t tell what was happening. Something was downloading model weights and indexing my history in the background, but the process was invisible. IMHO when a tool is running on your private session history, you should be able to easily see what’s happening. That became the thing I was most determined to do differently.</p>
 </section>
 <section id="the-bets-i-made" class="level2">
@@ -81,8 +83,7 @@ TLDR
 <div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>It was only while building qrec that I discovered the sessions were on my machine all along, just with a 30-day retention window before they’re cleared from disk.↩︎</p></li>
-<li id="fn2"><p>I was partly wrong on the speed complaint: I found out later that <code>qmd serve</code> runs a background server, which would’ve helped. But the other reasons still stood.↩︎</p></li>
+<li id="fn1"><p>I was partly wrong on the speed complaint: I found out later that <code>qmd serve</code> runs a background server, which would’ve helped. But the other reasons still stood.↩︎</p></li>
 </ol>
 </section></div> ]]></description>
   <category>tech</category>
