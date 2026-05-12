@@ -130,6 +130,8 @@ project:
 
 **Pitfall:** Using only `!`-prefixed exclusions (e.g. `- "!README.md"`) in the `render:` list breaks the build entirely — no files are rendered, `docs/index.xml` is never created, and the post-render hook fails.
 
+**`.ipynb` requires explicit inclusion.** The render list is allow-list-style: `.qmd` files won't pick up siblings of other extensions automatically. To publish Jupyter notebooks as posts, add `"**/*.ipynb"` to the list. See `.claude/rules/jupyter-posts.md` for the full notebook-post workflow.
+
 ### Static files in `project.resources` (not top-level `resource:`)
 
 To include a static file (e.g. `dashboard.html`) in the rendered output, it must be listed under `project.resources` in `_quarto.yml`:

@@ -5,6 +5,7 @@ project:
   render:
     - "*.qmd"
     - "**/*.qmd"
+    - "**/*.ipynb"
   resources:
     - dashboard.html
     - metrics.jsonl

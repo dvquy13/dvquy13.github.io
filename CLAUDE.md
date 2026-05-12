@@ -13,6 +13,8 @@ In general I admire and want to follow Paul Graham's writing style in his essays
 Local preview: `make run` (Quarto dev server on port 8183).
 Local build + RSS validation: `make build`.
 
+For UI / rendering changes, verify in-browser via chrome-devtools MCP against `make run`: navigate to `localhost:8183/<path>`, evaluate JS to probe the DOM / computed styles, screenshot to confirm visually. Do this before reporting done.
+
 ## Writing Principles
 
 These apply to any writing task in this repo.
