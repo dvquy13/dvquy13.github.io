@@ -67,6 +67,23 @@ With the right-side TOC visible, the body column shrinks to ~555px. To extend a 
 
 The directive wraps the cell output in `<div class="column-page">`; Quarto auto-collapses the TOC into a dropdown to make room.
 
+## DataFrame Tables
+
+Prefer rendered HTML tables over plain text. Return the DataFrame as the last expression in a cell — Quarto captures the `text/html` output and renders it as a proper table:
+
+```python
+df.round(4).set_index("model")  # renders as HTML table
+```
+
+Avoid `print(df.to_string(...))` — it forces monospace text output and loses table formatting.
+
+For DataFrames inside loops (e.g. multiple confusion matrices), use `display()`:
+
+```python
+from IPython.display import display
+display(pd.DataFrame(cm, index=[...], columns=[...]))
+```
+
 ## Papermill Workflow
 
 Re-execute notebooks in place with papermill so the cell outputs are stored in the `.ipynb` itself:
