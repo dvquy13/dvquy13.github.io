@@ -84,6 +84,29 @@ from IPython.display import display
 display(pd.DataFrame(cm, index=[...], columns=[...]))
 ```
 
+## Editing Markdown Cells with NotebookEdit
+
+**`NotebookEdit` writes `source` as a single string, breaking paragraph rendering.** nbformat expects `source` to be a list of lines; when it's a plain string, Quarto collapses all `\n\n` paragraph breaks so multi-paragraph markdown cells render as one unbroken blob.
+
+After any `NotebookEdit` session that touched multi-paragraph markdown cells, normalize with:
+
+```bash
+python3 -c "
+import json
+p = 'projects/<slug>/index.ipynb'
+nb = json.load(open(p))
+for c in nb['cells']:
+    if isinstance(c.get('source'), str):
+        c['source'] = c['source'].splitlines(keepends=True)
+json.dump(nb, open(p, 'w'), indent=1, ensure_ascii=False)
+open(p, 'a').write('\n')
+"
+```
+
+Verify by checking paragraph counts in-browser — not just that the heading renders.
+
+**Never put a `## heading`, `$$` display math, and body prose in the same markdown cell.** Quarto's notebook renderer swallows the entire cell into the `<h2>` element, making the section disappear as body content. Keep the `## heading` in its own cell; put body prose and math in the cell(s) that follow.
+
 ## Papermill Workflow
 
 Re-execute notebooks in place with papermill so the cell outputs are stored in the `.ipynb` itself:
