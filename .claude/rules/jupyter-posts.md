@@ -118,3 +118,11 @@ uv run papermill index.ipynb index.ipynb --no-progress-bar
 Combined with `freeze: true` in `posts/_metadata.yml` / `projects/_metadata.yml`, the embedded outputs are what Quarto renders — no Python kernel registration or re-execution at build time. Just commit the executed notebook.
 
 When iterating on a cell, clear outputs + execution_count for all code cells before re-running so the diff stays clean.
+
+## Avoiding Session Bloat During Iteration
+
+`Read` and `NotebookEdit` both dump the full notebook JSON (including every embedded base64 image output) into the transcript — `Read` on every call, `NotebookEdit` via its `toolUseResult`. On a plot-heavy notebook, an "iterate until target metric" loop that repeatedly Read/edits an output-populated `.ipynb` can balloon the session to tens of MB in a few dozen turns, which risks 529 errors on resume later.
+
+- **Compute outside the notebook.** Run experiment/tuning loops as a plain script via `Bash` (`uv run ...`), writing small CSV/parquet results to disk. Evaluate progress by reading those result files, not the notebook.
+- **Clear outputs before a round of edits.** Strip cell outputs (see snippet above) before a batch of `Read`/`NotebookEdit` calls; only run the final `papermill` re-execute once, after all edits are done.
+- **Evaluate narrowly.** To check notebook content mid-loop, parse just the relevant cell via a `python3 -c` snippet through `Bash` instead of a full `Read`.

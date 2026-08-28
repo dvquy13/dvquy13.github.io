@@ -23,7 +23,7 @@ These apply to any writing task in this repo.
 
 **Write Like You Talk** — Every sentence should pass the friend test: "Is this the way I'd say this to a friend?" If not, say it out loud — and use that instead. Informal language is the athletic clothing of ideas. The harder the subject, the more important it is to keep the language simple. The root failure mode of AI-generated prose is that it *performs* ideas—dramatic fragments, theatrical pauses, restatements for emphasis—instead of talking through them. DvQ talks through ideas. Each sentence assumes the previous one and sets up the next, the way a story actually comes out of your mouth.
 
-**Write Like DvQ** — Conversational first-person. Specific and grounded in lived experience. Honest about failures — what didn't work always comes before what did. No hedges, no filler transitions, no advice from a distance.
+**Write Like DvQ** — Conversational first-person. Specific and grounded in lived experience. Honest about failures — what didn't work always comes before what did.
 
 ### Anti-patterns (flag and reject these)
 
