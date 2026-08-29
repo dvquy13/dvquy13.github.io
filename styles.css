@@ -1,1 +1,3 @@
 /* css styles */
+
+.plotly-graph-div { margin-bottom: 2rem; } /* breathing room between embedded Plotly figures and the following paragraph */

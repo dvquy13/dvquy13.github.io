@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2026-05-12">
+<meta name="keywords" content="imbalanced classification, downsampling, average precision, ROC-AUC, calibration, credit card fraud, logistic regression">
+
+<title>Training ML Models on Imbalanced Datasets – DvQ</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../avatar.png" rel="icon" type="image/png">
+<script src="../../site_libs/cookie-consent/cookie-consent.js"></script>
+<link href="../../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-86daaaaad7353f9cc0c554efc1dd6d94.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-c9904a0f3f019df0ff21be4fa43828cb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-NH6GYY9FZV"></script>
+
+<script type="text/plain" cookie-consent="tracking">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-NH6GYY9FZV', { 'anonymize_ip': true});
+</script>
+
+<script type="text/javascript" charset="UTF-8">
+document.addEventListener('DOMContentLoaded', function () {
+cookieconsent.run({
+  "notice_banner_type":"simple",
+  "consent_type":"implied",
+  "palette":"light",
+  "language":"en",
+  "page_load_consent_levels":["strictly-necessary","functionality","tracking","targeting"],
+  "notice_banner_reject_button_hide":false,
+  "preferences_center_close_button_hide":false,
+  "website_name":""
+  ,
+"language":"en"
+  });
+});
+</script> 
+  
+<style>html{ scroll-behavior: smooth; }</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<!-- Inter (fallback) -->
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<!-- Figtree + DM Sans -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&amp;family=Google+Sans+Code:wght@400;700&amp;family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Roboto+Mono:ital,wght@0,100..700;1,100..700&amp;display=swap" rel="stylesheet">
+<meta name="quarto:status" content="draft">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner"><div id="quarto-draft-alert" class="alert alert-warning"><i class="bi bi-pencil-square"></i>Draft</div>
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">DvQ</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../subscribe.html"> 
+<span class="menu-text">Newsletter</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://www.linkedin.com/in/dvquy/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text">LinkedIn</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://github.com/dvquy13"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text">GitHub</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://x.com/dvquys"> <i class="bi bi-twitter-x" role="img">
+</i> 
+<span class="menu-text">X</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text">RSS</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Training ML Models on Imbalanced Datasets</h1>
+            <p class="subtitle lead">A pedagogical study: full data vs.&nbsp;1:1 downsampling on credit card fraud</p>
+                                <div class="quarto-categories">
+                <div class="quarto-category">tech</div>
+                <div class="quarto-category">ml</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 12, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+
+  <div>
+    <div class="keywords">
+      <div class="block-title">Keywords</div>
+      <p>imbalanced classification, downsampling, average precision, ROC-AUC, calibration, credit card fraud, logistic regression</p>
+    </div>
+  </div>
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#load-data" id="toc-load-data" class="nav-link active" data-scroll-target="#load-data">1. Load data</a></li>
+  <li><a href="#trainval-split-stratified" id="toc-trainval-split-stratified" class="nav-link" data-scroll-target="#trainval-split-stratified">2. Train/val split (stratified)</a></li>
+  <li><a href="#baseline-full-imbalanced-training-set" id="toc-baseline-full-imbalanced-training-set" class="nav-link" data-scroll-target="#baseline-full-imbalanced-training-set">3. Baseline: full imbalanced training set</a></li>
+  <li><a href="#comparison-11-downsampled-training-set" id="toc-comparison-11-downsampled-training-set" class="nav-link" data-scroll-target="#comparison-11-downsampled-training-set">4. Comparison: 1:1 downsampled training set</a></li>
+  <li><a href="#metric-comparison" id="toc-metric-comparison" class="nav-link" data-scroll-target="#metric-comparison">5. Metric comparison</a></li>
+  <li><a href="#score-distributions-on-the-validation-set" id="toc-score-distributions-on-the-validation-set" class="nav-link" data-scroll-target="#score-distributions-on-the-validation-set">6. Score distributions on the validation set</a></li>
+  <li><a href="#why-does-training-on-downsampled-data-push-scores-higher" id="toc-why-does-training-on-downsampled-data-push-scores-higher" class="nav-link" data-scroll-target="#why-does-training-on-downsampled-data-push-scores-higher">Why does training on downsampled data push scores higher?</a></li>
+  <li><a href="#what-happens-when-we-use-class_weightbalanced" id="toc-what-happens-when-we-use-class_weightbalanced" class="nav-link" data-scroll-target="#what-happens-when-we-use-class_weightbalanced">What happens when we use <code>class_weight='balanced'</code>?</a></li>
+  <li><a href="#lightgbm-does-the-same-story-hold" id="toc-lightgbm-does-the-same-story-hold" class="nav-link" data-scroll-target="#lightgbm-does-the-same-story-hold">LightGBM: does the same story hold?</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content">
+
+
+
+
+
+<p>A pedagogical walkthrough using the Kaggle Credit Card Fraud dataset (~0.17% positive rate).</p>
+<p><strong>Plan</strong></p>
+<ol type="1">
+<li>Load and inspect the data.</li>
+<li>Stratified train/val split.</li>
+<li>Baseline: logistic regression on the full imbalanced training set.</li>
+<li>Comparison: logistic regression on a 1:1 downsampled training set.</li>
+<li>Compare metrics (Average Precision, ROC-AUC, precision/recall/F1 at threshold, confusion matrix).</li>
+<li>Compare predicted-score distributions on the validation set.</li>
+</ol>
+<section id="load-data" class="level2">
+<h2 class="anchored" data-anchor-id="load-data">1. Load data</h2>
+<div id="05b7dc77" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:15.396506Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:15.396375Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:16.500130Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:16.499302Z&quot;}" data-papermill="{&quot;duration&quot;:1.142291,&quot;end_time&quot;:&quot;2026-05-13T14:02:16.500938+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:15.358647+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.graph_objects <span class="im">as</span> go</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotly.subplots <span class="im">import</span> make_subplots</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Registers and activates the shared `dvq` Plotly template.</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dvq_theme</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Load credentials from the repo-root .env, then map KAGGLE_API_TOKEN (KGAT_...) into KAGGLE_KEY for kagglehub.</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>load_dotenv(Path.cwd().parent.parent <span class="op">/</span> <span class="st">".env"</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.environ.get(<span class="st">"KAGGLE_API_TOKEN"</span>) <span class="kw">and</span> <span class="kw">not</span> os.environ.get(<span class="st">"KAGGLE_KEY"</span>):</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    os.environ[<span class="st">"KAGGLE_KEY"</span>] <span class="op">=</span> os.environ[<span class="st">"KAGGLE_API_TOKEN"</span>]</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>RANDOM_STATE <span class="op">=</span> <span class="dv">42</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>DATA_DIR <span class="op">=</span> Path(<span class="st">"data"</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>DATA_DIR.mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="0110731f" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:16.506756Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:16.506636Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:18.059359Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:18.058924Z&quot;}" data-papermill="{&quot;duration&quot;:1.556706,&quot;end_time&quot;:&quot;2026-05-13T14:02:18.059952+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:16.503246+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> kagglehub</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>dataset_path <span class="op">=</span> kagglehub.dataset_download(<span class="st">"mlg-ulb/creditcardfraud"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>csv_path <span class="op">=</span> Path(dataset_path) <span class="op">/</span> <span class="st">"creditcard.csv"</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(csv_path)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(csv_path)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.shape)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'Class'</span>].value_counts(normalize<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>/Users/dvq/.cache/kagglehub/datasets/mlg-ulb/creditcardfraud/versions/3/creditcard.csv
+(284807, 31)</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>Class
+0    0.998273
+1    0.001727
+Name: proportion, dtype: float64</code></pre>
+</div>
+</div>
+</section>
+<section id="trainval-split-stratified" class="level2">
+<h2 class="anchored" data-anchor-id="trainval-split-stratified">2. Train/val split (stratified)</h2>
+<div id="d7499b4f" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:18.068468Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:18.068359Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:19.286308Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:19.285855Z&quot;}" data-papermill="{&quot;duration&quot;:1.22113,&quot;end_time&quot;:&quot;2026-05-13T14:02:19.287066+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:18.065936+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df.drop(columns<span class="op">=</span>[<span class="st">"Class"</span>])</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">"Class"</span>]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>X_train, X_val, y_train, y_val <span class="op">=</span> train_test_split(</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, stratify<span class="op">=</span>y, random_state<span class="op">=</span>RANDOM_STATE</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"train: </span><span class="sc">{</span><span class="bu">len</span>(X_train)<span class="sc">:&gt;7,}</span><span class="ss">   positives: </span><span class="sc">{</span><span class="bu">int</span>(y_train.<span class="bu">sum</span>())<span class="sc">:&gt;5,}</span><span class="ss">  (</span><span class="sc">{</span>y_train<span class="sc">.</span>mean()<span class="op">*</span><span class="dv">100</span><span class="sc">:.3f}</span><span class="ss">%)"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"val:   </span><span class="sc">{</span><span class="bu">len</span>(X_val)<span class="sc">:&gt;7,}</span><span class="ss">   positives: </span><span class="sc">{</span><span class="bu">int</span>(y_val.<span class="bu">sum</span>())<span class="sc">:&gt;5,}</span><span class="ss">  (</span><span class="sc">{</span>y_val<span class="sc">.</span>mean()<span class="op">*</span><span class="dv">100</span><span class="sc">:.3f}</span><span class="ss">%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>train: 227,845   positives:   394  (0.173%)
+val:    56,962   positives:    98  (0.172%)</code></pre>
+</div>
+</div>
+</section>
+<section id="baseline-full-imbalanced-training-set" class="level2">
+<h2 class="anchored" data-anchor-id="baseline-full-imbalanced-training-set">3. Baseline: full imbalanced training set</h2>
+<div id="d3379f1a" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:19.298269Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:19.298054Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:19.882755Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:19.882300Z&quot;}" data-papermill="{&quot;duration&quot;:0.589845,&quot;end_time&quot;:&quot;2026-05-13T14:02:19.883635+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:19.293790+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>baseline <span class="op">=</span> Pipeline([</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"scaler"</span>, StandardScaler()),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"lr"</span>, LogisticRegression(max_iter<span class="op">=</span><span class="dv">1000</span>, random_state<span class="op">=</span>RANDOM_STATE)),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>baseline.fit(X_train, y_train)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>scores_baseline <span class="op">=</span> baseline.predict_proba(X_val)[:, <span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="comparison-11-downsampled-training-set" class="level2">
+<h2 class="anchored" data-anchor-id="comparison-11-downsampled-training-set">4. Comparison: 1:1 downsampled training set</h2>
+<div id="f76dbcb5" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:19.893148Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:19.893032Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:19.915947Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:19.915553Z&quot;}" data-papermill="{&quot;duration&quot;:0.026105,&quot;end_time&quot;:&quot;2026-05-13T14:02:19.916435+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:19.890330+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pos_idx <span class="op">=</span> y_train[y_train <span class="op">==</span> <span class="dv">1</span>].index</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>neg_idx <span class="op">=</span> y_train[y_train <span class="op">==</span> <span class="dv">0</span>].index</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>neg_sampled <span class="op">=</span> np.random.RandomState(RANDOM_STATE).choice(neg_idx, size<span class="op">=</span><span class="bu">len</span>(pos_idx), replace<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>ds_idx <span class="op">=</span> np.concatenate([pos_idx, neg_sampled])</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>X_train_ds <span class="op">=</span> X_train.loc[ds_idx]</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>y_train_ds <span class="op">=</span> y_train.loc[ds_idx]</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"downsampled train: </span><span class="sc">{</span><span class="bu">len</span>(X_train_ds)<span class="sc">:,}</span><span class="ss">  (positives: </span><span class="sc">{</span><span class="bu">int</span>(y_train_ds.<span class="bu">sum</span>())<span class="sc">:,}</span><span class="ss">)"</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>downsampled <span class="op">=</span> Pipeline([</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"scaler"</span>, StandardScaler()),</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"lr"</span>, LogisticRegression(max_iter<span class="op">=</span><span class="dv">1000</span>, random_state<span class="op">=</span>RANDOM_STATE)),</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>downsampled.fit(X_train_ds, y_train_ds)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>scores_downsampled <span class="op">=</span> downsampled.predict_proba(X_val)[:, <span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>downsampled train: 788  (positives: 394)</code></pre>
+</div>
+</div>
+</section>
+<section id="metric-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="metric-comparison">5. Metric comparison</h2>
+<div id="30fef86d" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:19.925313Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:19.925214Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:20.021621Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:20.020933Z&quot;}" data-papermill="{&quot;duration&quot;:0.099567,&quot;end_time&quot;:&quot;2026-05-13T14:02:20.022236+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:19.922669+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> (</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    average_precision_score,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    roc_auc_score,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    precision_score,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    recall_score,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    f1_score,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    confusion_matrix,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> display</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> metrics_row(name, y_true, scores, threshold<span class="op">=</span><span class="fl">0.5</span>):</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> (scores <span class="op">&gt;=</span> threshold).astype(<span class="bu">int</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"model"</span>: name,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"AP"</span>: average_precision_score(y_true, scores),</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"ROC-AUC"</span>: roc_auc_score(y_true, scores),</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"precision@</span><span class="sc">{</span>threshold<span class="sc">}</span><span class="ss">"</span>: precision_score(y_true, y_pred, zero_division<span class="op">=</span><span class="dv">0</span>),</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"recall@</span><span class="sc">{</span>threshold<span class="sc">}</span><span class="ss">"</span>: recall_score(y_true, y_pred, zero_division<span class="op">=</span><span class="dv">0</span>),</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"f1@</span><span class="sc">{</span>threshold<span class="sc">}</span><span class="ss">"</span>: f1_score(y_true, y_pred, zero_division<span class="op">=</span><span class="dv">0</span>),</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>metrics_df <span class="op">=</span> pd.DataFrame([</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    metrics_row(<span class="st">"imbalanced (full)"</span>, y_val, scores_baseline),</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    metrics_row(<span class="st">"downsampled 1:1"</span>, y_val, scores_downsampled),</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>metrics_df.<span class="bu">round</span>(<span class="dv">4</span>).set_index(<span class="st">"model"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">AP</th>
+<th data-quarto-table-cell-role="th">ROC-AUC</th>
+<th data-quarto-table-cell-role="th">precision@0.5</th>
+<th data-quarto-table-cell-role="th">recall@0.5</th>
+<th data-quarto-table-cell-role="th">f1@0.5</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">model</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">imbalanced (full)</td>
+<td>0.7414</td>
+<td>0.9605</td>
+<td>0.8267</td>
+<td>0.6327</td>
+<td>0.7168</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">downsampled 1:1</td>
+<td>0.4578</td>
+<td>0.9752</td>
+<td>0.0516</td>
+<td>0.9184</td>
+<td>0.0977</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="de1ef452" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:20.029116Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:20.028988Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:20.044417Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:20.043672Z&quot;}" data-papermill="{&quot;duration&quot;:0.018921,&quot;end_time&quot;:&quot;2026-05-13T14:02:20.044946+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:20.026025+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, scores <span class="kw">in</span> [(<span class="st">"imbalanced (full)"</span>, scores_baseline), (<span class="st">"downsampled 1:1"</span>, scores_downsampled)]:</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> (scores <span class="op">&gt;=</span> <span class="fl">0.5</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    cm <span class="op">=</span> confusion_matrix(y_val, y_pred)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss"> @ threshold=0.5"</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    display(pd.DataFrame(cm, index<span class="op">=</span>[<span class="st">"actual 0"</span>, <span class="st">"actual 1"</span>], columns<span class="op">=</span>[<span class="st">"pred 0"</span>, <span class="st">"pred 1"</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>imbalanced (full) @ threshold=0.5</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">pred 0</th>
+<th data-quarto-table-cell-role="th">pred 1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">actual 0</td>
+<td>56851</td>
+<td>13</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">actual 1</td>
+<td>36</td>
+<td>62</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>downsampled 1:1 @ threshold=0.5</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">pred 0</th>
+<th data-quarto-table-cell-role="th">pred 1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">actual 0</td>
+<td>55209</td>
+<td>1655</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">actual 1</td>
+<td>8</td>
+<td>90</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Both metrics are built on ranking—they sweep thresholds from high to low—but they weight the ranking differently, which is why the downsampled model scores better on one and worse on the other.</p>
+<p><strong>ROC-AUC</strong> asks: for a random positive-negative pair, did the positive score higher? Averaged uniformly over all pairs.</p>
+<p><strong>AP</strong> steps down the ranked list from highest score to lowest, and each time it hits a positive, it notes the precision at that point. A positive found early (before negatives mix in) contributes more than one found late. So AP is specifically measuring the quality of high-confidence predictions—when the model is most certain something is fraud, is it actually right?</p>
+</section>
+<section id="score-distributions-on-the-validation-set" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="score-distributions-on-the-validation-set">6. Score distributions on the validation set</h2>
+<p>Plotting each class separately with percentage on the y-axis keeps the two classes visually comparable, while hover tooltips surface the raw counts — so you can see both “what fraction of positives have a high score?” and “how many negatives is that tail actually?”</p>
+<div id="806c8c00" class="cell page-columns page-full" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:20.077290Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:20.077141Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:20.159721Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:20.159236Z&quot;}" data-papermill="{&quot;duration&quot;:0.08788,&quot;end_time&quot;:&quot;2026-05-13T14:02:20.160482+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:20.072602+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> HTML</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>bins <span class="op">=</span> np.arange(<span class="dv">0</span>, <span class="fl">1.02</span>, <span class="fl">0.02</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>bin_centers <span class="op">=</span> (bins[:<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> bins[<span class="dv">1</span>:]) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>class_colors <span class="op">=</span> {<span class="dv">0</span>: <span class="st">"#999999"</span>, <span class="dv">1</span>: dvq_theme.ACCENT}</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> make_subplots(</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    rows<span class="op">=</span><span class="dv">2</span>, cols<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    subplot_titles<span class="op">=</span>(</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"negatives (class 0)"</span>, <span class="st">"positives (class 1)"</span>,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"negatives (class 0)"</span>, <span class="st">"positives (class 1)"</span>,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    row_titles<span class="op">=</span>[<span class="st">"imbalanced (full)"</span>, <span class="st">"downsampled 1:1"</span>],</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    shared_yaxes<span class="op">=</span><span class="st">"all"</span>,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    shared_xaxes<span class="op">=</span><span class="st">"all"</span>,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    vertical_spacing<span class="op">=</span><span class="fl">0.14</span>,</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    horizontal_spacing<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row, (name, scores) <span class="kw">in</span> <span class="bu">enumerate</span>(</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    [(<span class="st">"imbalanced (full)"</span>, scores_baseline), (<span class="st">"downsampled 1:1"</span>, scores_downsampled)],</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    start<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> col, label <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="dv">0</span>, <span class="dv">1</span>], start<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> y_val <span class="op">==</span> label</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>        counts, _ <span class="op">=</span> np.histogram(scores[mask], bins<span class="op">=</span>bins)</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>        pct <span class="op">=</span> counts <span class="op">/</span> counts.<span class="bu">sum</span>() <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>        fig.add_trace(</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>            go.Bar(</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>                x<span class="op">=</span>bin_centers,</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>                y<span class="op">=</span>pct,</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>                width<span class="op">=</span><span class="fl">0.02</span>,</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>                customdata<span class="op">=</span>counts,</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>                hovertemplate<span class="op">=</span><span class="st">"score: %</span><span class="sc">{x:.2f}</span><span class="st">&lt;br&gt;%</span><span class="sc">{y:.1f}</span><span class="st">%&lt;br&gt;count: %</span><span class="sc">{customdata:,d}</span><span class="st">&lt;extra&gt;&lt;/extra&gt;"</span>,</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>                marker<span class="op">=</span><span class="bu">dict</span>(color<span class="op">=</span>class_colors[label], line<span class="op">=</span><span class="bu">dict</span>(width<span class="op">=</span><span class="dv">0</span>)),</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>                showlegend<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>            row<span class="op">=</span>row, col<span class="op">=</span>col,</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>        n_above <span class="op">=</span> <span class="bu">int</span>((scores[mask] <span class="op">&gt;=</span> <span class="fl">0.5</span>).<span class="bu">sum</span>())</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>        fig.add_vline(</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>            x<span class="op">=</span><span class="fl">0.5</span>, row<span class="op">=</span>row, col<span class="op">=</span>col,</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>            line_dash<span class="op">=</span><span class="st">"dash"</span>, line_color<span class="op">=</span><span class="st">"#444444"</span>, line_width<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>        fig.add_annotation(</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>            x<span class="op">=</span><span class="fl">0.52</span>, y<span class="op">=</span><span class="dv">88</span>,</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>            text<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>n_above<span class="sc">:,}</span><span class="ss"> above 0.5"</span>,</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>            row<span class="op">=</span>row, col<span class="op">=</span>col,</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>            showarrow<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>            xanchor<span class="op">=</span><span class="st">"left"</span>,</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>            font<span class="op">=</span><span class="bu">dict</span>(size<span class="op">=</span><span class="dv">11</span>, color<span class="op">=</span><span class="st">"#444444"</span>),</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>fig.update_layout(</span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="dv">560</span>,</span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>    autosize<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Score distributions by class — % within class (hover for raw count)"</span>,</span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>    bargap<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>    hoverlabel<span class="op">=</span><span class="bu">dict</span>(bgcolor<span class="op">=</span><span class="st">"#1a1a1a"</span>, font_color<span class="op">=</span><span class="st">"white"</span>, bordercolor<span class="op">=</span><span class="st">"#1a1a1a"</span>),</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>fig.update_xaxes(title_text<span class="op">=</span><span class="st">"predicted P(class=1)"</span>, <span class="bu">range</span><span class="op">=</span>[<span class="dv">0</span>, <span class="dv">1</span>])</span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>fig.update_yaxes(title_text<span class="op">=</span><span class="st">"</span><span class="sc">% o</span><span class="st">f class"</span>, <span class="bu">range</span><span class="op">=</span>[<span class="dv">0</span>, <span class="dv">100</span>])</span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>HTML(fig.to_html(</span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a>    include_plotlyjs<span class="op">=</span><span class="st">"cdn"</span>,</span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>    full_html<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a>    div_id<span class="op">=</span><span class="st">"fig-scores-2x2"</span>,</span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a>    config<span class="op">=</span>{<span class="st">"responsive"</span>: <span class="va">True</span>},</span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a>    default_width<span class="op">=</span><span class="st">"100%"</span>,</span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>    default_height<span class="op">=</span><span class="st">"560px"</span>,</span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display column-page" data-execution_count="8">
+<div>                        <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.5.0.min.js" integrity="sha256-fHbNLP+GlIXN+efbQec78UkemUz3NJp7UmfGxC1tNxs=" crossorigin="anonymous"></script>                <div id="fig-scores-2x2" class="plotly-graph-div" style="height:560px; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("fig-scores-2x2")) {                    Plotly.newPlot(                        "fig-scores-2x2",                        [{"customdata":{"dtype":"i4","bdata":"1t0AAB0AAAAEAAAABAAAAAUAAAACAAAAAQAAAAIAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAEAAAAEAAAAAAAAAAMAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsAAAA="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#999999","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"wkkA3qv3WEAbL0lEhhyqP4AZP+oG0Hw\u002fgBk\u002f6gbQfD\u002fwb2dSBAKCP4AZP+oG0Gw\u002fgBk\u002f6gbQXD+AGT\u002fqBtBsPwAAAAAAAAAAgBk\u002f6gbQXD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAGT\u002fqBtBcPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACBTry8FnHU\u002fAAAAAAAAAACAGT\u002fqBtBcP4AZP+oG0Hw\u002fAAAAAAAAAAAgU68vBZx1P4AZP+oG0Fw\u002fAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBk\u002f6gbQXD8AAAAAAAAAAIAZP+oG0Fw\u002fAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACIYQvBBM+TPw=="},"type":"bar","xaxis":"x","yaxis":"y"},{"customdata":{"dtype":"i1","bdata":"CwYABAIAAAEAAgEAAQEBAQABAQEAAAEAAQAAAAAAAQAAAgACAQEBAQEBAAACAQECAyo="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#0062a8","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"nYKXU\u002fByJkAfGutDY30YQAAAAAAAAAAAFbycgpdTEEAVvJyCl1MAQAAAAAAAAAAAAAAAAAAAAAAVvJyCl1PwPwAAAAAAAAAAFbycgpdTAEAVvJyCl1PwPwAAAAAAAAAAFbycgpdT8D8VvJyCl1PwPxW8nIKXU\u002fA\u002fFbycgpdT8D8AAAAAAAAAABW8nIKXU\u002fA\u002fFbycgpdT8D8VvJyCl1PwPwAAAAAAAAAAAAAAAAAAAAAVvJyCl1PwPwAAAAAAAAAAFbycgpdT8D8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFbycgpdT8D8AAAAAAAAAAAAAAAAAAAAAFbycgpdTAEAAAAAAAAAAABW8nIKXUwBAFbycgpdT8D8VvJyCl1PwPxW8nIKXU\u002fA\u002fFbycgpdT8D8VvJyCl1PwPxW8nIKXU\u002fA\u002fAAAAAAAAAAAAAAAAAAAAABW8nIKXUwBAFbycgpdT8D8VvJyCl1PwPxW8nIKXUwBAHxrrQ2N9CEDbtm3btm1FQA=="},"type":"bar","xaxis":"x2","yaxis":"y2"},{"customdata":{"dtype":"i2","bdata":"lToCMrAcixJNDboJJAdKBQUEPAPJAhwCxgGhAUQBSQHyAAUB0gC4ALIAkQCPAHoAewB0AGwAVgBFAFUAQwBKAEYAQAAvADAALgA1ADUAKQAkACsAKABRADIARQBKADsALwCBAA=="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#999999","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"BIpilJpfOkDlnTjna4M2QFyR\u002fzJ+1ClAbgDNgSuyIEBjlJq\u002frvMXQOCbJjT2gxFAQ1IVLK63CUCcN16SiAwDQF\u002fo4\u002fIK9Pw\u002fngVplzVM9z+Bb5rQ2A\u002f0P+SMDktnY+4\u002fnfO1IXaM6T9FZMihbXfnPyPuO2CkO+I\u002f44uFcayD4j8bpm+JpjzbP\u002f9U0gwXYN0\u002f68InrKWi1z9UWl34hLXUP7vf386kCNQ\u002fcb2t6tNR0D8+P9ncMxjQP04kRJdGdss\u002fgaIYpeavyz8bL0lEhhzKP4Q9pdWFT8g\u002fImVipcRbwz99B4x0RxC\u002fP+\u002fmjZckIsM\u002fsQ46Pccpvj++emz\u002fQ6jAP+MDNZCHg78\u002fgBk\u002f6gbQvD+6VgYUxSi1PyBTry8FnLU\u002fVFpd+IS1tD8eQfy5Rdy3Px5B\u002fLlF3Lc\u002fVmwQbkR1sj9YfsPjAzWwPyJlYqXEW7M\u002f8G9nUgQCsj8j7jtgpDvCP+xLAWeFgrY\u002ffQeMdEcQvz++emz\u002fQ6jAP4Ir8l\u002fGj7o\u002fulYGFMUotT+zlxP4pgnNPw=="},"type":"bar","xaxis":"x3","yaxis":"y3"},{"customdata":{"dtype":"i1","bdata":"AAEAAwABAQEAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAEAAAAAAQACA1E="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#0062a8","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"AAAAAAAAAAAVvJyCl1PwPwAAAAAAAAAAHxrrQ2N9CEAAAAAAAAAAABW8nIKXU\u002fA\u002fFbycgpdT8D8VvJyCl1PwPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVvJyCl1PwPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABW8nIKXUwBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVvJyCl1PwPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFbycgpdT8D8AAAAAAAAAABW8nIKXUwBAHxrrQ2N9CEALXk7By6lUQA=="},"type":"bar","xaxis":"x4","yaxis":"y4"}],                        {"template":{"layout":{"colorway":["#0062a8","#F58518","#54A24B","#B279A2","#EECA3B","#72B7B2","#FF9DA6","#9D755D"],"font":{"color":"#1a1a1a","family":"Figtree, system-ui, -apple-system, Helvetica, Arial, sans-serif","size":13},"hoverlabel":{"bgcolor":"white","bordercolor":"#e5e5e5","font":{"family":"Figtree, system-ui, -apple-system, Helvetica, Arial, sans-serif","size":12}},"legend":{"bgcolor":"rgba(0,0,0,0)","bordercolor":"rgba(0,0,0,0)","font":{"color":"#1a1a1a","size":12}},"margin":{"b":50,"l":60,"r":20,"t":50},"paper_bgcolor":"white","plot_bgcolor":"white","title":{"font":{"color":"#1a1a1a","family":"Figtree, system-ui, -apple-system, Helvetica, Arial, sans-serif","size":16},"x":0,"xanchor":"left"},"xaxis":{"linecolor":"#e5e5e5","showgrid":false,"showline":true,"tickcolor":"#cccccc","ticklen":4,"ticks":"outside","title":{"font":{"color":"#797979","size":12}},"zeroline":false},"yaxis":{"linecolor":"#e5e5e5","showgrid":false,"showline":true,"tickcolor":"#cccccc","ticklen":4,"ticks":"outside","title":{"font":{"color":"#797979","size":12}},"zeroline":false}}},"xaxis":{"anchor":"y","domain":[0.0,0.44],"matches":"x3","showticklabels":false,"title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis":{"anchor":"x","domain":[0.5700000000000001,1.0],"matches":"y3","title":{"text":"% of class"},"range":[0,100]},"xaxis2":{"anchor":"y2","domain":[0.54,0.98],"matches":"x3","showticklabels":false,"title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis2":{"anchor":"x2","domain":[0.5700000000000001,1.0],"matches":"y3","showticklabels":false,"title":{"text":"% of class"},"range":[0,100]},"xaxis3":{"anchor":"y3","domain":[0.0,0.44],"title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis3":{"anchor":"x3","domain":[0.0,0.43],"title":{"text":"% of class"},"range":[0,100]},"xaxis4":{"anchor":"y4","domain":[0.54,0.98],"matches":"x3","title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis4":{"anchor":"x4","domain":[0.0,0.43],"matches":"y3","showticklabels":false,"title":{"text":"% of class"},"range":[0,100]},"annotations":[{"font":{"size":16},"showarrow":false,"text":"negatives (class 0)","x":0.22,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"positives (class 1)","x":0.76,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"negatives (class 0)","x":0.22,"xanchor":"center","xref":"paper","y":0.43,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"positives (class 1)","x":0.76,"xanchor":"center","xref":"paper","y":0.43,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"imbalanced (full)","textangle":90,"x":0.98,"xanchor":"left","xref":"paper","y":0.785,"yanchor":"middle","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"downsampled 1:1","textangle":90,"x":0.98,"xanchor":"left","xref":"paper","y":0.215,"yanchor":"middle","yref":"paper"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"13 above 0.5","x":0.52,"xanchor":"left","xref":"x","y":88,"yref":"y"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"62 above 0.5","x":0.52,"xanchor":"left","xref":"x2","y":88,"yref":"y2"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"1,655 above 0.5","x":0.52,"xanchor":"left","xref":"x3","y":88,"yref":"y3"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"90 above 0.5","x":0.52,"xanchor":"left","xref":"x4","y":88,"yref":"y4"}],"shapes":[{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x2","y0":0,"y1":1,"yref":"y2 domain"},{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x3","y0":0,"y1":1,"yref":"y3 domain"},{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x4","y0":0,"y1":1,"yref":"y4 domain"}],"hoverlabel":{"font":{"color":"white"},"bgcolor":"#1a1a1a","bordercolor":"#1a1a1a"},"height":560,"autosize":true,"title":{"text":"Score distributions by class \u2014 % within class (hover for raw count)"},"bargap":0},                        {"responsive": true}                    )                };            </script>        </div>
+</div>
+</div>
+<p>Now the picture is hard to miss on the positive side (right column): the downsampled model pushes ~80% of all fraud cases into the last bin, while the baseline spreads them across the full range. The negative side (left column) tells a subtler story. You won’t see any bars above 0.5 in the bottom-left — hover over that region and you’ll find they’re there, just under 0.2% per bin. That’s because 1,655 out of 56,864 negatives is only 2.9%, and spread across 25 bins it’s too small to appear on a linear scale.</p>
+<p>But here’s the thing: those invisible 1,655 negatives are competing directly with only 90 true positives in the high-score region. Flag everything above 0.5 and you send out 1,745 alerts, 90 of which are real fraud — a 5% precision. For every genuine fraud case, an analyst wades through roughly 18 false alarms.</p>
+<p>The baseline avoids this because its negative tail is almost nonexistent above 0.2 (top-left). Fewer negatives leak into the high-score region, so precision at the same threshold is 83%.</p>
+</section>
+<section id="why-does-training-on-downsampled-data-push-scores-higher" class="level2">
+<h2 class="anchored" data-anchor-id="why-does-training-on-downsampled-data-push-scores-higher">Why does training on downsampled data push scores higher?</h2>
+<p>Logistic regression models the probability of a positive outcome as:</p>
+<p><span class="math display">\[p = \text{sigmoid}(w \cdot x + b) = \frac{1}{1 + e^{-(w \cdot x + b)}}\]</span></p>
+<p>The weights <span class="math inline">\(w\)</span> learn which features push the probability up or down. The bias <span class="math inline">\(b\)</span> is a constant added to every sample’s raw score before it gets squashed through sigmoid — the model’s baseline suspicion before it looks at any features.</p>
+<p>The model is trained to minimize cross-entropy loss:</p>
+<p><span class="math display">\[L = -\sum_i \left[ y_i \log(p_i) + (1 - y_i) \log(1 - p_i) \right]\]</span></p>
+<p>The <span class="math inline">\(\log\)</span> terms are what give this its character: <span class="math inline">\(\log(p)\)</span> shoots toward <span class="math inline">\(-\infty\)</span> as <span class="math inline">\(p \to 0\)</span>, so being confidently wrong incurs a catastrophically large penalty. Think of it as a <strong>“how surprised were you?” scorer</strong>. Every time the model makes a prediction, it gets scored on how shocked it should be by what actually happened. Predict 99% fraud and it turns out to be fraud — barely surprised, tiny penalty. Predict 1% fraud and it turns out to be fraud — extremely surprised, huge penalty. The model’s entire job during training is to stop being surprised.</p>
+<p>Now zoom in on the bias. If it’s set too low, the model is systematically shocked every time fraud shows up. If it’s too high, it’s systematically shocked by the 99.83% of transactions that aren’t fraud. The only resting point where the bias stops accumulating surprise from both sides is when it matches how often fraud actually occurs in training — the training positive rate. Any other value leaves the model consistently surprised by one class or the other, which keeps bleeding into the loss.</p>
+<p>This is why the downsampled model’s scores are inflated. It was trained to stop being surprised in a world where fraud is 50% common. When deployed into a world where fraud is 0.17% common, its baseline suspicion is miscalibrated by three orders of magnitude. The weights still learned the right patterns — the model reliably ranks fraud higher than non-fraud, which is why ROC-AUC is actually better — but the absolute score values reflect the wrong world. That’s what miscalibration means: the scores don’t correspond to real-world frequencies.</p>
+</section>
+<section id="what-happens-when-we-use-class_weightbalanced" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="what-happens-when-we-use-class_weightbalanced">What happens when we use <code>class_weight='balanced'</code>?</h2>
+<p><code>class_weight='balanced'</code> keeps all the training data and instead multiplies each sample’s contribution to the loss by a class-specific weight. Sklearn computes it as <code>n_samples / (n_classes × class_count)</code> — roughly 289× for fraud and 0.5× for legitimate transactions in our dataset.</p>
+<p>This is appealing because you don’t throw away data. But the score calibration problem doesn’t go away. The loss equilibrium — where gradient accumulation stops — is governed by the effective class ratio in the loss, not the true base rate. With equal effective weighting, the bias settles near the same resting point as the downsampled model. Scores will still be inflated.</p>
+<p>The genuine difference is in the feature weights <span class="math inline">\(w\)</span>. The downsampled model trained on 788 examples; this one trains on all 227k. More diverse negatives give the model a much richer picture of what legitimate transactions look like, so the decision boundary is carved more precisely.</p>
+<div id="5e8d791d" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:20.188109Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:20.187993Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:20.840430Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:20.839879Z&quot;}" data-papermill="{&quot;duration&quot;:0.656787,&quot;end_time&quot;:&quot;2026-05-13T14:02:20.841738+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:20.184951+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>balanced <span class="op">=</span> Pipeline([</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"scaler"</span>, StandardScaler()),</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"lr"</span>, LogisticRegression(max_iter<span class="op">=</span><span class="dv">1000</span>, random_state<span class="op">=</span>RANDOM_STATE, class_weight<span class="op">=</span><span class="st">"balanced"</span>)),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>balanced.fit(X_train, y_train)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>scores_balanced <span class="op">=</span> balanced.predict_proba(X_val)[:, <span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="563c7104" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:20.848996Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:20.848869Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:20.949212Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:20.948780Z&quot;}" data-papermill="{&quot;duration&quot;:0.104904,&quot;end_time&quot;:&quot;2026-05-13T14:02:20.949763+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:20.844859+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="10">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>metrics_df <span class="op">=</span> pd.DataFrame([</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    metrics_row(<span class="st">"imbalanced (full)"</span>, y_val, scores_baseline),</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    metrics_row(<span class="st">"downsampled 1:1"</span>, y_val, scores_downsampled),</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    metrics_row(<span class="st">"balanced weights"</span>, y_val, scores_balanced),</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>metrics_df.<span class="bu">round</span>(<span class="dv">4</span>).set_index(<span class="st">"model"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">AP</th>
+<th data-quarto-table-cell-role="th">ROC-AUC</th>
+<th data-quarto-table-cell-role="th">precision@0.5</th>
+<th data-quarto-table-cell-role="th">recall@0.5</th>
+<th data-quarto-table-cell-role="th">f1@0.5</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">model</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">imbalanced (full)</td>
+<td>0.7414</td>
+<td>0.9605</td>
+<td>0.8267</td>
+<td>0.6327</td>
+<td>0.7168</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">downsampled 1:1</td>
+<td>0.4578</td>
+<td>0.9752</td>
+<td>0.0516</td>
+<td>0.9184</td>
+<td>0.0977</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">balanced weights</td>
+<td>0.7190</td>
+<td>0.9721</td>
+<td>0.0610</td>
+<td>0.9184</td>
+<td>0.1144</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="c07c5663" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:20.955749Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:20.955604Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:20.970484Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:20.970025Z&quot;}" data-papermill="{&quot;duration&quot;:0.01853,&quot;end_time&quot;:&quot;2026-05-13T14:02:20.970930+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:20.952400+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="11">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, scores <span class="kw">in</span> [</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"imbalanced (full)"</span>, scores_baseline),</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"downsampled 1:1"</span>, scores_downsampled),</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"balanced weights"</span>, scores_balanced),</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>]:</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> (scores <span class="op">&gt;=</span> <span class="fl">0.5</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    cm <span class="op">=</span> confusion_matrix(y_val, y_pred)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss"> @ threshold=0.5"</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    display(pd.DataFrame(cm, index<span class="op">=</span>[<span class="st">"actual 0"</span>, <span class="st">"actual 1"</span>], columns<span class="op">=</span>[<span class="st">"pred 0"</span>, <span class="st">"pred 1"</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>imbalanced (full) @ threshold=0.5</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">pred 0</th>
+<th data-quarto-table-cell-role="th">pred 1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">actual 0</td>
+<td>56851</td>
+<td>13</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">actual 1</td>
+<td>36</td>
+<td>62</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>downsampled 1:1 @ threshold=0.5</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">pred 0</th>
+<th data-quarto-table-cell-role="th">pred 1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">actual 0</td>
+<td>55209</td>
+<td>1655</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">actual 1</td>
+<td>8</td>
+<td>90</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>balanced weights @ threshold=0.5</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">pred 0</th>
+<th data-quarto-table-cell-role="th">pred 1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">actual 0</td>
+<td>55478</td>
+<td>1386</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">actual 1</td>
+<td>8</td>
+<td>90</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="1a79e696" class="cell page-columns page-full" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:20.976733Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:20.976640Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:21.176239Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:21.175811Z&quot;}" data-papermill="{&quot;duration&quot;:0.203861,&quot;end_time&quot;:&quot;2026-05-13T14:02:21.177474+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:20.973613+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="12">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>bins <span class="op">=</span> np.arange(<span class="dv">0</span>, <span class="fl">1.02</span>, <span class="fl">0.02</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>bin_centers <span class="op">=</span> (bins[:<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> bins[<span class="dv">1</span>:]) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>class_colors <span class="op">=</span> {<span class="dv">0</span>: <span class="st">"#999999"</span>, <span class="dv">1</span>: dvq_theme.ACCENT}</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> make_subplots(</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    rows<span class="op">=</span><span class="dv">3</span>, cols<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    subplot_titles<span class="op">=</span>(</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"negatives (class 0)"</span>, <span class="st">"positives (class 1)"</span>,</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"negatives (class 0)"</span>, <span class="st">"positives (class 1)"</span>,</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"negatives (class 0)"</span>, <span class="st">"positives (class 1)"</span>,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    row_titles<span class="op">=</span>[<span class="st">"imbalanced (full)"</span>, <span class="st">"downsampled 1:1"</span>, <span class="st">"balanced weights"</span>],</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    shared_yaxes<span class="op">=</span><span class="st">"all"</span>,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    shared_xaxes<span class="op">=</span><span class="st">"all"</span>,</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    vertical_spacing<span class="op">=</span><span class="fl">0.10</span>,</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    horizontal_spacing<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row, (name, scores) <span class="kw">in</span> <span class="bu">enumerate</span>(</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"imbalanced (full)"</span>, scores_baseline),</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"downsampled 1:1"</span>, scores_downsampled),</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"balanced weights"</span>, scores_balanced),</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>    start<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> col, label <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="dv">0</span>, <span class="dv">1</span>], start<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> y_val <span class="op">==</span> label</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>        counts, _ <span class="op">=</span> np.histogram(scores[mask], bins<span class="op">=</span>bins)</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>        pct <span class="op">=</span> counts <span class="op">/</span> counts.<span class="bu">sum</span>() <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>        fig.add_trace(</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>            go.Bar(</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>                x<span class="op">=</span>bin_centers,</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>                y<span class="op">=</span>pct,</span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>                width<span class="op">=</span><span class="fl">0.02</span>,</span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>                customdata<span class="op">=</span>counts,</span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>                hovertemplate<span class="op">=</span><span class="st">"score: %</span><span class="sc">{x:.2f}</span><span class="st">&lt;br&gt;%</span><span class="sc">{y:.1f}</span><span class="st">%&lt;br&gt;count: %</span><span class="sc">{customdata:,d}</span><span class="st">&lt;extra&gt;&lt;/extra&gt;"</span>,</span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>                marker<span class="op">=</span><span class="bu">dict</span>(color<span class="op">=</span>class_colors[label], line<span class="op">=</span><span class="bu">dict</span>(width<span class="op">=</span><span class="dv">0</span>)),</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>                showlegend<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>            row<span class="op">=</span>row, col<span class="op">=</span>col,</span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>        n_above <span class="op">=</span> <span class="bu">int</span>((scores[mask] <span class="op">&gt;=</span> <span class="fl">0.5</span>).<span class="bu">sum</span>())</span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>        fig.add_vline(</span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>            x<span class="op">=</span><span class="fl">0.5</span>, row<span class="op">=</span>row, col<span class="op">=</span>col,</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>            line_dash<span class="op">=</span><span class="st">"dash"</span>, line_color<span class="op">=</span><span class="st">"#444444"</span>, line_width<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>        fig.add_annotation(</span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>            x<span class="op">=</span><span class="fl">0.52</span>, y<span class="op">=</span><span class="dv">88</span>,</span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a>            text<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>n_above<span class="sc">:,}</span><span class="ss"> above 0.5"</span>,</span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>            row<span class="op">=</span>row, col<span class="op">=</span>col,</span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a>            showarrow<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>            xanchor<span class="op">=</span><span class="st">"left"</span>,</span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a>            font<span class="op">=</span><span class="bu">dict</span>(size<span class="op">=</span><span class="dv">11</span>, color<span class="op">=</span><span class="st">"#444444"</span>),</span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a>fig.update_layout(</span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="dv">800</span>,</span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a>    autosize<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb21-61"><a href="#cb21-61" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Score distributions by class — % within class (hover for raw count)"</span>,</span>
+<span id="cb21-62"><a href="#cb21-62" aria-hidden="true" tabindex="-1"></a>    bargap<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb21-63"><a href="#cb21-63" aria-hidden="true" tabindex="-1"></a>    hoverlabel<span class="op">=</span><span class="bu">dict</span>(bgcolor<span class="op">=</span><span class="st">"#1a1a1a"</span>, font_color<span class="op">=</span><span class="st">"white"</span>, bordercolor<span class="op">=</span><span class="st">"#1a1a1a"</span>),</span>
+<span id="cb21-64"><a href="#cb21-64" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-65"><a href="#cb21-65" aria-hidden="true" tabindex="-1"></a>fig.update_xaxes(title_text<span class="op">=</span><span class="st">"predicted P(class=1)"</span>, <span class="bu">range</span><span class="op">=</span>[<span class="dv">0</span>, <span class="dv">1</span>])</span>
+<span id="cb21-66"><a href="#cb21-66" aria-hidden="true" tabindex="-1"></a>fig.update_yaxes(title_text<span class="op">=</span><span class="st">"</span><span class="sc">% o</span><span class="st">f class"</span>, <span class="bu">range</span><span class="op">=</span>[<span class="dv">0</span>, <span class="dv">100</span>])</span>
+<span id="cb21-67"><a href="#cb21-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-68"><a href="#cb21-68" aria-hidden="true" tabindex="-1"></a>HTML(fig.to_html(</span>
+<span id="cb21-69"><a href="#cb21-69" aria-hidden="true" tabindex="-1"></a>    include_plotlyjs<span class="op">=</span><span class="st">"cdn"</span>,</span>
+<span id="cb21-70"><a href="#cb21-70" aria-hidden="true" tabindex="-1"></a>    full_html<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb21-71"><a href="#cb21-71" aria-hidden="true" tabindex="-1"></a>    div_id<span class="op">=</span><span class="st">"fig-scores-3x2"</span>,</span>
+<span id="cb21-72"><a href="#cb21-72" aria-hidden="true" tabindex="-1"></a>    config<span class="op">=</span>{<span class="st">"responsive"</span>: <span class="va">True</span>},</span>
+<span id="cb21-73"><a href="#cb21-73" aria-hidden="true" tabindex="-1"></a>    default_width<span class="op">=</span><span class="st">"100%"</span>,</span>
+<span id="cb21-74"><a href="#cb21-74" aria-hidden="true" tabindex="-1"></a>    default_height<span class="op">=</span><span class="st">"800px"</span>,</span>
+<span id="cb21-75"><a href="#cb21-75" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display column-page" data-execution_count="12">
+<div>                        <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.5.0.min.js" integrity="sha256-fHbNLP+GlIXN+efbQec78UkemUz3NJp7UmfGxC1tNxs=" crossorigin="anonymous"></script>                <div id="fig-scores-3x2" class="plotly-graph-div" style="height:800px; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("fig-scores-3x2")) {                    Plotly.newPlot(                        "fig-scores-3x2",                        [{"customdata":{"dtype":"i4","bdata":"1t0AAB0AAAAEAAAABAAAAAUAAAACAAAAAQAAAAIAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAEAAAAEAAAAAAAAAAMAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsAAAA="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#999999","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"wkkA3qv3WEAbL0lEhhyqP4AZP+oG0Hw\u002fgBk\u002f6gbQfD\u002fwb2dSBAKCP4AZP+oG0Gw\u002fgBk\u002f6gbQXD+AGT\u002fqBtBsPwAAAAAAAAAAgBk\u002f6gbQXD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAGT\u002fqBtBcPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACBTry8FnHU\u002fAAAAAAAAAACAGT\u002fqBtBcP4AZP+oG0Hw\u002fAAAAAAAAAAAgU68vBZx1P4AZP+oG0Fw\u002fAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBk\u002f6gbQXD8AAAAAAAAAAIAZP+oG0Fw\u002fAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACIYQvBBM+TPw=="},"type":"bar","xaxis":"x","yaxis":"y"},{"customdata":{"dtype":"i1","bdata":"CwYABAIAAAEAAgEAAQEBAQABAQEAAAEAAQAAAAAAAQAAAgACAQEBAQEBAAACAQECAyo="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#0062a8","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"nYKXU\u002fByJkAfGutDY30YQAAAAAAAAAAAFbycgpdTEEAVvJyCl1MAQAAAAAAAAAAAAAAAAAAAAAAVvJyCl1PwPwAAAAAAAAAAFbycgpdTAEAVvJyCl1PwPwAAAAAAAAAAFbycgpdT8D8VvJyCl1PwPxW8nIKXU\u002fA\u002fFbycgpdT8D8AAAAAAAAAABW8nIKXU\u002fA\u002fFbycgpdT8D8VvJyCl1PwPwAAAAAAAAAAAAAAAAAAAAAVvJyCl1PwPwAAAAAAAAAAFbycgpdT8D8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFbycgpdT8D8AAAAAAAAAAAAAAAAAAAAAFbycgpdTAEAAAAAAAAAAABW8nIKXUwBAFbycgpdT8D8VvJyCl1PwPxW8nIKXU\u002fA\u002fFbycgpdT8D8VvJyCl1PwPxW8nIKXU\u002fA\u002fAAAAAAAAAAAAAAAAAAAAABW8nIKXUwBAFbycgpdT8D8VvJyCl1PwPxW8nIKXUwBAHxrrQ2N9CEDbtm3btm1FQA=="},"type":"bar","xaxis":"x2","yaxis":"y2"},{"customdata":{"dtype":"i2","bdata":"lToCMrAcixJNDboJJAdKBQUEPAPJAhwCxgGhAUQBSQHyAAUB0gC4ALIAkQCPAHoAewB0AGwAVgBFAFUAQwBKAEYAQAAvADAALgA1ADUAKQAkACsAKABRADIARQBKADsALwCBAA=="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#999999","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"BIpilJpfOkDlnTjna4M2QFyR\u002fzJ+1ClAbgDNgSuyIEBjlJq\u002frvMXQOCbJjT2gxFAQ1IVLK63CUCcN16SiAwDQF\u002fo4\u002fIK9Pw\u002fngVplzVM9z+Bb5rQ2A\u002f0P+SMDktnY+4\u002fnfO1IXaM6T9FZMihbXfnPyPuO2CkO+I\u002f44uFcayD4j8bpm+JpjzbP\u002f9U0gwXYN0\u002f68InrKWi1z9UWl34hLXUP7vf386kCNQ\u002fcb2t6tNR0D8+P9ncMxjQP04kRJdGdss\u002fgaIYpeavyz8bL0lEhhzKP4Q9pdWFT8g\u002fImVipcRbwz99B4x0RxC\u002fP+\u002fmjZckIsM\u002fsQ46Pccpvj++emz\u002fQ6jAP+MDNZCHg78\u002fgBk\u002f6gbQvD+6VgYUxSi1PyBTry8FnLU\u002fVFpd+IS1tD8eQfy5Rdy3Px5B\u002fLlF3Lc\u002fVmwQbkR1sj9YfsPjAzWwPyJlYqXEW7M\u002f8G9nUgQCsj8j7jtgpDvCP+xLAWeFgrY\u002ffQeMdEcQvz++emz\u002fQ6jAP4Ir8l\u002fGj7o\u002fulYGFMUotT+zlxP4pgnNPw=="},"type":"bar","xaxis":"x3","yaxis":"y3"},{"customdata":{"dtype":"i1","bdata":"AAEAAwABAQEAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAEAAAAAAQACA1E="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#0062a8","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"AAAAAAAAAAAVvJyCl1PwPwAAAAAAAAAAHxrrQ2N9CEAAAAAAAAAAABW8nIKXU\u002fA\u002fFbycgpdT8D8VvJyCl1PwPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVvJyCl1PwPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABW8nIKXUwBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVvJyCl1PwPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFbycgpdT8D8AAAAAAAAAABW8nIKXUwBAHxrrQ2N9CEALXk7By6lUQA=="},"type":"bar","xaxis":"x4","yaxis":"y4"},{"customdata":{"dtype":"i2","bdata":"imQIJX4TcgxrCLkGVgUlBHMDAQNrAvsBzgF5AV0BJgH6AOQAzAC0AKIAiwB7AHQAdwB2AFAAXABVAEoAPgBAAD0AOwAuAC0AJwAoAB4AIQAbACIAIgArADcAKwA9ADMAHQBRAA=="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#999999","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"9Nd1rpWhRkChwkkA3qswQJjPTzb3jCFAtlT0YE9pFkB1JbxGZVEOQE1GmM9PNghAQpa9nMA3A0Ar4TUqi9r9Pz3pffZh2Pg\u002f5uJpMTmj9T+qpBkuwGrxP8F79dj+h+w\u002fA\u002fBePbb\u002f6T9HdnsXLTflP+ECrLbMo+M\u002fpDuC+HOL4D\u002fnnsHAJiPcP7UyoChGqdk\u002fUkiqgsX11j\u002fuXbTcRELUPyPuO2CkO9I\u002fsIVggudJzz+Bohil5q\u002fLPxsvSUSGHMo\u002ftanGbWbJyj+CK\u002fJfxo\u002fKP\u002fBvZ1IEAsI\u002fVFpd+IS1xD\u002fv5o2XJCLDP756bP9DqMA\u002ftCDtsobpuz+AGT\u002fqBtC8P04kRJdGdrs\u002fgivyX8aPuj9UWl34hLW0P+5dtNxEQrQ\u002finO+NsSOsT\u002fwb2dSBAKyP+gnm3sGA6s\u002fTBKRIYe2rT+EPaXVhU+oPxcL41gHna4\u002fFwvjWAedrj8iZWKlxFuzP+o5TvHFwrg\u002fImVipcRbsz9OJESXRna7P1JIqoLF9bY\u002fGy9JRIYcqj8j7jtgpDvCPw=="},"type":"bar","xaxis":"x5","yaxis":"y5"},{"customdata":{"dtype":"i1","bdata":"AQMAAQAAAAAAAQEBAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAQAAAAAAAAAAAlU="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#0062a8","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"FbycgpdT8D8fGutDY30IQAAAAAAAAAAAFbycgpdT8D8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFbycgpdT8D8VvJyCl1PwPxW8nIKXU\u002fA\u002fAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABW8nIKXU\u002fA\u002fAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVvJyCl1PwPwAAAAAAAAAAFbycgpdT8D8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFbycgpdTAEDMKXg5Ba9VQA=="},"type":"bar","xaxis":"x6","yaxis":"y6"}],                        {"template":{"layout":{"colorway":["#0062a8","#F58518","#54A24B","#B279A2","#EECA3B","#72B7B2","#FF9DA6","#9D755D"],"font":{"color":"#1a1a1a","family":"Figtree, system-ui, -apple-system, Helvetica, Arial, sans-serif","size":13},"hoverlabel":{"bgcolor":"white","bordercolor":"#e5e5e5","font":{"family":"Figtree, system-ui, -apple-system, Helvetica, Arial, sans-serif","size":12}},"legend":{"bgcolor":"rgba(0,0,0,0)","bordercolor":"rgba(0,0,0,0)","font":{"color":"#1a1a1a","size":12}},"margin":{"b":50,"l":60,"r":20,"t":50},"paper_bgcolor":"white","plot_bgcolor":"white","title":{"font":{"color":"#1a1a1a","family":"Figtree, system-ui, -apple-system, Helvetica, Arial, sans-serif","size":16},"x":0,"xanchor":"left"},"xaxis":{"linecolor":"#e5e5e5","showgrid":false,"showline":true,"tickcolor":"#cccccc","ticklen":4,"ticks":"outside","title":{"font":{"color":"#797979","size":12}},"zeroline":false},"yaxis":{"linecolor":"#e5e5e5","showgrid":false,"showline":true,"tickcolor":"#cccccc","ticklen":4,"ticks":"outside","title":{"font":{"color":"#797979","size":12}},"zeroline":false}}},"xaxis":{"anchor":"y","domain":[0.0,0.44],"matches":"x5","showticklabels":false,"title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis":{"anchor":"x","domain":[0.7333333333333334,1.0],"matches":"y5","title":{"text":"% of class"},"range":[0,100]},"xaxis2":{"anchor":"y2","domain":[0.54,0.98],"matches":"x5","showticklabels":false,"title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis2":{"anchor":"x2","domain":[0.7333333333333334,1.0],"matches":"y5","showticklabels":false,"title":{"text":"% of class"},"range":[0,100]},"xaxis3":{"anchor":"y3","domain":[0.0,0.44],"matches":"x5","showticklabels":false,"title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis3":{"anchor":"x3","domain":[0.3666666666666667,0.6333333333333333],"matches":"y5","title":{"text":"% of class"},"range":[0,100]},"xaxis4":{"anchor":"y4","domain":[0.54,0.98],"matches":"x5","showticklabels":false,"title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis4":{"anchor":"x4","domain":[0.3666666666666667,0.6333333333333333],"matches":"y5","showticklabels":false,"title":{"text":"% of class"},"range":[0,100]},"xaxis5":{"anchor":"y5","domain":[0.0,0.44],"title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis5":{"anchor":"x5","domain":[0.0,0.26666666666666666],"title":{"text":"% of class"},"range":[0,100]},"xaxis6":{"anchor":"y6","domain":[0.54,0.98],"matches":"x5","title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis6":{"anchor":"x6","domain":[0.0,0.26666666666666666],"matches":"y5","showticklabels":false,"title":{"text":"% of class"},"range":[0,100]},"annotations":[{"font":{"size":16},"showarrow":false,"text":"negatives (class 0)","x":0.22,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"positives (class 1)","x":0.76,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"negatives (class 0)","x":0.22,"xanchor":"center","xref":"paper","y":0.6333333333333333,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"positives (class 1)","x":0.76,"xanchor":"center","xref":"paper","y":0.6333333333333333,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"negatives (class 0)","x":0.22,"xanchor":"center","xref":"paper","y":0.26666666666666666,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"positives (class 1)","x":0.76,"xanchor":"center","xref":"paper","y":0.26666666666666666,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"imbalanced (full)","textangle":90,"x":0.98,"xanchor":"left","xref":"paper","y":0.8666666666666667,"yanchor":"middle","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"downsampled 1:1","textangle":90,"x":0.98,"xanchor":"left","xref":"paper","y":0.5,"yanchor":"middle","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"balanced weights","textangle":90,"x":0.98,"xanchor":"left","xref":"paper","y":0.13333333333333333,"yanchor":"middle","yref":"paper"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"13 above 0.5","x":0.52,"xanchor":"left","xref":"x","y":88,"yref":"y"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"62 above 0.5","x":0.52,"xanchor":"left","xref":"x2","y":88,"yref":"y2"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"1,655 above 0.5","x":0.52,"xanchor":"left","xref":"x3","y":88,"yref":"y3"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"90 above 0.5","x":0.52,"xanchor":"left","xref":"x4","y":88,"yref":"y4"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"1,386 above 0.5","x":0.52,"xanchor":"left","xref":"x5","y":88,"yref":"y5"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"90 above 0.5","x":0.52,"xanchor":"left","xref":"x6","y":88,"yref":"y6"}],"shapes":[{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x2","y0":0,"y1":1,"yref":"y2 domain"},{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x3","y0":0,"y1":1,"yref":"y3 domain"},{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x4","y0":0,"y1":1,"yref":"y4 domain"},{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x5","y0":0,"y1":1,"yref":"y5 domain"},{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x6","y0":0,"y1":1,"yref":"y6 domain"}],"hoverlabel":{"font":{"color":"white"},"bgcolor":"#1a1a1a","bordercolor":"#1a1a1a"},"height":800,"autosize":true,"title":{"text":"Score distributions by class \u2014 % within class (hover for raw count)"},"bargap":0},                        {"responsive": true}                    )                };            </script>        </div>
+</div>
+</div>
+<p>The distributions confirm the theory: row 3 (balanced weights) mirrors row 2 (downsampled) almost exactly. Positives pile up near 1.0; the negative tail above 0.5 is invisible on a linear scale but hover over it and you’ll find 1,386 negatives there — only slightly fewer than the 1,655 from the downsampled model.</p>
+<p>The metrics table is where the story gets interesting:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>model</th>
+<th>AP</th>
+<th>ROC-AUC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>imbalanced (full)</td>
+<td><strong>0.741</strong></td>
+<td>0.961</td>
+</tr>
+<tr class="even">
+<td>balanced weights</td>
+<td>0.719</td>
+<td>0.972</td>
+</tr>
+<tr class="odd">
+<td>downsampled 1:1</td>
+<td>0.458</td>
+<td><strong>0.975</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The balanced model’s AP is 57% higher than the downsampled model’s (0.719 vs 0.458), which is the more data story: the decision boundary is carved from all 227k examples, so fewer negatives bleed into the very top of the ranking. But it still lands slightly below the baseline (0.719 vs 0.741).</p>
+<p>That last gap is easy to miss. The baseline was trained on the true distribution, where the model learned an implicit lesson: fraud is so rare that it should only fire on very strong signals. The balanced model unlearns that lesson — it trades scoring precision at the top of the list for much higher recall at any given threshold. Whether that trade is worth it depends on the operating point you care about.</p>
+<p>The false positive count at threshold 0.5 reflects this directly. The baseline sends out 13 false alarms per fraud wave; the balanced model sends 1,386. Both catch the same 90 fraud cases. If your analyst team is staffed for 13 reviews per fraud case, the balanced model is a disaster. If you can tolerate more volume in exchange for catching everything, it’s the right starting point.</p>
+<p>The one thing neither approach solves is calibration. To get scores that mean something as probabilities — where 0.7 actually means 70% likely fraud — you need an explicit calibration step on top.</p>
+</section>
+<section id="lightgbm-does-the-same-story-hold" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="lightgbm-does-the-same-story-hold">LightGBM: does the same story hold?</h2>
+<p>LightGBM’s equivalent of <code>class_weight='balanced'</code> is <code>scale_pos_weight</code>. Setting it to <code>n_neg / n_pos</code> (~577 here) makes the total loss contribution from positives equal to negatives — same math, different API.</p>
+<p>One important difference from logistic regression: LightGBM needs explicit early stopping. Logistic regression optimizes log-loss globally and the gradient naturally accounts for every example throughout training. LightGBM builds trees, and trees split on actual sample counts. With <code>min_child_samples=20</code> (default) and only 394 positives in training, the model can make at most ~15 minority-class-isolating leaves before it runs out of fraud examples that meet the threshold. After that, it continues with splits that have negative gain — which degrade AP. The exact point where this cliff hits is non-deterministic across runs due to parallel thread scheduling.</p>
+<p>The fix is early stopping: carve out 20% of training data as a validation set, track AP directly, and stop when it stops improving.</p>
+<div id="1395af4c" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:21.203169Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:21.203026Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:26.487724Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:26.486670Z&quot;}" data-papermill="{&quot;duration&quot;:5.291495,&quot;end_time&quot;:&quot;2026-05-13T14:02:26.488606+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:21.197111+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="13">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> lightgbm <span class="im">as</span> lgb</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>n_pos <span class="op">=</span> <span class="bu">int</span>(y_train.<span class="bu">sum</span>())</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>n_neg <span class="op">=</span> <span class="bu">int</span>((y_train <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>())</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Carve out 20% of training data for early stopping (stratified so it has ~79 positives).</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co"># X_val is kept fully held-out for final evaluation.</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>X_tr, X_es, y_tr, y_es <span class="op">=</span> train_test_split(</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    X_train, y_train, test_size<span class="op">=</span><span class="fl">0.2</span>, stratify<span class="op">=</span>y_train, random_state<span class="op">=</span>RANDOM_STATE</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"LGBM training set:       </span><span class="sc">{</span><span class="bu">len</span>(X_tr)<span class="sc">:,}</span><span class="ss">  (</span><span class="sc">{</span><span class="bu">int</span>(y_tr.<span class="bu">sum</span>())<span class="sc">}</span><span class="ss"> positives)"</span>)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Early stopping set:      </span><span class="sc">{</span><span class="bu">len</span>(X_es)<span class="sc">:,}</span><span class="ss">  (</span><span class="sc">{</span><span class="bu">int</span>(y_es.<span class="bu">sum</span>())<span class="sc">}</span><span class="ss"> positives)"</span>)</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ap_metric(y_true, y_pred):</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"ap"</span>, average_precision_score(y_true, y_pred), <span class="va">True</span>  <span class="co"># higher is better</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>callbacks <span class="op">=</span> [lgb.early_stopping(<span class="dv">50</span>, verbose<span class="op">=</span><span class="va">False</span>), lgb.log_evaluation(period<span class="op">=-</span><span class="dv">1</span>)]</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit_lgbm(X_fit, y_fit, <span class="op">**</span>kwargs):</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> lgb.LGBMClassifier(</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>        n_estimators<span class="op">=</span><span class="dv">2000</span>, random_state<span class="op">=</span>RANDOM_STATE, verbose<span class="op">=-</span><span class="dv">1</span>,</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>        num_threads<span class="op">=</span><span class="dv">1</span>,  <span class="co"># deterministic: parallel threading changes split order</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>kwargs</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>    m.fit(X_fit, y_fit, eval_set<span class="op">=</span>[(X_es, y_es)], eval_metric<span class="op">=</span>ap_metric, callbacks<span class="op">=</span>callbacks)</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>lgbm_baseline    <span class="op">=</span> fit_lgbm(X_tr, y_tr)</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>lgbm_balanced    <span class="op">=</span> fit_lgbm(X_tr, y_tr, scale_pos_weight<span class="op">=</span>n_neg <span class="op">/</span> n_pos)</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>lgbm_downsampled <span class="op">=</span> fit_lgbm(X_train_ds, y_train_ds)</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>scores_lgbm_baseline    <span class="op">=</span> lgbm_baseline.predict_proba(X_val)[:, <span class="dv">1</span>]</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>scores_lgbm_balanced    <span class="op">=</span> lgbm_balanced.predict_proba(X_val)[:, <span class="dv">1</span>]</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>scores_lgbm_downsampled <span class="op">=</span> lgbm_downsampled.predict_proba(X_val)[:, <span class="dv">1</span>]</span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">scale_pos_weight: </span><span class="sc">{</span>n_neg <span class="op">/</span> n_pos<span class="sc">:.1f}</span><span class="ss">×"</span>)</span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, m <span class="kw">in</span> [(<span class="st">"baseline"</span>, lgbm_baseline), (<span class="st">"scale_pos_weight"</span>, lgbm_balanced), (<span class="st">"downsampled"</span>, lgbm_downsampled)]:</span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  LGBM </span><span class="sc">{</span>name<span class="sc">:18s}</span><span class="ss">  best_iter=</span><span class="sc">{</span>m<span class="sc">.</span>best_iteration_<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>LGBM training set:       182,276  (315 positives)
+Early stopping set:      45,569  (79 positives)
+
+scale_pos_weight: 577.3×
+  LGBM baseline            best_iter=1
+  LGBM scale_pos_weight    best_iter=3
+  LGBM downsampled         best_iter=61</code></pre>
+</div>
+</div>
+<div id="1a05e254" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:26.516562Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:26.515841Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:26.748175Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:26.747641Z&quot;}" data-papermill="{&quot;duration&quot;:0.237176,&quot;end_time&quot;:&quot;2026-05-13T14:02:26.748885+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:26.511709+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="14">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>metrics_all <span class="op">=</span> pd.DataFrame([</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    metrics_row(<span class="st">"LR — imbalanced (full)"</span>, y_val, scores_baseline),</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    metrics_row(<span class="st">"LR — downsampled 1:1"</span>, y_val, scores_downsampled),</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    metrics_row(<span class="st">"LR — balanced weights"</span>, y_val, scores_balanced),</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    metrics_row(<span class="st">"LGBM — imbalanced (full)"</span>, y_val, scores_lgbm_baseline),</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    metrics_row(<span class="st">"LGBM — downsampled 1:1"</span>, y_val, scores_lgbm_downsampled),</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    metrics_row(<span class="st">"LGBM — balanced weights"</span>, y_val, scores_lgbm_balanced),</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>metrics_all.<span class="bu">round</span>(<span class="dv">4</span>).set_index(<span class="st">"model"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">AP</th>
+<th data-quarto-table-cell-role="th">ROC-AUC</th>
+<th data-quarto-table-cell-role="th">precision@0.5</th>
+<th data-quarto-table-cell-role="th">recall@0.5</th>
+<th data-quarto-table-cell-role="th">f1@0.5</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">model</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">LR — imbalanced (full)</td>
+<td>0.7414</td>
+<td>0.9605</td>
+<td>0.8267</td>
+<td>0.6327</td>
+<td>0.7168</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">LR — downsampled 1:1</td>
+<td>0.4578</td>
+<td>0.9752</td>
+<td>0.0516</td>
+<td>0.9184</td>
+<td>0.0977</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">LR — balanced weights</td>
+<td>0.7190</td>
+<td>0.9721</td>
+<td>0.0610</td>
+<td>0.9184</td>
+<td>0.1144</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">LGBM — imbalanced (full)</td>
+<td>0.7775</td>
+<td>0.9390</td>
+<td>0.6143</td>
+<td>0.8776</td>
+<td>0.7227</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">LGBM — downsampled 1:1</td>
+<td>0.6728</td>
+<td>0.9754</td>
+<td>0.0353</td>
+<td>0.9184</td>
+<td>0.0679</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">LGBM — balanced weights</td>
+<td>0.1330</td>
+<td>0.8685</td>
+<td>0.1580</td>
+<td>0.8367</td>
+<td>0.2658</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="3e692f51" class="cell page-columns page-full" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-05-13T14:02:26.755837Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-13T14:02:26.755716Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-13T14:02:26.832136Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-13T14:02:26.831031Z&quot;}" data-papermill="{&quot;duration&quot;:0.081042,&quot;end_time&quot;:&quot;2026-05-13T14:02:26.833241+00:00&quot;,&quot;exception&quot;:false,&quot;start_time&quot;:&quot;2026-05-13T14:02:26.752199+00:00&quot;,&quot;status&quot;:&quot;completed&quot;}" data-tags="[]" data-execution_count="15">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> make_subplots(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    rows<span class="op">=</span><span class="dv">3</span>, cols<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    subplot_titles<span class="op">=</span>(</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"negatives (class 0)"</span>, <span class="st">"positives (class 1)"</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"negatives (class 0)"</span>, <span class="st">"positives (class 1)"</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"negatives (class 0)"</span>, <span class="st">"positives (class 1)"</span>,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    row_titles<span class="op">=</span>[<span class="st">"LGBM — imbalanced (full)"</span>, <span class="st">"LGBM — downsampled 1:1"</span>, <span class="st">"LGBM — balanced weights"</span>],</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    shared_yaxes<span class="op">=</span><span class="st">"all"</span>,</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    shared_xaxes<span class="op">=</span><span class="st">"all"</span>,</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    vertical_spacing<span class="op">=</span><span class="fl">0.10</span>,</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    horizontal_spacing<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row, (name, scores) <span class="kw">in</span> <span class="bu">enumerate</span>(</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"LGBM — imbalanced (full)"</span>, scores_lgbm_baseline),</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"LGBM — downsampled 1:1"</span>, scores_lgbm_downsampled),</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"LGBM — balanced weights"</span>, scores_lgbm_balanced),</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>    start<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> col, label <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="dv">0</span>, <span class="dv">1</span>], start<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> y_val <span class="op">==</span> label</span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>        counts, _ <span class="op">=</span> np.histogram(scores[mask], bins<span class="op">=</span>bins)</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>        pct <span class="op">=</span> counts <span class="op">/</span> counts.<span class="bu">sum</span>() <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>        fig.add_trace(</span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>            go.Bar(</span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>                x<span class="op">=</span>bin_centers,</span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>                y<span class="op">=</span>pct,</span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>                width<span class="op">=</span><span class="fl">0.02</span>,</span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>                customdata<span class="op">=</span>counts,</span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>                hovertemplate<span class="op">=</span><span class="st">"score: %</span><span class="sc">{x:.2f}</span><span class="st">&lt;br&gt;%</span><span class="sc">{y:.1f}</span><span class="st">%&lt;br&gt;count: %</span><span class="sc">{customdata:,d}</span><span class="st">&lt;extra&gt;&lt;/extra&gt;"</span>,</span>
+<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a>                marker<span class="op">=</span><span class="bu">dict</span>(color<span class="op">=</span>class_colors[label], line<span class="op">=</span><span class="bu">dict</span>(width<span class="op">=</span><span class="dv">0</span>)),</span>
+<span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a>                showlegend<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb25-36"><a href="#cb25-36" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb25-37"><a href="#cb25-37" aria-hidden="true" tabindex="-1"></a>            row<span class="op">=</span>row, col<span class="op">=</span>col,</span>
+<span id="cb25-38"><a href="#cb25-38" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb25-39"><a href="#cb25-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-40"><a href="#cb25-40" aria-hidden="true" tabindex="-1"></a>        n_above <span class="op">=</span> <span class="bu">int</span>((scores[mask] <span class="op">&gt;=</span> <span class="fl">0.5</span>).<span class="bu">sum</span>())</span>
+<span id="cb25-41"><a href="#cb25-41" aria-hidden="true" tabindex="-1"></a>        fig.add_vline(</span>
+<span id="cb25-42"><a href="#cb25-42" aria-hidden="true" tabindex="-1"></a>            x<span class="op">=</span><span class="fl">0.5</span>, row<span class="op">=</span>row, col<span class="op">=</span>col,</span>
+<span id="cb25-43"><a href="#cb25-43" aria-hidden="true" tabindex="-1"></a>            line_dash<span class="op">=</span><span class="st">"dash"</span>, line_color<span class="op">=</span><span class="st">"#444444"</span>, line_width<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb25-44"><a href="#cb25-44" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb25-45"><a href="#cb25-45" aria-hidden="true" tabindex="-1"></a>        fig.add_annotation(</span>
+<span id="cb25-46"><a href="#cb25-46" aria-hidden="true" tabindex="-1"></a>            x<span class="op">=</span><span class="fl">0.52</span>, y<span class="op">=</span><span class="dv">88</span>,</span>
+<span id="cb25-47"><a href="#cb25-47" aria-hidden="true" tabindex="-1"></a>            text<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>n_above<span class="sc">:,}</span><span class="ss"> above 0.5"</span>,</span>
+<span id="cb25-48"><a href="#cb25-48" aria-hidden="true" tabindex="-1"></a>            row<span class="op">=</span>row, col<span class="op">=</span>col,</span>
+<span id="cb25-49"><a href="#cb25-49" aria-hidden="true" tabindex="-1"></a>            showarrow<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb25-50"><a href="#cb25-50" aria-hidden="true" tabindex="-1"></a>            xanchor<span class="op">=</span><span class="st">"left"</span>,</span>
+<span id="cb25-51"><a href="#cb25-51" aria-hidden="true" tabindex="-1"></a>            font<span class="op">=</span><span class="bu">dict</span>(size<span class="op">=</span><span class="dv">11</span>, color<span class="op">=</span><span class="st">"#444444"</span>),</span>
+<span id="cb25-52"><a href="#cb25-52" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb25-53"><a href="#cb25-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-54"><a href="#cb25-54" aria-hidden="true" tabindex="-1"></a>fig.update_layout(</span>
+<span id="cb25-55"><a href="#cb25-55" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="dv">800</span>,</span>
+<span id="cb25-56"><a href="#cb25-56" aria-hidden="true" tabindex="-1"></a>    autosize<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb25-57"><a href="#cb25-57" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"LightGBM score distributions by class — % within class (hover for raw count)"</span>,</span>
+<span id="cb25-58"><a href="#cb25-58" aria-hidden="true" tabindex="-1"></a>    bargap<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb25-59"><a href="#cb25-59" aria-hidden="true" tabindex="-1"></a>    hoverlabel<span class="op">=</span><span class="bu">dict</span>(bgcolor<span class="op">=</span><span class="st">"#1a1a1a"</span>, font_color<span class="op">=</span><span class="st">"white"</span>, bordercolor<span class="op">=</span><span class="st">"#1a1a1a"</span>),</span>
+<span id="cb25-60"><a href="#cb25-60" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-61"><a href="#cb25-61" aria-hidden="true" tabindex="-1"></a>fig.update_xaxes(title_text<span class="op">=</span><span class="st">"predicted P(class=1)"</span>, <span class="bu">range</span><span class="op">=</span>[<span class="dv">0</span>, <span class="dv">1</span>])</span>
+<span id="cb25-62"><a href="#cb25-62" aria-hidden="true" tabindex="-1"></a>fig.update_yaxes(title_text<span class="op">=</span><span class="st">"</span><span class="sc">% o</span><span class="st">f class"</span>, <span class="bu">range</span><span class="op">=</span>[<span class="dv">0</span>, <span class="dv">100</span>])</span>
+<span id="cb25-63"><a href="#cb25-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-64"><a href="#cb25-64" aria-hidden="true" tabindex="-1"></a>HTML(fig.to_html(</span>
+<span id="cb25-65"><a href="#cb25-65" aria-hidden="true" tabindex="-1"></a>    include_plotlyjs<span class="op">=</span><span class="st">"cdn"</span>,</span>
+<span id="cb25-66"><a href="#cb25-66" aria-hidden="true" tabindex="-1"></a>    full_html<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb25-67"><a href="#cb25-67" aria-hidden="true" tabindex="-1"></a>    div_id<span class="op">=</span><span class="st">"fig-scores-lgbm-3x2"</span>,</span>
+<span id="cb25-68"><a href="#cb25-68" aria-hidden="true" tabindex="-1"></a>    config<span class="op">=</span>{<span class="st">"responsive"</span>: <span class="va">True</span>},</span>
+<span id="cb25-69"><a href="#cb25-69" aria-hidden="true" tabindex="-1"></a>    default_width<span class="op">=</span><span class="st">"100%"</span>,</span>
+<span id="cb25-70"><a href="#cb25-70" aria-hidden="true" tabindex="-1"></a>    default_height<span class="op">=</span><span class="st">"800px"</span>,</span>
+<span id="cb25-71"><a href="#cb25-71" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display column-page" data-execution_count="15">
+<div>                        <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.5.0.min.js" integrity="sha256-fHbNLP+GlIXN+efbQec78UkemUz3NJp7UmfGxC1tNxs=" crossorigin="anonymous"></script>                <div id="fig-scores-lgbm-3x2" class="plotly-graph-div" style="height:800px; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("fig-scores-lgbm-3x2")) {                    Plotly.newPlot(                        "fig-scores-lgbm-3x2",                        [{"customdata":{"dtype":"i4","bdata":"yN0AABIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAACUAAAA="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#999999","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"T3qffRj2WEBYfsPjAzWgPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAZP+oG0Jw\u002fAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAGT\u002fqBtCMPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWH7D4wM1kD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC+emz\u002fQ6iwPw=="},"type":"bar","xaxis":"x","yaxis":"y"},{"customdata":{"dtype":"i1","bdata":"DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAFI="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#0062a8","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"HxrrQ2N9KEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFbycgpdTEEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD70FgfGutUQA=="},"type":"bar","xaxis":"x2","yaxis":"y2"},{"customdata":{"dtype":"i4","bdata":"j6IAAKERAAC2BwAAwwQAAAoDAAB3AgAABgIAAHYBAABdAQAAHQEAAAIBAADvAAAAwAAAAKUAAACdAAAAkQAAAHoAAABzAAAAcAAAAIAAAAB0AAAAXAAAAGQAAABlAAAAZwAAAFkAAABKAAAAVgAAAFUAAABCAAAAVgAAAE0AAABHAAAAQgAAAEYAAABJAAAARAAAAFgAAAA6AAAAOgAAAEcAAAA9AAAARwAAADoAAABAAAAAVAAAAIIAAADDAAAA7gAAAHgBAAA="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#999999","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"YscYlLxLUkAIJnie9L4fQNNRSKqCxQtAzU6tHVImAUDg8PhADeT1P\u002fZh2EIwwfE\u002fzNb9\u002fnYm7T+gFxwN9QvlP+ECrLbMo+M\u002fsh9k2csJ4D+zlxP4pgndP8\u002fosHQ25to\u002fIFOvLwWc1T9vq\u002fp0FJLSP6SyqD2Uq9E\u002fcb2t6tNR0D9OJESXRnbLP+iwdDbm4sk\u002fTzb3DAY2yT+AGT\u002fqBtDMPxsvSUSGHMo\u002fVFpd+IS1xD\u002fsSwFnhYLGPx\u002fK1XQlvMY\u002fhcZ+kGUvxz+739\u002fOpAjEP756bP9DqMA\u002fImVipcRbwz\u002fv5o2XJCLDP0wSkSGHtr0\u002fImVipcRbwz9X9ekoJFXBP0oA3qvH9r8\u002fTBKRIYe2vT\u002fjAzWQh4O\u002fP4v8l\u002fGjbsA\u002fFwvjWAedvj+IYQvBBM\u002fDPxsvSUSGHLo\u002fGy9JRIYcuj9KAN6rx\u002fa\u002fP04kRJdGdrs\u002fSgDeq8f2vz8bL0lEhhy6P4AZP+oG0Lw\u002fvGi5iYTowj\u002fmFegFR0PNP2wQbkR18tU\u002ftanGbWbJ2j+6VgYUxSjlPw=="},"type":"bar","xaxis":"x3","yaxis":"y3"},{"customdata":{"dtype":"i1","bdata":"BAEAAAAAAQAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAACAAABAVU="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#0062a8","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"FbycgpdTEEAVvJyCl1PwPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFbycgpdT8D8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABW8nIKXUwBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVvJyCl1PwPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABW8nIKXUwBAAAAAAAAAAAAAAAAAAAAAABW8nIKXU\u002fA\u002fFbycgpdT8D\u002fMKXg5Ba9VQA=="},"type":"bar","xaxis":"x4","yaxis":"y4"},{"customdata":{"dtype":"i4","bdata":"a9wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALUBAAA="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#999999","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"SiIy5NDOWEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABE2+7mjZfoPw=="},"type":"bar","xaxis":"x5","yaxis":"y5"},{"customdata":{"dtype":"i1","bdata":"EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFI="},"hovertemplate":"score: %{x:.2f}\u003cbr\u003e%{y:.1f}%\u003cbr\u003ecount: %{customdata:,d}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#0062a8","line":{"width":0}},"showlegend":false,"width":0.02,"x":{"dtype":"f8","bdata":"exSuR+F6hD+4HoXrUbieP5qZmZmZmak\u002f7FG4HoXrsT8K16NwPQq3Pylcj8L1KLw\u002fpHA9CtejwD80MzMzMzPDP8L1KFyPwsU\u002fUrgehetRyD\u002fiehSuR+HKP3A9CtejcM0\u002fAAAAAAAA0D9I4XoUrkfRP5DC9Shcj9I\u002f16NwPQrX0z8fhetRuB7VP2ZmZmZmZtY\u002frkfhehSu1z\u002f2KFyPwvXYPz4K16NwPdo\u002fhetRuB6F2z\u002fNzMzMzMzcPxSuR+F6FN4\u002fXI\u002fC9Shc3z9SuB6F61HgP\u002fYoXI\u002fC9eA\u002fmpmZmZmZ4T8+CtejcD3iP+F6FK5H4eI\u002fhetRuB6F4z8pXI\u002fC9SjkP83MzMzMzOQ\u002fcT0K16Nw5T8VrkfhehTmP7gehetRuOY\u002fXI\u002fC9Shc5z8AAAAAAADoP6RwPQrXo+g\u002fSOF6FK5H6T\u002fsUbgehevpP5DC9Shcj+o\u002fMzMzMzMz6z\u002fXo3A9CtfrP3sUrkfheuw\u002fH4XrUbge7T\u002fD9Shcj8LtP2ZmZmZmZu4\u002fCtejcD0K7z+uR+F6FK7vPw=="},"y":{"dtype":"f8","bdata":"FbycgpdTMEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD70FgfGutUQA=="},"type":"bar","xaxis":"x6","yaxis":"y6"}],                        {"template":{"layout":{"colorway":["#0062a8","#F58518","#54A24B","#B279A2","#EECA3B","#72B7B2","#FF9DA6","#9D755D"],"font":{"color":"#1a1a1a","family":"Figtree, system-ui, -apple-system, Helvetica, Arial, sans-serif","size":13},"hoverlabel":{"bgcolor":"white","bordercolor":"#e5e5e5","font":{"family":"Figtree, system-ui, -apple-system, Helvetica, Arial, sans-serif","size":12}},"legend":{"bgcolor":"rgba(0,0,0,0)","bordercolor":"rgba(0,0,0,0)","font":{"color":"#1a1a1a","size":12}},"margin":{"b":50,"l":60,"r":20,"t":50},"paper_bgcolor":"white","plot_bgcolor":"white","title":{"font":{"color":"#1a1a1a","family":"Figtree, system-ui, -apple-system, Helvetica, Arial, sans-serif","size":16},"x":0,"xanchor":"left"},"xaxis":{"linecolor":"#e5e5e5","showgrid":false,"showline":true,"tickcolor":"#cccccc","ticklen":4,"ticks":"outside","title":{"font":{"color":"#797979","size":12}},"zeroline":false},"yaxis":{"linecolor":"#e5e5e5","showgrid":false,"showline":true,"tickcolor":"#cccccc","ticklen":4,"ticks":"outside","title":{"font":{"color":"#797979","size":12}},"zeroline":false}}},"xaxis":{"anchor":"y","domain":[0.0,0.44],"matches":"x5","showticklabels":false,"title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis":{"anchor":"x","domain":[0.7333333333333334,1.0],"matches":"y5","title":{"text":"% of class"},"range":[0,100]},"xaxis2":{"anchor":"y2","domain":[0.54,0.98],"matches":"x5","showticklabels":false,"title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis2":{"anchor":"x2","domain":[0.7333333333333334,1.0],"matches":"y5","showticklabels":false,"title":{"text":"% of class"},"range":[0,100]},"xaxis3":{"anchor":"y3","domain":[0.0,0.44],"matches":"x5","showticklabels":false,"title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis3":{"anchor":"x3","domain":[0.3666666666666667,0.6333333333333333],"matches":"y5","title":{"text":"% of class"},"range":[0,100]},"xaxis4":{"anchor":"y4","domain":[0.54,0.98],"matches":"x5","showticklabels":false,"title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis4":{"anchor":"x4","domain":[0.3666666666666667,0.6333333333333333],"matches":"y5","showticklabels":false,"title":{"text":"% of class"},"range":[0,100]},"xaxis5":{"anchor":"y5","domain":[0.0,0.44],"title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis5":{"anchor":"x5","domain":[0.0,0.26666666666666666],"title":{"text":"% of class"},"range":[0,100]},"xaxis6":{"anchor":"y6","domain":[0.54,0.98],"matches":"x5","title":{"text":"predicted P(class=1)"},"range":[0,1]},"yaxis6":{"anchor":"x6","domain":[0.0,0.26666666666666666],"matches":"y5","showticklabels":false,"title":{"text":"% of class"},"range":[0,100]},"annotations":[{"font":{"size":16},"showarrow":false,"text":"negatives (class 0)","x":0.22,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"positives (class 1)","x":0.76,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"negatives (class 0)","x":0.22,"xanchor":"center","xref":"paper","y":0.6333333333333333,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"positives (class 1)","x":0.76,"xanchor":"center","xref":"paper","y":0.6333333333333333,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"negatives (class 0)","x":0.22,"xanchor":"center","xref":"paper","y":0.26666666666666666,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"positives (class 1)","x":0.76,"xanchor":"center","xref":"paper","y":0.26666666666666666,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"LGBM \u2014 imbalanced (full)","textangle":90,"x":0.98,"xanchor":"left","xref":"paper","y":0.8666666666666667,"yanchor":"middle","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"LGBM \u2014 downsampled 1:1","textangle":90,"x":0.98,"xanchor":"left","xref":"paper","y":0.5,"yanchor":"middle","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"LGBM \u2014 balanced weights","textangle":90,"x":0.98,"xanchor":"left","xref":"paper","y":0.13333333333333333,"yanchor":"middle","yref":"paper"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"54 above 0.5","x":0.52,"xanchor":"left","xref":"x","y":88,"yref":"y"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"86 above 0.5","x":0.52,"xanchor":"left","xref":"x2","y":88,"yref":"y2"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"2,463 above 0.5","x":0.52,"xanchor":"left","xref":"x3","y":88,"yref":"y3"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"90 above 0.5","x":0.52,"xanchor":"left","xref":"x4","y":88,"yref":"y4"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"437 above 0.5","x":0.52,"xanchor":"left","xref":"x5","y":88,"yref":"y5"},{"font":{"color":"#444444","size":11},"showarrow":false,"text":"82 above 0.5","x":0.52,"xanchor":"left","xref":"x6","y":88,"yref":"y6"}],"shapes":[{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x2","y0":0,"y1":1,"yref":"y2 domain"},{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x3","y0":0,"y1":1,"yref":"y3 domain"},{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x4","y0":0,"y1":1,"yref":"y4 domain"},{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x5","y0":0,"y1":1,"yref":"y5 domain"},{"line":{"color":"#444444","dash":"dash","width":1.5},"type":"line","x0":0.5,"x1":0.5,"xref":"x6","y0":0,"y1":1,"yref":"y6 domain"}],"hoverlabel":{"font":{"color":"white"},"bgcolor":"#1a1a1a","bordercolor":"#1a1a1a"},"height":800,"autosize":true,"title":{"text":"LightGBM score distributions by class \u2014 % within class (hover for raw count)"},"bargap":0},                        {"responsive": true}                    )                };            </script>        </div>
+</div>
+</div>
+<p>The story holds — and with a twist.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>model</th>
+<th>AP</th>
+<th>ROC-AUC</th>
+<th>best_iter</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>LR — imbalanced (full)</td>
+<td><strong>0.741</strong></td>
+<td>0.961</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>LR — balanced weights</td>
+<td>0.719</td>
+<td>0.972</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>LR — downsampled 1:1</td>
+<td>0.458</td>
+<td>0.975</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>LGBM — imbalanced (full)</td>
+<td><strong>0.778</strong></td>
+<td>0.939</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>LGBM — downsampled 1:1</td>
+<td>0.673</td>
+<td>0.975</td>
+<td>61</td>
+</tr>
+<tr class="even">
+<td>LGBM — scale_pos_weight</td>
+<td>0.133</td>
+<td>0.869</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<p>LGBM baseline outperforms every LR variant — and it does so in a single tree (<code>best_iter=1</code>). That’s not a fluke. The credit card fraud features (V1–V28) are PCA components pre-engineered for discriminative power. The first tree finds a split on the most informative axis (V14 is the known key predictor) that alone separates most fraud from legitimate transactions. Every subsequent tree tries to refine this, but with only 394 training fraud cases, the refinements overfit and degrade AP on the eval set.</p>
+<p>Downsampling LGBM still gives good results (AP 0.673, 61 trees) but is worse than the baseline. The same conclusion as LR: if AP is the metric, train on everything.</p>
+<p><code>scale_pos_weight</code> struggles more here than it did for LR. With 577× weight on positives, the first few trees split so aggressively in the fraud direction that they also drag many negatives into the high-score region. The AP metric on the early stopping set penalizes this immediately, stopping at iter 3 before the model can recover.</p>
+<p>One important caveat: <code>best_iter=1</code> is dataset-specific. This credit card fraud dataset is unusually clean — the PCA preprocessing does most of the heavy lifting. In messier real-world data with raw features, correlated noise, and less separation, LGBM would need many more trees and the early stopping would stop much later.</p>
+<p>The broader point stands across both model families: <strong>for AP maximization, train on the real distribution and stop when the ranking stops improving. Reweighting trades precision-at-the-top for recall coverage, and that trade almost never helps AP.</strong></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/dvquys\.com");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="dvquy13/icy-touch-comments" data-repo-id="R_kgDONEpzPA" data-category="General" data-category-id="DIC_kwDONEpzPM4Cjn8n" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="https://cdn.jsdelivr.net/gh/dvquy13/dvquy13.github.io@main/giscus-theme.css" data-lang="en" crossorigin="anonymous" data-loading="lazy" async="">
+</script>
+<input type="hidden" id="giscus-base-theme" value="https://cdn.jsdelivr.net/gh/dvquy13/dvquy13.github.io@main/giscus-theme.css">
+<input type="hidden" id="giscus-alt-theme" value="https://cdn.jsdelivr.net/gh/dvquy13/dvquy13.github.io@main/giscus-theme.css">
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+
+<div class="cookie-consent-footer"><a href="#" id="open_preferences_center">Cookie Preferences</a></div></div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

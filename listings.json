@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/projects/imbalanced-ml/index.html",
       "/posts/introducing-qrec/index.html",
       "/posts/the-30m-promise/index.html",
       "/projects/implement-recsys/c7/index.html",
@@ -20,6 +21,7 @@
   {
     "listing": "/projects.html",
     "items": [
+      "/projects/imbalanced-ml/index.html",
       "/projects/implement-recsys/c7/index.html",
       "/projects/implement-recsys/c6/index.html",
       "/projects/implement-recsys/c5/index.html",
