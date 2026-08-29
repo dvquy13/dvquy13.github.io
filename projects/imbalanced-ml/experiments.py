@@ -167,6 +167,8 @@ def run_fold(X: pd.DataFrame, y: pd.Series, train_idx, val_idx, fold: int) -> li
     X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
     y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
 
+    # LR's downsample: independent of LGBM's early-stopping split below, since
+    # LR never evaluates against that held-out set.
     pos_idx = y_train[y_train == 1].index
     neg_idx = y_train[y_train == 0].index
     neg_sampled = np.random.RandomState(fold).choice(neg_idx, size=len(pos_idx), replace=False)
@@ -195,13 +197,12 @@ def run_fold(X: pd.DataFrame, y: pd.Series, train_idx, val_idx, fold: int) -> li
     add("LR", "balanced", lr_bal.predict_proba(X_val)[:, 1])
 
     X_train_lgb = _as_lgbm_frame(X_train)
-    X_train_ds_lgb = _as_lgbm_frame(X_train_ds)
     X_val_lgb = _as_lgbm_frame(X_val)
 
-    # Same early-stopping set (carved from this fold's full imbalanced training
-    # data) is reused across all three LGBM variants, so best_iteration_ stays
-    # comparable and the scarce downsampled data isn't shrunk further just for
-    # early stopping.
+    # Carve the early-stopping set out first, so it's guaranteed disjoint from
+    # every LGBM variant's training data. Downsampling for LGBM then draws
+    # from X_tr only (not the full X_train) — otherwise the downsampled
+    # training set can include rows also used to judge its own early stopping.
     X_tr, X_es, y_tr, y_es = train_test_split(
         X_train_lgb, y_train, test_size=0.2, stratify=y_train, random_state=fold
     )
@@ -213,7 +214,13 @@ def run_fold(X: pd.DataFrame, y: pd.Series, train_idx, val_idx, fold: int) -> li
     m_bal = fit_lgbm(X_tr, y_tr, X_es, y_es, fold, scale_pos_weight=n_neg / n_pos)
     add("LGBM", "balanced", m_bal.predict_proba(X_val_lgb)[:, 1], m_bal.best_iteration_)
 
-    m_ds = fit_lgbm(X_train_ds_lgb, y_train_ds, X_es, y_es, fold)
+    pos_idx_lgb = y_tr[y_tr == 1].index
+    neg_idx_lgb = y_tr[y_tr == 0].index
+    neg_sampled_lgb = np.random.RandomState(fold).choice(neg_idx_lgb, size=len(pos_idx_lgb), replace=False)
+    ds_idx_lgb = np.concatenate([pos_idx_lgb, neg_sampled_lgb])
+    X_tr_ds_lgb, y_tr_ds_lgb = X_tr.loc[ds_idx_lgb], y_tr.loc[ds_idx_lgb]
+
+    m_ds = fit_lgbm(X_tr_ds_lgb, y_tr_ds_lgb, X_es, y_es, fold)
     add("LGBM", "downsampled", m_ds.predict_proba(X_val_lgb)[:, 1], m_ds.best_iteration_)
 
     return rows
