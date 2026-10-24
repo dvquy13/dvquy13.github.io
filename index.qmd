@@ -20,9 +20,9 @@ listing:
 #idx-btn {
   padding: 0.3rem 1rem;
   font-size: 0.95rem;
-  background: #0057a3;
+  background: var(--dvq-accent);
   color: #fff;
-  border: 1px solid #0057a3;
+  border: 1px solid var(--dvq-accent);
   border-radius: 4px;
   cursor: pointer;
   font-family: 'Google Sans Flex', sans-serif;
@@ -35,12 +35,12 @@ listing:
   content: '';
   position: absolute;
   inset: 0;
-  background: #fff;
+  background: var(--dvq-surface);
   transform: translateX(-100%);
   transition: transform 0.3s ease;
   z-index: -1;
 }
-#idx-btn:hover { color: #0057a3; }
+#idx-btn:hover { color: var(--dvq-accent); }
 #idx-btn:hover::before { transform: translateX(0); }
 </style>
 
@@ -51,11 +51,11 @@ listing:
     type="email"
     id="idx-email"
     placeholder="you@example.com"
-    style="padding: 0.45rem 0.75rem; font-size: 0.95rem; border: 1px solid #ccc; border-radius: 4px;"
+    style="padding: 0.45rem 0.75rem; font-size: 0.95rem; border: 1px solid var(--dvq-input-border); border-radius: 4px;"
   />
   <button onclick="idxSubscribe()" id="idx-btn">Subscribe</button>
 </div>
-<p id="idx-msg" style="margin-top: 0.5rem; min-height: 1em; font-size: 0.85rem; color: #555;"></p>
+<p id="idx-msg" style="margin-top: 0.5rem; min-height: 1em; font-size: 0.85rem; color: var(--dvq-message);"></p>
 </div>
 
 <script>

@@ -1,12 +1,35 @@
 /*-- scss:defaults --*/
 $primary: #0057a3;
 $code-color: #0057a3;
+$link-color: #0057a3;
 
-/* Navbar styling - use Quarto's native variables */
+/* Navbar styling - use Quarto's native variables (dark values live in custom-dark.scss) */
 $navbar-bg: white;
 $navbar-fg: black;
 
 /*-- scss:rules --*/
+/* Colour tokens: light is the default, body.quarto-dark (set by Quarto's toggle) swaps them */
+body {
+  --dvq-text: #666666;
+  --dvq-strong: #000000;
+  --dvq-muted: #797979;
+  --dvq-rule: #e5e5e5;
+  --dvq-accent: #0057a3;
+  --dvq-surface: #ffffff;
+  --dvq-input-border: #cccccc;
+  --dvq-message: #555555;
+}
+body.quarto-dark {
+  --dvq-text: #b4bcc8;
+  --dvq-strong: #ffffff;
+  --dvq-muted: #8791a0;
+  --dvq-rule: #2a323d;
+  --dvq-accent: #5aa9e6;
+  --dvq-surface: #14181f;
+  --dvq-input-border: #3d4755;
+  --dvq-message: #9aa4b2;
+}
+
 /* Prevent layout shift when navigating between pages with/without scrollbar */
 html {
   scrollbar-gutter: stable;
@@ -38,17 +61,17 @@ code, pre, kbd, samp {
 
 /* Remove blue background from title banner if present */
 .quarto-title-banner {
-  background: white !important;
-  color: black !important;
+  background: var(--dvq-surface) !important;
+  color: var(--dvq-strong) !important;
 }
 
-/* Ensure title text is black */
+/* Ensure title text is full contrast */
 .quarto-title-banner .quarto-title .title {
-  color: black !important;
+  color: var(--dvq-strong) !important;
 }
 
 .quarto-title-banner .quarto-title .subtitle {
-  color: #666 !important;
+  color: var(--dvq-text) !important;
 }
 
 div.listing-reading-time {
@@ -63,7 +86,7 @@ div.quarto-post .thumbnail {
 div.quarto-post .metadata {
   flex-basis: 100%;
   font-size: 0.85em;
-  color: #797979;
+  color: var(--dvq-muted);
   padding-top: 0.25rem;
 }
 
@@ -77,7 +100,7 @@ div.quarto-post .metadata > a {
 
 /* Change Note Callout color */
 div.callout-note.callout {
-  border-left-color: #0057a3;
+  border-left-color: var(--dvq-accent);
 }
 
 /* Update the line spacing between TOC items */
@@ -140,21 +163,21 @@ div.quarto-category {
 /* Change subtitle color */
 /* Need to place before hover change else hover does not take effect */
 div.quarto-post .listing-subtitle a {
-  color: #797979;
+  color: var(--dvq-muted);
 }
 
 /* Universal tag hover: border + text change to primary accent, background unchanged */
 div.category:hover,
 div.quarto-post .listing-categories .listing-category:hover,
 div.quarto-title .quarto-categories .quarto-category:hover {
-  color: #0057a3 !important;
-  border-color: #0057a3 !important;
+  color: var(--dvq-accent) !important;
+  border-color: var(--dvq-accent) !important;
   background-color: transparent !important;
   opacity: 1 !important;
 }
 
 div.quarto-post a:hover {
-  color: #0057a3;
+  color: var(--dvq-accent);
 }
 
 
@@ -266,14 +289,14 @@ $navbar-brand-padding: 119.5px + (500.5px - $body-width) / 2;
     font-weight: 600;
     padding-top: 0.4rem !important;
     padding-bottom: 0.4rem !important;
-    color: black !important;
+    color: var(--dvq-strong) !important;
   }
 
   // Separator + spacing before social icons (first icon-nav-item after text-nav-items)
   #navbarCollapse .nav-item:not(:has(i)) + .nav-item:has(i) {
     margin-top: 1.25rem;
     padding-top: 1.25rem;
-    border-top: 1px solid #e5e5e5;
+    border-top: 1px solid var(--dvq-rule);
   }
 
   // Social icon rows: icon + label, readable size
@@ -284,7 +307,7 @@ $navbar-brand-padding: 119.5px + (500.5px - $body-width) / 2;
     padding-top: 0.3rem !important;
     padding-bottom: 0.3rem !important;
     font-size: 1rem;
-    color: #444 !important;
+    color: var(--dvq-text) !important;
   }
 
   // Show text label for social icons in mobile menu
@@ -294,25 +317,25 @@ $navbar-brand-padding: 119.5px + (500.5px - $body-width) / 2;
 }
 
 // Change body font color
-body.nav-fixed.quarto-light {
-  color: #666666;
+body.nav-fixed {
+  color: var(--dvq-text);
 }
 
 // Keep headings and bold text full black so they stand out against the softer prose
-body.nav-fixed.quarto-light strong,
-body.nav-fixed.quarto-light b,
-body.nav-fixed.quarto-light h1,
-body.nav-fixed.quarto-light h2,
-body.nav-fixed.quarto-light h3,
-body.nav-fixed.quarto-light h4,
-body.nav-fixed.quarto-light h5,
-body.nav-fixed.quarto-light h6 {
-  color: black;
+body.nav-fixed strong,
+body.nav-fixed b,
+body.nav-fixed h1,
+body.nav-fixed h2,
+body.nav-fixed h3,
+body.nav-fixed h4,
+body.nav-fixed h5,
+body.nav-fixed h6 {
+  color: var(--dvq-strong);
 }
 
 // Change listing title font color
 div.quarto-post a {
-  color: black;
+  color: var(--dvq-strong);
 }
 
 // Change title font color
@@ -371,4 +394,35 @@ div.quarto-post a {
 .cc-pc-container,
 .cc-pc-container * {
   font-family: "Google Sans Flex", InterVariable, Inter, sans-serif !important;
+}
+
+/* Dark mode: figures drawn for a white page (Plotly, Mermaid, black-stroke SVGs) sit on a light card */
+body.quarto-dark .plotly-graph-div,
+body.quarto-dark .mermaid,
+body.quarto-dark img[src$=".svg"] {
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 0.5rem;
+}
+
+/* Dark mode: cookie consent popup */
+body.quarto-dark .cc-nb-main-container,
+body.quarto-dark .cc-pc-container {
+  background-color: #1c222b !important;
+  color: #dde3ec !important;
+}
+body.quarto-dark .cc-nb-main-container *,
+body.quarto-dark .cc-pc-container * {
+  color: inherit;
+}
+
+/* Dark mode: newsletter inputs and buttons (inline styles in index.qmd / subscribe.qmd set light colours) */
+body.quarto-dark #idx-email,
+body.quarto-dark #sub-email {
+  background: transparent;
+  color: var(--dvq-strong);
+}
+body.quarto-dark #idx-btn:not(:hover),
+body.quarto-dark #sub-btn:not(:hover) {
+  color: #111111;
 }

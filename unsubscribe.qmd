@@ -3,7 +3,7 @@ title: "Unsubscribe"
 toc: false
 ---
 
-<p id="unsub-msg" style="font-size: 1rem; color: #555;">Processing your request…</p>
+<p id="unsub-msg" style="font-size: 1rem; color: var(--dvq-message);">Processing your request…</p>
 
 <script>
 (async function () {

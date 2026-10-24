@@ -9,9 +9,9 @@ title: "Subscribe"
 #sub-btn {
   padding: 0.3rem 1rem;
   font-size: 0.95rem;
-  background: #0057a3;
+  background: var(--dvq-accent);
   color: #fff;
-  border: 1px solid #0057a3;
+  border: 1px solid var(--dvq-accent);
   border-radius: 4px;
   cursor: pointer;
   font-family: 'Google Sans Flex', sans-serif;
@@ -24,12 +24,12 @@ title: "Subscribe"
   content: '';
   position: absolute;
   inset: 0;
-  background: #fff;
+  background: var(--dvq-surface);
   transform: translateX(-100%);
   transition: transform 0.3s ease;
   z-index: -1;
 }
-#sub-btn:hover { color: #0057a3; }
+#sub-btn:hover { color: var(--dvq-accent); }
 #sub-btn:hover::before { transform: translateX(0); }
 </style>
 
@@ -39,10 +39,10 @@ Drop your email and I'll send you a note when something new goes up.
 
 <div class="newsletter-form" style="margin-top: 1.5rem;">
 <div class="newsletter-form-row">
-<input type="email" id="sub-email" placeholder="you@example.com" style="padding: 0.45rem 0.75rem; font-size: 0.95rem; border: 1px solid #ccc; border-radius: 4px;" />
+<input type="email" id="sub-email" placeholder="you@example.com" style="padding: 0.45rem 0.75rem; font-size: 0.95rem; border: 1px solid var(--dvq-input-border); border-radius: 4px;" />
 <button onclick="doSubscribe()" id="sub-btn">Subscribe</button>
 </div>
-<p id="sub-msg" style="margin-top: 0.6rem; min-height: 1.2em; font-size: 0.9rem; color: #555;"></p>
+<p id="sub-msg" style="margin-top: 0.6rem; min-height: 1.2em; font-size: 0.9rem; color: var(--dvq-message);"></p>
 </div>
 
 <script>

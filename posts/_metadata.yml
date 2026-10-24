@@ -16,4 +16,6 @@ comments:
     reactions-enabled: true
     loading: lazy
     input-position: top
-    theme: https://cdn.jsdelivr.net/gh/dvquy13/dvquy13.github.io@main/giscus-theme.css
+    theme:
+      light: https://cdn.jsdelivr.net/gh/dvquy13/dvquy13.github.io@main/giscus-theme.css
+      dark: https://cdn.jsdelivr.net/gh/dvquy13/dvquy13.github.io@main/giscus-theme-dark.css

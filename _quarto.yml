@@ -45,21 +45,35 @@ website:
 format:
   html:
     theme:
-      - united
-      - custom.scss
+      light:
+        - united
+        - custom.scss
+      dark:
+        - darkly
+        - custom-dark.scss
+        - custom.scss
     code-fold: true
     css: styles.css
     mainfont: "DM Sans, InterVariable, sans-serif"
-    highlight-style: github
+    highlight-style:
+      light: github
+      dark: github-dark
     fontsize: 15px
     linestretch: 1.7
-    linkcolor: "#0057a3"
     smooth-scroll: true
     monofont: "Google Sans Code, Roboto Mono"
     grid:
       # Chosen so that we have maximum 75 characters in the text body for readability
       body-width: 550px
     header-includes: |
+      <!-- First visit: follow the OS dark setting (Quarto 1.6 has no respect-user-color-scheme); the toggle overrides it -->
+      <script>
+        try {
+          if (!localStorage.getItem('quarto-color-scheme') && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            localStorage.setItem('quarto-color-scheme', 'alternate');
+          }
+        } catch (e) {}
+      </script>
       <!-- Inter (fallback) -->
       <link rel="preconnect" href="https://rsms.me/">
       <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
