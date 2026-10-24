@@ -4,7 +4,7 @@ title: "Subscribe"
 
 <style>
 #sub-email {
-  font-family: 'Figtree', sans-serif;
+  font-family: 'Google Sans Flex', sans-serif;
 }
 #sub-btn {
   padding: 0.3rem 1rem;
@@ -14,7 +14,7 @@ title: "Subscribe"
   border: 1px solid #0057a3;
   border-radius: 4px;
   cursor: pointer;
-  font-family: 'Figtree', sans-serif;
+  font-family: 'Google Sans Flex', sans-serif;
   position: relative;
   overflow: hidden;
   transition: color 0.3s ease;
